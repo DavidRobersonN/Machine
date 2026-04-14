@@ -1,0 +1,239 @@
+.painel-machine {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #d9d9d9;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.painel-shell {
+  width: 850px;
+  max-width: 100%;
+  background: linear-gradient(180deg, #f5f5f5 0%, #e9e9e9 100%);
+  border-radius: 18px;
+  padding: 26px;
+  box-sizing: border-box;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.18),
+    inset 0 2px 4px rgba(255, 255, 255, 0.8),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.08);
+  border: 1px solid #cfcfcf;
+}
+
+.painel-inner {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+  background: #e4e4e4;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #bcbcbc;
+}
+
+.painel-display-area {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.display-screen {
+  width: 100%;
+  max-width: 420px;
+  background: #f8f8f8;
+  border: 3px solid #333;
+  box-shadow: inset 0 0 0 2px #c8c8c8;
+}
+
+.screen-main {
+  display: flex;
+  min-height: 250px;
+}
+
+.screen-canvas {
+  flex: 1;
+  background:
+    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    #ffffff;
+  background-size: 20px 20px;
+  border-right: 2px solid #b7c4de;
+}
+
+.screen-sidebar {
+  width: 125px;
+  background: #eef3ff;
+  padding: 10px 8px;
+  box-sizing: border-box;
+  font-size: 12px;
+  color: #1d3260;
+}
+
+.screen-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.screen-divider {
+  height: 1px;
+  background: #9fb1d8;
+  margin: 10px 0;
+}
+
+.screen-progress-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.screen-progress {
+  width: 100%;
+  height: 12px;
+  background: #d8dfef;
+  border: 1px solid #8da1c8;
+  overflow: hidden;
+}
+
+.screen-progress-fill {
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, #1c2e57 0%, #3d63b3 100%);
+}
+
+.screen-statusbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 11px;
+  padding: 6px 8px;
+  border-top: 2px solid #b7c4de;
+  background: #f2f5fb;
+  color: #2f3d5c;
+}
+
+.painel-controls-area {
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center;
+}
+
+.direction-pad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.direction-middle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.btn {
+  border: none;
+  border-radius: 10px;
+  min-width: 78px;
+  min-height: 42px;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow:
+    0 4px 0 rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.btn-green {
+  background: linear-gradient(180deg, #2cc45a 0%, #11953b 100%);
+}
+
+.btn-red {
+  background: linear-gradient(180deg, #ff4a4a 0%, #cc1b1b 100%);
+}
+
+.btn-orange {
+  background: linear-gradient(180deg, #ffb13a 0%, #e88b00 100%);
+}
+
+.btn-round {
+  width: 62px;
+  min-width: 62px;
+  height: 62px;
+  min-height: 62px;
+  border-radius: 50%;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-arrow {
+  width: 56px;
+  min-width: 56px;
+  height: 56px;
+  min-height: 56px;
+  font-size: 22px;
+  padding: 0;
+}
+
+.btn-reset {
+  width: 74px;
+  min-width: 74px;
+  height: 74px;
+  min-height: 74px;
+}
+
+.painel-bottom-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+  justify-content: center;
+}
+
+.painel-bottom-buttons .btn:not(.btn-reset) {
+  min-width: 90px;
+}
+
+@media (max-width: 860px) {
+  .painel-inner {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .painel-controls-area {
+    width: 100%;
+  }
+
+  .display-screen {
+    max-width: 100%;
+  }
+
+  .painel-bottom-buttons {
+    justify-content: center;
+  }
+}
