@@ -1,5 +1,10 @@
-import { HomePage } from './pages/HomePage'
+import { PainelMachine } from './components/Painel/PainelMachine'
+import { MachineProvider } from './context/MachineContext'
 
 export default function App() {
-  return <HomePage />
+  return (
+    <MachineProvider>
+        <PainelMachine />
+    </MachineProvider>
+  )
 }

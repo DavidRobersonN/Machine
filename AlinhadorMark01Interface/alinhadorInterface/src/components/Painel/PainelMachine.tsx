@@ -1,6 +1,21 @@
 import './Styles.css'
+import { useMachineContext } from '../../context/MachineContext'
+
 
 export function PainelMachine() {
+  const { state, sendCommand } = useMachineContext()
+
+  function handleTurnLedOn() {
+    sendCommand({
+      action: 'led_on',
+    })
+  }
+
+  function handleTurnLedOff() {
+    sendCommand({
+      action: 'led_off',
+    })
+  }
   return (
     <section className="painel-machine">
       <div className="painel-shell">
@@ -89,8 +104,8 @@ export function PainelMachine() {
 
         <div className="painel-bottom-buttons">
           <button className="btn btn-round btn-red btn-reset">Reset</button>
-          <button className="btn btn-green">Pulse</button>
-          <button className="btn btn-green">Speed</button>
+          <button className="btn btn-green" onClick={handleTurnLedOn}>Ligar</button>
+          <button className="btn btn-green" onClick={handleTurnLedOff}>Desligar</button>
           <button className="btn btn-green">Min Power</button>
           <button className="btn btn-green">Max Power</button>
           <button className="btn btn-green">File</button>
