@@ -15,7 +15,7 @@ class MachineService:
 
     def __init__(self):
         self.serial_service = SerialService(
-            port='COM9',
+            port='COM5',
             baudrate=9600,
             timeout=1.0,
         )
