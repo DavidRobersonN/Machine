@@ -1,21 +1,12 @@
-import './Styles.css'
 import { useMachineContext } from '../../context/MachineContext'
 
+type PainelMachineProps = {
+  children: React.ReactNode
+}
 
-export function PainelMachine() {
-  const { state, sendCommand } = useMachineContext()
+export function PainelMachine({ children }: PainelMachineProps) {
+  const { state } = useMachineContext()
 
-  function handleTurnLedOn() {
-    sendCommand({
-      action: 'led_on',
-    })
-  }
-
-  function handleTurnLedOff() {
-    sendCommand({
-      action: 'led_off',
-    })
-  }
   return (
     <section className="painel-machine">
       <div className="painel-shell">
@@ -27,13 +18,13 @@ export function PainelMachine() {
 
                 <div className="screen-sidebar">
                   <div className="screen-row">
-                    <span>File:</span>
-                    <span>LOGO</span>
+                    <span>Led:</span>
+                    <span>{state.led}</span>
                   </div>
 
                   <div className="screen-row">
-                    <span>Mode:</span>
-                    <span>Auto</span>
+                    <span>Data Base</span>
+                    <span>{state.connected ? 'Conectado' : 'Desconectado'}</span>
                   </div>
 
                   <div className="screen-divider" />
@@ -67,12 +58,12 @@ export function PainelMachine() {
               </div>
 
               <div className="screen-statusbar">
-                <span>Idle</span>
+                <span>{state.connected ? 'Online' : 'Offline'}</span>
                 <span>00:00:00</span>
                 <span>Count: 0</span>
                 <span>X: 0.0mm</span>
                 <span>Y: 0.0mm</span>
-                <span>Laser OFF</span>
+                <span>Led {state.led}</span>
               </div>
             </div>
           </div>
@@ -102,15 +93,7 @@ export function PainelMachine() {
           </div>
         </div>
 
-        <div className="painel-bottom-buttons">
-          <button className="btn btn-round btn-red btn-reset">Reset</button>
-          <button className="btn btn-green" onClick={handleTurnLedOn}>Ligar</button>
-          <button className="btn btn-green" onClick={handleTurnLedOff}>Desligar</button>
-          <button className="btn btn-green">Min Power</button>
-          <button className="btn btn-green">Max Power</button>
-          <button className="btn btn-green">File</button>
-          <button className="btn btn-orange">Start / Pause</button>
-        </div>
+        {children}
       </div>
     </section>
   )

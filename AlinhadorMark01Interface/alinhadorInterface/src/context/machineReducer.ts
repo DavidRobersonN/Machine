@@ -2,7 +2,7 @@ import type { MachineAction, MachineState } from '../types/machine'
 
 export const initialMachineState: MachineState = {
   connected: false,
-  led: 'Desconhecido',
+  led: 'Desligado',
 }
 
 export function machineReducer(

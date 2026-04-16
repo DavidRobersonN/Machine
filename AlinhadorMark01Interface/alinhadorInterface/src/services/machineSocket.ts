@@ -18,6 +18,7 @@ export function createMachineSocket(
   socket.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data) as MachineMessage
+      console.log('Mensagem recebida do WebSocket:', data)
       onMessage(data)
     } catch (error) {
       console.error('Erro ao ler mensagem do WebSocket:', error)

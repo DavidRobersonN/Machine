@@ -1,4 +1,6 @@
-import { Container } from '../../components/Container'
+import { Container } from '../../components/Container';
+import { PainelMachine } from '../../components/Painel/PainelMachine';
+
 //Declarando o tipo das Props aceitas
 type MainTemplateProps = {
   children: React.ReactNode;
@@ -6,8 +8,12 @@ type MainTemplateProps = {
 
 export function MainTemplate({ children }: MainTemplateProps) {
   return (
-    <Container>
-      {children}
-    </Container>
+    <>
+      <Container>
+        <PainelMachine>
+          {children}
+        </PainelMachine>
+      </Container>
+    </>
   );
 }

@@ -1,5 +1,5 @@
 export type LedBackendState = 'ON' | 'OFF'
-export type LedUiState = 'Ligado' | 'Desligado' | 'Desconhecido'
+export type LedUiState = 'Ligado' | 'Desligado'
 
 export type MotorDirection = 'tighten' | 'loosen'
 
