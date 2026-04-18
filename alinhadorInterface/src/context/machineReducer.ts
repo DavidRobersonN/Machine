@@ -52,10 +52,15 @@ export function machineReducer(
       /*
         Quando o WebSocket desconecta,
         marcamos o frontend como desconectado.
+
+        Também faz sentido considerar o Arduino
+        como desconectado na interface,
+        já que perdemos o canal principal de comunicação.
       */
       return {
         ...state,
         connected: false,
+        arduino_connected: 'Desconectado',
       }
 
     case 'ADD_LOG':
@@ -67,7 +72,7 @@ export function machineReducer(
       */
       return {
         ...state,
-        logs: [...state.logs, action.payload].slice(-30),
+        logs: [...state.logs, action.payload].slice(-3),
       }
 
     case 'CLEAR_LOGS':

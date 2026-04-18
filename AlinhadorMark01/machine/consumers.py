@@ -28,8 +28,26 @@ class MachineConsumer(WebsocketConsumer):
     def receive(self, text_data):
         try:
             data = json.loads(text_data)
+
+            # LOG 1:
+            # registra que o backend recebeu uma mensagem do frontend
+            self.send(text_data=json.dumps({
+                'type': 'log',
+                'direction': 'received',
+                'message': f'Mensagem recebida do frontend: {data}',
+            }))
+
             response = self.machine_service.handle_command(data)
 
+            # LOG 2:
+            # registra que o backend vai enviar uma resposta ao frontend
+            self.send(text_data=json.dumps({
+                'type': 'log',
+                'direction': 'sent',
+                'message': f'Resposta enviada pelo backend: {response}',
+            }))
+
+            # resposta principal da aplicação
             self.send(text_data=json.dumps(response))
 
         except json.JSONDecodeError:

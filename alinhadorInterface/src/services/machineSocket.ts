@@ -73,13 +73,12 @@ export function createMachineSocket(
       */
       const data = JSON.parse(event.data) as MachineMessage
 
-      console.log('Mensagem recebida do WebSocket:', data)
-
       /*
-        Esse log serve para mostrar no console do navegador
-        a mensagem recebida do backend.
-        É muito útil para testes e depuração.
+        Esse log aparece apenas no console do navegador.
+        Ele é útil para depuração, mas não substitui
+        os logs visuais da aplicação.
       */
+      console.log('Mensagem recebida do WebSocket:', data)
 
       /*
         Depois de converter a mensagem,
@@ -139,7 +138,7 @@ export function sendSocketMessage(socket: WebSocket, payload: unknown): boolean 
     console.error('WebSocket não está conectado')
     return false
   }
-  
+
   /*
     Aqui transformamos o payload em texto JSON
     usando JSON.stringify.

@@ -23,7 +23,7 @@ class SerialService:
 
     def __init__(
         self,
-        port: str = 'COM5',
+        port: str = 'COM9',
         baudrate: int = 9600,
         timeout: float = 0.3,
     ):
