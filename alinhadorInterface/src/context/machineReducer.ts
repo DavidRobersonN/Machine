@@ -3,11 +3,11 @@ import type { MachineAction, MachineState } from '../types/machine'
 /*
   Estado inicial global da máquina.
 
-  Esse objeto representa como a aplicação começa
-  antes de qualquer comunicação com o backend.
+  Esse objeto define como a aplicação começa
+  antes de receber qualquer informação do backend.
 */
 export const initialMachineState: MachineState = {
-  // Indica se o WebSocket com o backend está conectado
+  // Indica se o frontend está conectado ao WebSocket
   connected: false,
 
   // Estado inicial do LED mostrado na interface
@@ -15,34 +15,33 @@ export const initialMachineState: MachineState = {
 
   // Estado inicial da conexão com o Arduino
   arduino_connected: 'Desconectado',
+
+  // Lista de mensagens enviadas e recebidas
+  logs: [],
 }
 
 /*
-  Reducer principal do contexto da máquina.
+  Reducer principal da máquina.
 
   Ele recebe:
-  - state: o estado atual
-  - action: a ação enviada para alterar o estado
+  - o estado atual
+  - a ação que queremos executar
 
-  E sempre retorna um NOVO estado.
+  E devolve sempre um NOVO estado.
 */
 export function machineReducer(
   state: MachineState,
   action: MachineAction,
 ): MachineState {
   /*
-    O switch verifica qual ação foi disparada
-    e decide como atualizar o estado.
+    O switch analisa o tipo da ação
+    e decide como o estado será atualizado.
   */
   switch (action.type) {
     case 'SOCKET_CONNECTED':
       /*
-        Quando o frontend consegue se conectar
-        ao WebSocket do backend, atualizamos apenas
-        o campo "connected" para true.
-
-        O resto do estado continua igual,
-        por isso usamos ...state
+        Quando o WebSocket conecta com sucesso,
+        marcamos o frontend como conectado.
       */
       return {
         ...state,
@@ -51,12 +50,33 @@ export function machineReducer(
 
     case 'SOCKET_DISCONNECTED':
       /*
-        Quando a conexão WebSocket cai ou é encerrada,
-        marcamos "connected" como false.
+        Quando o WebSocket desconecta,
+        marcamos o frontend como desconectado.
       */
       return {
         ...state,
         connected: false,
+      }
+
+    case 'ADD_LOG':
+      /*
+        Adiciona um novo log ao final da lista.
+
+        O slice(-30) mantém somente os últimos 30 logs,
+        evitando crescer demais e pesar a interface.
+      */
+      return {
+        ...state,
+        logs: [...state.logs, action.payload].slice(-30),
+      }
+
+    case 'CLEAR_LOGS':
+      /*
+        Limpa completamente a lista de logs.
+      */
+      return {
+        ...state,
+        logs: [],
       }
 
     case 'MACHINE_UPDATED':
@@ -65,15 +85,15 @@ export function machineReducer(
         trazendo informações atualizadas da máquina.
 
         Aqui estamos atualizando:
-        - estado do LED
-        - estado de conexão do Arduino
+        - o estado do LED
+        - o estado da conexão com o Arduino
       */
       return {
         ...state,
 
         /*
-          Converte o valor técnico vindo do backend
-          para um texto amigável na interface.
+          Traduz o valor técnico do backend
+          para um texto mais amigável na interface.
 
           Regras:
           - 'ON'  => 'Ligado'
@@ -88,15 +108,15 @@ export function machineReducer(
               : state.led,
 
         /*
-          Faz a mesma ideia para a conexão do Arduino.
+          Faz a tradução do status do Arduino.
 
           Regras:
           - true  => 'Conectado'
           - false => 'Desconectado'
           - qualquer outro valor => mantém o valor anterior
 
-          Isso é útil caso o backend envie um payload parcial
-          ou sem esse campo.
+          Isso evita quebrar o estado caso o backend
+          envie um payload incompleto.
         */
         arduino_connected:
           action.payload.arduino_connected === true
@@ -108,9 +128,8 @@ export function machineReducer(
 
     default:
       /*
-        Caso chegue uma ação desconhecida,
-        o reducer não altera nada e apenas
-        devolve o estado atual.
+        Se chegar uma ação desconhecida,
+        o reducer simplesmente devolve o estado atual.
       */
       return state
   }

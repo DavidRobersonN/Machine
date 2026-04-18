@@ -4,10 +4,16 @@ export type ArduinoConnectionState = 'Conectado' | 'Desconectado'
 
 export type MotorDirection = 'tighten' | 'loosen'
 
+export type MachineLog = {
+  direction: 'sent' | 'received'
+  message: string
+}
+
 export interface MachineState {
   connected: boolean
   led: LedUiState
   arduino_connected: ArduinoConnectionState
+  logs: MachineLog[]
 }
 
 export interface MachineUpdatePayload {
@@ -47,3 +53,11 @@ export type MachineAction =
   | { type: 'SOCKET_CONNECTED' }
   | { type: 'SOCKET_DISCONNECTED' }
   | { type: 'MACHINE_UPDATED'; payload: MachineUpdatePayload }
+  | {
+      type: 'ADD_LOG'
+      payload: {
+        direction: 'sent' | 'received'
+        message: string
+      }
+    }
+  | { type: 'CLEAR_LOGS' }
