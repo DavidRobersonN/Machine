@@ -14,6 +14,7 @@ export function PainelMachine({ children }: PainelMachineProps) {
           <div className="painel-display-area">
             <div className="display-screen">
               <div className="screen-main">
+                
                 <div className="screen-canvas" />
 
                 <div className="screen-sidebar">
