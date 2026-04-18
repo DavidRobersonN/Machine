@@ -1,16 +1,18 @@
 export type LedBackendState = 'ON' | 'OFF'
 export type LedUiState = 'Ligado' | 'Desligado'
+export type ArduinoConnectionState = 'Conectado' | 'Desconectado'
 
 export type MotorDirection = 'tighten' | 'loosen'
-
 
 export interface MachineState {
   connected: boolean
   led: LedUiState
+  arduino_connected: ArduinoConnectionState
 }
 
 export interface MachineUpdatePayload {
   led?: LedBackendState
+  arduino_connected?: boolean
 }
 
 export interface MachineUpdateMessage {

@@ -2,7 +2,6 @@ import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from machine.services.machine_service import MachineService
-from machine.services.machine_state_service import MachineStateService
 
 
 class MachineConsumer(WebsocketConsumer):
@@ -10,7 +9,7 @@ class MachineConsumer(WebsocketConsumer):
 
     def connect(self):
         self.machine_service = MachineService()
-        self.machine_state_service = MachineStateService()
+        self.machine_state_service = self.machine_service.machine_state_service
 
         async_to_sync(self.channel_layer.group_add)(
             self.GROUP_NAME,

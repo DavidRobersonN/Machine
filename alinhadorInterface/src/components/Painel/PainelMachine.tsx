@@ -27,6 +27,11 @@ export function PainelMachine({ children }: PainelMachineProps) {
                     <span>{state.connected ? 'Conectado' : 'Desconectado'}</span>
                   </div>
 
+                  <div className="screen-row">
+                    <span>Arduino</span>
+                    <span>{state.arduino_connected}</span>
+                  </div>
+
                   <div className="screen-divider" />
 
                   <div className="screen-row">

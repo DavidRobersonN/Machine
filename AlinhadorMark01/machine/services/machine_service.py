@@ -19,7 +19,7 @@ class MachineService:
             baudrate=9600,
             timeout=1.0,
         )
-        self.machine_state_service = MachineStateService()
+        self.machine_state_service = MachineStateService(self.serial_service)
 
     def handle_command(self, data: dict) -> dict:
         action = data.get('action')
@@ -51,10 +51,12 @@ class MachineService:
             self.machine_state_service.update_state({
                 'led': 'ON',
             })
+        else:
+            self.machine_state_service.update_state({})
 
         return {
             'type': 'led_status',
-            'state': 'ON',
+            'state': 'ON' if serial_result['success'] else 'OFF',
             'serial': serial_result,
         }
 
@@ -65,6 +67,8 @@ class MachineService:
             self.machine_state_service.update_state({
                 'led': 'OFF',
             })
+        else:
+            self.machine_state_service.update_state({})
 
         return {
             'type': 'led_status',
@@ -78,6 +82,8 @@ class MachineService:
         Aqui você pode evoluir depois para sensores, motor, etc.
         """
         serial_result = self.serial_service.send_command('READ_STATE')
+
+        self.machine_state_service.update_state({})
 
         return {
             'type': 'machine_read',

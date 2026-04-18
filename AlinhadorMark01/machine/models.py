@@ -11,5 +11,7 @@ class MachineState(models.Model):
 
     updated_at = models.DateTimeField(auto_now=True)
 
+    arduino_connected = models.BooleanField(default=False)
+    
     def __str__(self):
-        return f'MachineState #{self.id} - LED: {self.led}'
+        return f'MachineState #{self.id} - LED: {self.led}, Arduino: {self.arduino_connected}'
