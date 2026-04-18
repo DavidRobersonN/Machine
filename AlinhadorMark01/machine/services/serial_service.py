@@ -53,11 +53,9 @@ class SerialService:
         - False -> se não conseguiu conectar
         """
         if self.connection and self.connection.is_open:
-            print('[SerialService] Arduino já estava conectado')
             return True
 
         try:
-            print(f'[SerialService] Tentando conectar em {self.port}...')
 
             self.connection = serial.Serial(
                 port=self.port,
@@ -72,8 +70,8 @@ class SerialService:
             # Limpa buffers antigos para evitar ler lixo de inicialização.
             self.connection.reset_input_buffer()
             self.connection.reset_output_buffer()
+            print('[SerialService] Conexão com Arduino estabelecida com sucesso')
 
-            print('[SerialService] Arduino conectado com sucesso')
             return True
 
         except serial.SerialException as error:
@@ -163,7 +161,6 @@ class SerialService:
 
         try:
             command_to_send = f'{command}\n'
-            print(f'[SerialService] Enviando comando: {command}')
 
             # Limpa o buffer de entrada para não pegar sobra de mensagem antiga.
             self.connection.reset_input_buffer()
@@ -217,7 +214,6 @@ class SerialService:
                 return None
 
             decoded_data = raw_data.decode('utf-8', errors='ignore').strip()
-            print(f'[SerialService] Resposta recebida: {decoded_data}')
             return decoded_data
 
         except (serial.SerialException, OSError) as error:

@@ -17,7 +17,6 @@ class MachineStateService:
         """
         Atualiza o estado principal da máquina no banco.
         """
-        print(f'Atualizando estado da máquina com dados: {data}')
 
         state, _ = MachineState.objects.get_or_create(id=1)
 
@@ -27,7 +26,6 @@ class MachineStateService:
         state.arduino_connected = self.serial_service.is_connected()
 
         state.save()
-        print(f'Estado atualizado: {state}')
 
         self.broadcast_service.broadcast_machine_state(
             payload=self.serialize_state(state)
@@ -50,7 +48,6 @@ class MachineStateService:
         """
         Converte o model para o formato esperado pelo frontend.
         """
-        print(f'Serializando estado para envio: {state}')
 
         return {
             'led': state.led,
