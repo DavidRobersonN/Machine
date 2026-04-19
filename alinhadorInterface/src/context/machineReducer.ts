@@ -67,7 +67,7 @@ export function machineReducer(
       /*
         Adiciona um novo log ao final da lista.
 
-        O slice(-30) mantém somente os últimos 30 logs,
+        O slice(-3) mantém somente os últimos 3 logs,
         evitando crescer demais e pesar a interface.
       */
       return {
