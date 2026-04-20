@@ -1,5 +1,5 @@
-import { ScreenMain } from '../ScreenMain/ScreenMain'
-import { ScreenStatusBar } from '../ScreenStatusBar/ScreenStatusBar'
+import { ScreenMain } from '../Screen/ScreenMain/ScreenMain'
+import { ScreenStatusBar } from '../Screen/ScreenStatusBar/ScreenStatusBar'
 import { PainelControls } from '../PainelControls/PainelControls'
 
 type PainelMachineProps = {

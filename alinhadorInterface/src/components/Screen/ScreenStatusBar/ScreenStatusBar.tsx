@@ -1,4 +1,4 @@
-import { useMachineContext } from '../../context/MachineContext'
+import { useMachineContext } from '../../../context/MachineContext'
 
 export function ScreenStatusBar() {
   const { state } = useMachineContext()

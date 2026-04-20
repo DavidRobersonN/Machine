@@ -43,3 +43,48 @@ algum componente com ele, os filhos terao acesso a esse contexto
 Sexto Passo: funções de CallBack
 Agora podemos acessar de qualquer lugar da nossa aplicação, as funções de call
 back que definimos em MachineContext..
+
+
+
+
+Componentes
+
+Exemplo de Componente Botao Led
+
+1 Passo
+Componente Botao Generico, que recebe Props com:
+                                          nome:
+                                          função de callback:
+
+2 Passo
+Utilizar esse Botao que receber Props dentro de um template..  para posteriormente esse template, ser utilizado de diferentes formas.. mas com
+a mesa aparencia.. mas com utilizadades diferentes em cada botao dependendo como eu utilize esse template
+          
+2 Passo
+Utilizar ele dentro de um Componente que vai fazer a Função de Led
+
+                                          import { useMachineContext } from '../../context/MachineContext'
+                                          import { Botao } from '../Botao/Botao'
+
+                                          export function Led() {
+                                            const { sendCommand } = useMachineContext()
+
+                                            function handleTurnLedOn() {
+                                              sendCommand({
+                                                action: 'led_on',
+                                              })
+                                            }
+
+                                            function handleTurnLedOff() {
+                                              sendCommand({
+                                                action: 'led_off',
+                                              })
+                                            }
+
+                                            return (
+                                              <>
+                                                <Botao nome="Ligar" onClick={handleTurnLedOn} />
+                                                <Botao nome="Desligar" onClick={handleTurnLedOff} />
+                                              </>
+                                            )
+                                
