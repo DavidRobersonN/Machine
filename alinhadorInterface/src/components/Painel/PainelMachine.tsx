@@ -1,12 +1,9 @@
 import { ScreenMain } from '../Screen/ScreenMain/ScreenMain'
 import { ScreenStatusBar } from '../Screen/ScreenStatusBar/ScreenStatusBar'
 import { PainelControls } from '../PainelControls/PainelControls'
+import { Botoes } from '../Botoes/Botoes'
 
-type PainelMachineProps = {
-  children?: React.ReactNode
-}
-
-export function PainelMachine({ children }: PainelMachineProps) {
+export function PainelMachine() {
   return (
     <section className="painel-machine">
       <div className="painel-shell">
@@ -21,7 +18,8 @@ export function PainelMachine({ children }: PainelMachineProps) {
           <PainelControls />
         </div>
 
-        {children}
+        <Botoes />
+
       </div>
     </section>
   )
