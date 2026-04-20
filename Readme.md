@@ -2,19 +2,24 @@
 Proximo passo vou criar no arduino o codigo orientado a Objetos.. mantendo o codigo atual, apenas do led.
 
 
+20/04
+preciso alterar os componentes que eu criei, para receber props..  quero deixar eles
+reutilizaveis, para criar um template que pode ser usado de varias formar..
+para os botoes terem funcionaliidades diferentes dependendo da tela que for ser usado
+
 Front
-Primeiro Passo: machineSocket.ts
+Primeiro Passo: *machineSocket.ts*
 
   Começa Pelo machineSocket.ts que faz a conexao com o backend, e é onde de
 fato vai enviar as informações, ja convertidas em json.. 
   Agora ja tendo a comunicação entre backend e o front, Precisamos interpretar
 as mensagens recebidas.
 
-Segundo Passo: Types/machine.ts
+Segundo Passo: *Types/machine.ts*
   Criar o arquivo Types/machine.ts onde é definido o tipos aceitos que virao do
 backend, estado global e as actions que o reducer vai entender..
 
-Terceiro Passo: MachineReducer.ts
+Terceiro Passo: *MachineReducer.ts*
   MachineReducer.ts..  primeiro definimos um estado inicial.. 
   Agora é Feito o Reducer Principal da maquina, ele recebe o estado atual da
 maquina e uma ação que queremos executar. 
@@ -22,7 +27,7 @@ maquina e uma ação que queremos executar.
 e dentro de cada case, é executaddo a ação ja pre definida.. e devolve um novo 
 estado ja alterado.
 
-Quarto Passo: MachineContext.tsx
+Quarto Passo: *MachineContext.tsx*
   Aqui onde Criaremos o Contexto da Maquina, é criado um Reducer, passando o nosso
 InitialState, ja implementado em types, e o nosso machineReducer
 O que acontece aqui:
@@ -30,7 +35,7 @@ O que acontece aqui:
 e o payload que vem dentro dessa mensagem.. obs: meu machineReducer ja precisa estar esperando
 essa type, precisa vir do jeito que ele espera.. 
 
-Quinto Passo: Provider
+Quinto Passo: *Provider*
   Ainda em  MachineContext.tsx ..    o Retorno do nosso MachineProvider, é um
 é uma especie de componente que recebe Children.. ou seja quando envolvermos
 algum componente com ele, os filhos terao acesso a esse contexto
