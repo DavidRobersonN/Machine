@@ -1,6 +1,6 @@
 from machine.services.serial_service import SerialService
 from machine.services.machine_state_service import MachineStateService
-
+from serial.tools import list_ports
 
 class MachineService:
     """
@@ -23,6 +23,20 @@ class MachineService:
 
     def handle_command(self, data: dict) -> dict:
         action = data.get('action')
+
+        if action == 'list_serial_ports':
+            ports = []
+            for port in list_ports.comports():
+                ports.append({
+                    'device': port.device,
+                    'description': port.description,
+                    'hwid': port.hwid,
+                })
+
+            return {
+                'type': 'available_ports',
+                'ports': ports,
+            }
 
         if action == 'ping':
             return {

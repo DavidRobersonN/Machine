@@ -149,6 +149,24 @@ export function MachineProvider({ children }: MachineProviderProps) {
         },
       })
     }
+
+    /* 6) Mensagem de portas disponíveis */
+    if (message.type === 'available_ports') {
+      dispatch({
+      type: 'SET_AVAILABLE_PORTS',
+      payload: message.ports,
+      })
+
+      dispatch({
+        type: 'ADD_LOG',
+        payload: {
+        direction: 'received',
+        message: `Portas encontradas: ${message.ports.length}`,
+        },
+      })
+
+    return
+}
   }, [])
 
   /*

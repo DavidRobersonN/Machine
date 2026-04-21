@@ -5,6 +5,7 @@ type PainelMachineProps = {
   screenStatusBar: ReactNode
   screenPainelControls: ReactNode
   botaoled: ReactNode
+  botaoSerialPortList: ReactNode
 }
 
 export function PainelMachineTemplate({
@@ -12,6 +13,7 @@ export function PainelMachineTemplate({
   screenStatusBar,
   screenPainelControls,
   botaoled,
+  botaoSerialPortList,
 }: PainelMachineProps) {
   return (
     <section className="painel-machine">
@@ -27,6 +29,7 @@ export function PainelMachineTemplate({
           
         </div>
         {botaoled}
+        {botaoSerialPortList}
       </div>
       
     </section>

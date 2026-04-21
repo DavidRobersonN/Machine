@@ -19,6 +19,12 @@ export type MachineLog = {
   message: string
 }
 
+export type SerialPortInfo = {
+  device: string
+  description: string
+  hwid: string
+}
+
 /*
   Estado global da máquina usado no React.
 */
@@ -27,6 +33,12 @@ export interface MachineState {
   led: LedUiState
   arduino_connected: ArduinoConnectionState
   logs: MachineLog[]
+  available_ports: SerialPortInfo[]
+}
+
+export interface AvailablePortsMessage {
+  type: 'available_ports'
+  ports: SerialPortInfo[]
 }
 
 /*
@@ -98,6 +110,7 @@ export type MachineMessage =
   | ErrorMessage
   | InfoMessage
   | LogMessage
+  | AvailablePortsMessage
 
 /*
   Ações que o reducer entende.
@@ -108,3 +121,4 @@ export type MachineAction =
   | { type: 'MACHINE_UPDATED'; payload: MachineUpdatePayload }
   | { type: 'ADD_LOG'; payload: MachineLog }
   | { type: 'CLEAR_LOGS' }
+  | { type: 'SET_AVAILABLE_PORTS'; payload: SerialPortInfo[] }

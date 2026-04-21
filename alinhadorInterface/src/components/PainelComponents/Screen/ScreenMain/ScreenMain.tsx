@@ -1,4 +1,4 @@
-import { ScreenSidebar } from '../SscreenSideBar/ScreenSideBar'
+import { ScreenSidebar } from '../ScreenSideBar/ScreenSideBar'
 import { ScreenLogs } from '../ScreenLogs/ScreenLogs'
 
 export function ScreenMain() {

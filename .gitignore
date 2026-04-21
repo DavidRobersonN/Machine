@@ -1,6 +1,6 @@
-venv/
-.venv/
 __pycache__/
 *.pyc
+venv/
+db.sqlite3
 node_modules/
 dist/

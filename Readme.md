@@ -99,3 +99,147 @@ python -m serial.tools.list_ports -v
 *Templates*
 
 atualmente o que esta no meu painel machine, vai ser o o meu template
+
+
+
+
+
+*Criando Log para mostrar postas COM disponiveis no Sistema*
+
+1 Passo: *adicionar as portas no seu estado global*
+  Front: Criando tipo em Types/Machine.ts
+
+```ts
+        export type SerialPortInfo = {
+          device: string
+          description: string
+          hwid: string
+        }
+```
+
+
+2 Passo: *Estado inicial*
+  Front: Ainda no Machine.ts, dentro da interface MachineState:
+
+```ts
+        export interface MachineState {
+          connected: boolean
+          led: LedUiState
+          arduino_connected: ArduinoConnectionState
+          logs: MachineLog[]
+          available_ports: SerialPortInfo[]
+        }
+
+```
+3 Passo: *Criar mensagem vinda do backend*
+  Front: Ainda no Machine.ts. Adicionar um novo tipo de mensagem:
+```ts
+        export interface AvailablePortsMessage {
+          type: 'available_ports'
+          ports: SerialPortInfo[]
+        }
+```
+  E inclua isso na Uniao de Mensagens:
+```ts
+/*
+  União de todas as mensagens que podem chegar
+  do backend pelo WebSocket.
+*/
+        export type MachineMessage =
+          | MachineUpdateMessage
+          | ConnectionMessage
+          | ErrorMessage
+          | InfoMessage
+          | LogMessage
+          | AvailablePortsMessage
+```
+
+4 passo: *Criar action para o reducer*
+    Front: Machine.ts
+```ts
+/*
+  Ações que o reducer entende.
+*/
+        export type MachineAction =
+          | { type: 'SOCKET_CONNECTED' }
+          | { type: 'SOCKET_DISCONNECTED' }
+          | { type: 'MACHINE_UPDATED'; payload: MachineUpdatePayload }
+          | { type: 'ADD_LOG'; payload: MachineLog }
+          | { type: 'CLEAR_LOGS' }
+          | { type: 'SET_AVAILABLE_PORTS'; payload: SerialPortInfo[] }
+```
+
+5 Passo: *Atualizar o reducer*
+  Front: No machineReducer.ts, adicione este case:
+```ts
+          case 'SET_AVAILABLE_PORTS':
+            return {
+              ...state,
+              available_ports: action.payload,
+            }
+```
+
+
+Passo 6: *Fazer o contexto entender essa nova mensagem*
+  Front: No MachineContext, dentro do handleMachineMessage, adicione:
+```ts
+          if (message.type === 'available_ports') {
+            dispatch({
+              type: 'SET_AVAILABLE_PORTS',
+              payload: message.ports,
+            })
+
+            dispatch({
+              type: 'ADD_LOG',
+              payload: {
+                direction: 'received',
+                message: `Portas encontradas: ${message.ports.length}`,
+              },
+            })
+
+            return
+          }
+```
+
+
+Passo 7: *Criar comando para pedir as portas*
+  Front: Seu frontend pode pedir ao backend para listar as portas via WebSocket:
+```ts
+          sendCommand({
+            action: 'list_serial_ports',
+          })
+```
+
+
+Passo 8:
+
+
+
+Passo 9: *Backend: responder ao comando*
+  No seu MachineService, você pode tratar assim:
+```py
+          from serial.tools import list_ports
+
+          class MachineService:
+              def handle_command(self, data):
+                  action = data.get('action')
+
+                  if action == 'list_serial_ports':
+                      ports = []
+                      for port in list_ports.comports():
+                          ports.append({
+                              'device': port.device,
+                              'description': port.description,
+                              'hwid': port.hwid,
+                          })
+
+                      return {
+                          'type': 'available_ports',
+                          'ports': ports,
+                      }
+
+                  return {
+                      'type': 'error',
+                      'message': 'Ação desconhecida',
+                  }
+```

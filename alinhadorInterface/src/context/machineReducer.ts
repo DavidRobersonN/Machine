@@ -18,6 +18,9 @@ export const initialMachineState: MachineState = {
 
   // Lista de mensagens enviadas e recebidas
   logs: [],
+
+  // Lista de portas seriais disponíveis (inicialmente vazia)
+  available_ports: [],
 }
 
 /*
@@ -46,6 +49,12 @@ export function machineReducer(
       return {
         ...state,
         connected: true,
+      }
+      
+    case 'SET_AVAILABLE_PORTS':
+      return {
+        ...state,
+        available_ports: action.payload,
       }
 
     case 'SOCKET_DISCONNECTED':

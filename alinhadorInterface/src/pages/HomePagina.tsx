@@ -3,6 +3,7 @@ import { PainelControls } from '../components/PainelComponents/PainelControls/Pa
 import { ScreenMain } from '../components/PainelComponents/Screen/ScreenMain/ScreenMain'
 import { ScreenStatusBar } from '../components/PainelComponents/Screen/ScreenStatusBar/ScreenStatusBar'
 import { PainelMachineTemplate } from '../templates/PainelMachineTemplate'
+import { SerialPortList } from '../components/SerialPortList/SerialPortList'
 
 export function HomePage() {
   return (
@@ -11,6 +12,7 @@ export function HomePage() {
         screenStatusBar={<ScreenStatusBar />}
         screenPainelControls={<PainelControls />}
         botaoled={<Led />}
+        botaoSerialPortList={<SerialPortList />}
       />
   )
 }
