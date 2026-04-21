@@ -28,8 +28,8 @@
 const int LED_PIN = LED_BUILTIN;
 
 // Ajuste esses pinos conforme sua ligação no driver do motor.
-const int MOTOR_RODA_STEP_PIN = 2;
-const int MOTOR_RODA_DIR_PIN = 3;
+const int MOTOR_RODA_STEP_PIN = 31;
+const int MOTOR_RODA_DIR_PIN = 32;
 
 // =======================
 // ESTADOS
