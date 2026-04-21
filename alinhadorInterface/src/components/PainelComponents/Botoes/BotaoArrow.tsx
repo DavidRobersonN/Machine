@@ -1,4 +1,4 @@
-import { BotaoDirectionPad } from '../Botao/BotaoDirectionPad'
+import { BotaoDirectionPad } from '../../Botao/BotaoDirectionPad'
 
 export function Clique() {
   function handleUp() {

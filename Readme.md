@@ -88,3 +88,14 @@ Utilizar ele dentro de um Componente que vai fazer a Função de Led
                                               </>
                                             )
                                 
+
+
+*Arduino*
+
+para verificar as portas disponiveis
+python -m serial.tools.list_ports -v
+
+
+*Templates*
+
+atualmente o que esta no meu painel machine, vai ser o o meu template

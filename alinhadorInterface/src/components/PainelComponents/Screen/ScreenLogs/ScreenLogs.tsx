@@ -1,4 +1,4 @@
-import { useMachineContext } from '../../../context/MachineContext';
+import { useMachineContext } from '../../../../context/MachineContext'
 import './Styles.css'
 
 export function ScreenLogs() {

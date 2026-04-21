@@ -1,4 +1,4 @@
-import { Clique } from '../TesteClique/Clique'
+import { Clique } from '../Botoes/BotaoArrow'
 
 export function PainelControls() {
   return (

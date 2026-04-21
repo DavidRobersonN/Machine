@@ -1,5 +1,6 @@
-import { useMachineContext } from '../../context/MachineContext'
-import { BotaoRedondoVermelho } from '../Botao/BotaoRedondoVermelho'
+import { useMachineContext } from '../../../context/MachineContext'
+import { BotaoRedondoVermelho } from '../../Botao/BotaoRedondoVermelho'
+import { BotaoQuadradoVerde } from '../../Botao/BotaoQuadradoVerde'
 
 export function Led() {
   const { sendCommand } = useMachineContext()
@@ -17,15 +18,16 @@ export function Led() {
   }
 
   return (
-    <>
-      <BotaoRedondoVermelho
+    <div className="led-buttons">
+      <BotaoQuadradoVerde
         nome="Ligar"
         onClick={handleTurnLedOn}
       />
+
       <BotaoRedondoVermelho
         nome="Desligar"
         onClick={handleTurnLedOff}
       />
-    </>
+    </div>
   )
 }
