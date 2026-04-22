@@ -1,7 +1,6 @@
 export type LedBackendState = 'ON' | 'OFF'
 export type LedUiState = 'Ligado' | 'Desligado'
 export type ArduinoConnectionState = 'Conectado' | 'Desconectado'
-
 export type MotorDirection = 'tighten' | 'loosen'
 
 /*

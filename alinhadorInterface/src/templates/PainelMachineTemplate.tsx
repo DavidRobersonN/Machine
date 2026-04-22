@@ -28,8 +28,10 @@ export function PainelMachineTemplate({
           {screenPainelControls}
           
         </div>
-        {botaoled}
-        {botaoSerialPortList}
+        <div className="led-buttons">
+          {botaoled}
+          {botaoSerialPortList}
+        </div>
       </div>
       
     </section>

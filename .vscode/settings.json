@@ -1,3 +1,4 @@
 {
     "explorer.compactFolders": false,
+    "workbench.editor.enablePreview": false,
 }

@@ -3,7 +3,7 @@ import { PainelControls } from '../components/PainelComponents/PainelControls/Pa
 import { ScreenMain } from '../components/PainelComponents/Screen/ScreenMain/ScreenMain'
 import { ScreenStatusBar } from '../components/PainelComponents/Screen/ScreenStatusBar/ScreenStatusBar'
 import { PainelMachineTemplate } from '../templates/PainelMachineTemplate'
-import { SerialPortList } from '../components/SerialPortList/SerialPortList'
+import { SerialPortList } from '../components/PainelComponents/Botoes/SerialPortList'
 
 export function HomePage() {
   return (

@@ -1,6 +1,5 @@
-import { useMachineContext } from '../../context/MachineContext'
-import { BotaoQuadradoVerde } from '../Botao/BotaoQuadradoVerde'
-
+import { useMachineContext } from '../../../context/MachineContext'
+import { BotaoQuadradoLaranja } from '../../BotoesGenericos/BotaoQuadradoLaranja'
 
 export function SerialPortList() {
     const { sendCommand } = useMachineContext()
@@ -12,11 +11,10 @@ export function SerialPortList() {
     }
 
     return (
-        <div className="led-buttons">
-            <BotaoQuadradoVerde
+        
+            <BotaoQuadradoLaranja
             nome="Listar Portas Seriais"
             onClick={handlePortDisponivel}
             />
-        </div>
     )
 }
