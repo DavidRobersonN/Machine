@@ -2,6 +2,7 @@ export type LedBackendState = 'ON' | 'OFF'
 export type LedUiState = 'Ligado' | 'Desligado'
 export type ArduinoConnectionState = 'Conectado' | 'Desconectado'
 export type MotorDirection = 'tighten' | 'loosen'
+export type  SelectedSerialPortState = string | null
 
 /*
   Representa um item do histórico de logs da aplicação.
@@ -33,6 +34,7 @@ export interface MachineState {
   arduino_connected: ArduinoConnectionState
   logs: MachineLog[]
   available_ports: SerialPortInfo[]
+  selected_port: SelectedSerialPortState
 }
 
 export interface AvailablePortsMessage {
@@ -47,6 +49,7 @@ export interface AvailablePortsMessage {
 export interface MachineUpdatePayload {
   led?: LedBackendState
   arduino_connected?: boolean
+  selected_port?: SelectedSerialPortState
 }
 
 /*
@@ -99,6 +102,11 @@ export interface LogMessage {
   message: string
 }
 
+export interface SelectPortCommand {
+  action: 'select_port'
+  port: string
+}
+
 /*
   União de todas as mensagens que podem chegar
   do backend pelo WebSocket.
@@ -110,7 +118,6 @@ export type MachineMessage =
   | InfoMessage
   | LogMessage
   | AvailablePortsMessage
-
 /*
   Ações que o reducer entende.
 */
@@ -121,3 +128,4 @@ export type MachineAction =
   | { type: 'ADD_LOG'; payload: MachineLog }
   | { type: 'CLEAR_LOGS' }
   | { type: 'SET_AVAILABLE_PORTS'; payload: SerialPortInfo[] }
+  | { type: 'SET_SELECTED_PORT'; payload: SelectedSerialPortState }

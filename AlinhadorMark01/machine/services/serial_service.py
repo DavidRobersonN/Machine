@@ -23,7 +23,7 @@ class SerialService:
 
     def __init__(
         self,
-        port: str = 'COM9',
+        port: str | None = None,
         baudrate: int = 9600,
         timeout: float = 0.3,
     ):
@@ -44,6 +44,31 @@ class SerialService:
         self.timeout = timeout
         self.connection = None
 
+    def set_port(self, port: str | None) -> None:
+        """
+        Atualiza a porta serial usada pelo Arduino.
+
+        Regras:
+        - se a porta vier vazia ou indefinida, não troca
+        - se a porta for igual à atual, não faz nada
+        - se a porta for diferente, fecha a conexão atual antes de trocar
+
+        Isso evita ficar desconectando e reconectando sem necessidade.
+        """
+        if not port:
+            print('[SerialService] Porta não informada. Mantendo porta atual.')
+            return
+
+        if port == self.port:
+            print(f'[SerialService] Porta {port} já está selecionada. Nenhuma troca necessária.')
+            return
+
+        if self.connection and self.connection.is_open:
+            self.disconnect()
+
+        self.port = port
+        print(f'[SerialService] Porta serial atualizada para: {self.port}')
+
     def connect(self) -> bool:
         """
         Tenta abrir a conexão serial com o Arduino.
@@ -54,6 +79,11 @@ class SerialService:
         """
         if self.connection and self.connection.is_open:
             return True
+
+        if not self.port:
+            print('[SerialService] Nenhuma porta serial foi selecionada')
+            self.connection = None
+            return False
 
         try:
 
@@ -79,6 +109,7 @@ class SerialService:
             print(f'[SerialService] Detalhes do erro: {error}')
             self.connection = None
             return False
+        
 
     def disconnect(self) -> None:
         """

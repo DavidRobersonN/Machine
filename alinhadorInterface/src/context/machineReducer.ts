@@ -21,6 +21,8 @@ export const initialMachineState: MachineState = {
 
   // Lista de portas seriais disponíveis (inicialmente vazia)
   available_ports: [],
+
+  selected_port: null,
 }
 
 /*
@@ -41,6 +43,16 @@ export function machineReducer(
     e decide como o estado será atualizado.
   */
   switch (action.type) {
+        case 'SET_SELECTED_PORT':
+      /*
+        Essa action é disparada pelo frontend
+        quando o usuário escolhe uma porta na interface.
+      */
+      return {
+        ...state,
+        selected_port: action.payload,
+      }
+
     case 'SOCKET_CONNECTED':
       /*
         Quando o WebSocket conecta com sucesso,
@@ -138,6 +150,16 @@ export function machineReducer(
             : action.payload.arduino_connected === false
               ? 'Desconectado'
               : state.arduino_connected,
+
+              
+                /*
+          Atualiza a porta selecionada se o backend enviar.
+          Caso não envie, mantém a atual.
+        */
+        selected_port:
+          action.payload.selected_port !== undefined
+            ? action.payload.selected_port
+            : state.selected_port,
       }
 
     default:
