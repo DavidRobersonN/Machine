@@ -2,14 +2,12 @@ import type { ReactNode } from 'react'
 
 type PainelMachineProps = {
   screenMain: ReactNode
-  screenStatusBar?: ReactNode
   sideControls?: ReactNode
   bottomControls?: ReactNode
 }
 
 export function PainelMachineTemplate({
   screenMain,
-  screenStatusBar,
   sideControls,
   bottomControls,
 }: PainelMachineProps) {
@@ -20,7 +18,6 @@ export function PainelMachineTemplate({
           <div className="painel-display-area">
             <div className="display-screen">
               {screenMain}
-              {screenStatusBar}
             </div>
           </div>
 
