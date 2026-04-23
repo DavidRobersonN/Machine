@@ -12,17 +12,24 @@ type ScreenMainProps = {
   logs: ScreenLogItem[]
   sidebar?: ReactNode
   statusBar?: ReactNode
+  children?: ReactNode
 }
 
 export function ScreenMain({
   logs,
   sidebar,
   statusBar,
+  children,
 }: ScreenMainProps) {
   return (
     <>
       <div className="screen-main">
+        <div className="screen-main-content">
+          {children}
+        </div>
+
         <ScreenLogs logs={logs} />
+
         {sidebar}
       </div>
 
