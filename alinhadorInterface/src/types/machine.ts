@@ -2,7 +2,7 @@ export type LedBackendState = 'ON' | 'OFF'
 export type LedUiState = 'Ligado' | 'Desligado'
 export type ArduinoConnectionState = 'Conectado' | 'Desconectado'
 export type MotorDirection = 'tighten' | 'loosen'
-export type  SelectedSerialPortState = string | null
+export type SelectedSerialPortState = string | null
 
 /*
   Representa um item do histórico de logs da aplicação.
@@ -17,6 +17,11 @@ export type  SelectedSerialPortState = string | null
 export type MachineLog = {
   direction: 'sent' | 'received'
   message: string
+}
+
+/*Envia para o Backend*/ 
+export interface ListSerialPortsCommand {
+  action: 'list_serial_ports'
 }
 
 export type SerialPortInfo = {
@@ -118,6 +123,7 @@ export type MachineMessage =
   | InfoMessage
   | LogMessage
   | AvailablePortsMessage
+  | ListSerialPortsCommand
 /*
   Ações que o reducer entende.
 */

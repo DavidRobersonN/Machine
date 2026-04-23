@@ -1,19 +1,38 @@
-import { Clique } from '../Botoes/BotaoArrow'
+type PainelControlsProps = {
+  directionPad?: React.ReactNode
+  escButton?: React.ReactNode
+  enterButton?: React.ReactNode
+  originButton?: React.ReactNode
+  frameButton?: React.ReactNode
+}
 
-export function PainelControls() {
+export function PainelControls({
+  directionPad,
+  escButton,
+  enterButton,
+  originButton,
+  frameButton,
+}: PainelControlsProps) {
   return (
     <div className="painel-controls-area">
-      <Clique />
+      {/* Área do direcional */}
+      {directionPad}
 
-      <div className="action-buttons">
-        <button className="btn btn-red">Esc</button>
-        <button className="btn btn-orange">Enter</button>
-      </div>
+      {/* Botões principais */}
+      {(escButton || enterButton) && (
+        <div className="action-buttons">
+          {escButton}
+          {enterButton}
+        </div>
+      )}
 
-      <div className="action-buttons">
-        <button className="btn btn-green">Origin</button>
-        <button className="btn btn-green">Frame</button>
-      </div>
+      {/* Botões auxiliares */}
+      {(originButton || frameButton) && (
+        <div className="action-buttons">
+          {originButton}
+          {frameButton}
+        </div>
+      )}
     </div>
   )
 }

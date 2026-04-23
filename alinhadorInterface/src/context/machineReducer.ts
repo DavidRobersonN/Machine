@@ -93,7 +93,7 @@ export function machineReducer(
       */
       return {
         ...state,
-        logs: [...state.logs, action.payload].slice(-3),
+        logs: [...state.logs, action.payload].slice(-30),
       }
 
     case 'CLEAR_LOGS':

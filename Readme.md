@@ -243,3 +243,516 @@ Passo 9: *Backend: responder ao comando*
                       'message': 'Ação desconhecida',
                   }
 ```
+A lógica de navegação
+
+Fica em um container/page, por exemplo:
+
+PainelMachinePage.tsx
+ou MachineController.tsx
+
+Esse componente decide:
+
+em qual tela você está
+o que renderizar no screenMain
+o que acontece quando aperta ▲ ▼ ◀ ▶ Enter Esc
+
+
+```ts
+import { useMemo } from 'react'
+import type {
+  MachineCommand,
+  MachineState,
+  SelectPortCommand,
+} from '../../types/machine'
+
+type SerialPortSelectorProps = {
+  state: MachineState
+  dispatch: React.Dispatch<any>
+  send: (payload: MachineCommand) => void
+}
+
+export function SerialPortSelector({
+  state,
+  dispatch,
+  send,
+}: SerialPortSelectorProps) {
+  // Lista de portas disponíveis vinda do estado global
+  const ports = state.available_ports
+
+  /*
+    Descobre em qual posição do array está a porta atualmente selecionada.
+    Se nenhuma estiver selecionada, o resultado será -1.
+  */
+  const selectedIndex = useMemo(() => {
+    return ports.findIndex((port) => port.device === state.selected_port)
+  }, [ports, state.selected_port])
+
+  /*
+    Índice seguro para navegação.
+    Se ainda não houver porta selecionada, usamos 0 como referência.
+  */
+  const safeIndex = selectedIndex >= 0 ? selectedIndex : 0
+
+  /*
+    Seleciona a porta anterior na lista.
+    Aqui apenas atualizamos o state do frontend.
+    Ainda não enviamos nada para o backend.
+  */
+  function handlePreviousPort() {
+    if (ports.length === 0) return
+
+    const previousIndex =
+      safeIndex === 0 ? ports.length - 1 : safeIndex - 1
+
+    const previousPort = ports[previousIndex]
+
+    dispatch({
+      type: 'SET_SELECTED_PORT',
+      payload: previousPort.device,
+    })
+  }
+
+  /*
+    Seleciona a próxima porta na lista.
+    Também só altera o state local/global do frontend.
+  */
+  function handleNextPort() {
+    if (ports.length === 0) return
+
+    const nextIndex =
+      safeIndex === ports.length - 1 ? 0 : safeIndex + 1
+
+    const nextPort = ports[nextIndex]
+
+    dispatch({
+      type: 'SET_SELECTED_PORT',
+      payload: nextPort.device,
+    })
+  }
+
+  /*
+    Confirma a porta escolhida e envia ao backend.
+    Esse é o momento em que o frontend realmente manda o comando.
+  */
+  function handleConfirmPort() {
+    if (!state.selected_port) return
+
+    const command: SelectPortCommand = {
+      action: 'select_port',
+      port: state.selected_port,
+    }
+
+    send(command)
+  }
+
+  /*
+    Solicita ao backend a lista atualizada de portas seriais.
+  */
+  function handleListPorts() {
+    send({ action: 'list_serial_ports' })
+  }
+
+  /*
+    Busca o objeto completo da porta selecionada
+    para exibir device, description e hwid na tela.
+  */
+  const selectedPortInfo =
+    ports.find((port) => port.device === state.selected_port) ?? null
+
+  return (
+    <div className="serial-port-selector">
+      <h3>Porta COM</h3>
+
+      <div className="serial-port-display">
+        {selectedPortInfo ? (
+          <>
+            <p>
+              <strong>Selecionada:</strong> {selectedPortInfo.device}
+            </p>
+            <p>{selectedPortInfo.description}</p>
+            <p>{selectedPortInfo.hwid}</p>
+          </>
+        ) : (
+          <p>Nenhuma porta selecionada</p>
+        )}
+      </div>
+
+      <div className="serial-port-actions">
+        <button onClick={handlePreviousPort}>◀ Porta Anterior</button>
+        <button onClick={handleNextPort}>Próxima Porta ▶</button>
+        <button onClick={handleConfirmPort}>Enter / Confirmar</button>
+        <button onClick={handleListPorts}>Listar Portas Seriais</button>
+      </div>
+
+      <ul className="serial-port-list">
+        {ports.map((port) => (
+          <li
+            key={port.device}
+            className={
+              state.selected_port === port.device ? 'selected-port' : ''
+            }
+          >
+            {port.device} - {port.description}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+```
+Visão geral da arquitetura
+src/
+  hooks/
+    machine/
+      useLedActions.ts
+
+  components/
+    controls/
+      ToggleControl/
+        ToggleControl.tsx
+
+    PainelComponents/
+      led/
+        LedControl.tsx
+
+  pages/
+    HomePage.tsx
+
+A ideia principal é separar o projeto em responsabilidades:
+
+pages → montam telas
+components → mostram interface
+hooks → guardam lógica reutilizável ligada ao React
+components/controls → peças genéricas
+components/PainelComponents → peças específicas do painel/máquina
+1. hooks/machine/useLedActions.ts
+Função dele
+
+Esse arquivo guarda a lógica de ação do LED.
+
+Exemplo do que fica aí:
+
+ligar LED
+desligar LED
+chamar sendCommand
+conversar com contexto
+Por que isso fica em hooks
+
+Porque ele usa:
+
+useMachineContext()
+estado/contexto React
+lógica ligada à interface
+
+Ou seja, ele não é um componente visual.
+Ele é uma camada de comportamento.
+
+Papel na arquitetura
+
+Ele responde à pergunta:
+
+“Como eu executo a ação de ligar ou desligar o LED?”
+
+Então:
+
+HomePage não precisa saber como ligar LED
+LedControl não precisa saber como montar comando
+o hook centraliza isso
+Resumo para anotação
+useLedActions.ts = lógica de ações do LED.
+Fica em hooks porque usa contexto e encapsula comportamento reutilizável.
+2. components/controls/ToggleControl/ToggleControl.tsx
+Função dele
+
+Esse é o componente genérico de UI.
+
+Ele não sabe nada sobre LED.
+Ele apenas mostra dois botões, por exemplo:
+
+ativar / desativar
+ligar / desligar
+iniciar / parar
+Por que ele fica em controls
+
+Porque ele é um controle reutilizável da interface.
+
+Você pode usar esse mesmo componente para:
+
+LED
+motor
+sensor
+conexão serial
+modo automático
+Papel na arquitetura
+
+Ele responde à pergunta:
+
+“Como mostrar um controle visual de duas ações opostas?”
+
+Ele só cuida da aparência e da interação visual.
+
+O que ele não deve fazer
+
+Ele não deve:
+
+usar useMachineContext
+montar payload de comando
+saber o que é LED
+saber o que é Arduino
+
+Porque isso faria ele deixar de ser genérico.
+
+Resumo para anotação
+ToggleControl.tsx = componente visual genérico.
+Serve para qualquer controle binário (ligar/desligar, ativar/desativar, iniciar/parar).
+Não conhece regra de negócio.
+3. components/PainelComponents/led/LedControl.tsx
+Função dele
+
+Esse componente é a ponte entre:
+
+o componente genérico (ToggleControl)
+a lógica específica do LED (useLedActions)
+
+Ele é específico do domínio da sua máquina.
+
+Por que ele fica em PainelComponents/led
+
+Porque ele já não é mais genérico.
+Ele representa um controle real do painel: o controle do LED.
+
+Então ele pertence à área da máquina/painel.
+
+Papel na arquitetura
+
+Ele responde à pergunta:
+
+“Como eu monto o controle específico do LED usando as peças genéricas do sistema?”
+
+Ele pega:
+
+turnLedOn
+turnLedOff
+
+e injeta isso no ToggleControl.
+
+Por que isso é útil
+
+Porque você separa:
+
+o genérico → ToggleControl
+o específico → LedControl
+
+Assim, amanhã você pode ter:
+
+MotorControl.tsx
+SensorControl.tsx
+SerialConnectionControl.tsx
+
+todos usando componentes genéricos por baixo.
+
+Resumo para anotação
+LedControl.tsx = componente específico do LED.
+Conecta a lógica do LED com o componente genérico de interface.
+É um adaptador entre domínio e UI reutilizável.
+4. pages/HomePage.tsx
+Função dele
+
+A HomePage é a composição da tela.
+
+Ela não deve ficar cheia de regra de negócio.
+Ela deve principalmente:
+
+organizar layout
+juntar componentes
+passar estado necessário para a tela
+Papel na arquitetura
+
+Ela responde à pergunta:
+
+“Quais partes aparecem na tela inicial?”
+
+Exemplo:
+
+ScreenMain
+ScreenStatusBar
+PainelControls
+LedControl
+SerialPortList
+O que a HomePage não deve fazer
+
+Ela não deve virar lugar de:
+
+handleTurnLedOn
+handleTurnLedOff
+handleStartMotor
+handleStopMotor
+handleSelectPort
+
+Se fizer isso, ela começa a virar um “arquivo depósito de lógica”.
+
+Resumo para anotação
+HomePage.tsx = monta a tela.
+Seu papel é composição, não concentração de lógica.
+Relação entre as camadas
+
+O fluxo fica assim:
+
+HomePage
+  -> usa LedControl
+      -> usa useLedActions
+          -> usa useMachineContext
+      -> renderiza ToggleControl
+
+Ou, em palavras:
+
+a página monta o componente do LED
+o componente do LED usa o hook com a lógica
+o hook envia os comandos
+o componente visual só exibe os botões
+O grande benefício dessa arquitetura
+
+Ela cria baixo acoplamento.
+
+Sem arquitetura
+
+Se você colocasse tudo na HomePage:
+
+a página ficaria gigante
+a lógica ficaria espalhada
+seria difícil testar
+seria difícil reutilizar
+Com essa arquitetura
+
+Cada parte tem uma responsabilidade clara:
+
+Hook = lógica
+Componente genérico = UI reutilizável
+Componente específico = adaptação do domínio
+Página = composição
+Regra profissional que você pode anotar
+
+Use esta regra no projeto:
+
+1. Se o código usa React Context, estado, efeitos e ações reutilizáveis
+
+coloque em hooks
+
+2. Se o código só desenha interface e recebe props
+
+coloque em components
+
+3. Se o componente é reutilizável e genérico
+
+coloque em components/controls
+
+4. Se o componente é específico da máquina
+
+coloque em components/PainelComponents
+
+5. Se o arquivo só junta partes para formar uma tela
+
+coloque em pages
+
+Como isso escala no seu projeto
+
+Essa arquitetura foi uma boa escolha porque seu projeto vai crescer.
+Você já está indo para algo com:
+
+LED
+motor
+portas COM
+telas/menu
+status da máquina
+sensores
+comandos manuais
+
+Então amanhã você pode fazer assim:
+
+src/
+  hooks/
+    machine/
+      useLedActions.ts
+      useMotorActions.ts
+      useSerialPortActions.ts
+      useMenuNavigation.ts
+
+  components/
+    controls/
+      ToggleControl/
+        ToggleControl.tsx
+      DirectionPad/
+        DirectionPad.tsx
+      MenuList/
+        MenuList.tsx
+
+    PainelComponents/
+      led/
+        LedControl.tsx
+      motor/
+        MotorControl.tsx
+      serial/
+        SerialPortControl.tsx
+      menu/
+        MainMenu.tsx
+
+  pages/
+    HomePage.tsx
+    LedPage.tsx
+    SerialPortPage.tsx
+
+Ou seja, o padrão que você montou já prepara o projeto para escalar.
+
+Uma observação importante
+
+Essa arquitetura está ótima para ações ligadas ao React.
+
+Mais para frente, quando você quiser subir o nível ainda mais, você pode adicionar:
+
+services/
+  machine/
+    machineCommands.ts
+
+Aí esse arquivo ficaria responsável por criar os comandos, por exemplo:
+
+createLedOnCommand()
+createLedOffCommand()
+createRotateMotorCommand()
+
+Então a divisão ficaria ainda melhor:
+
+services = criação e transformação de dados
+hooks = uso desses dados com contexto/UI
+components = interface
+pages = composição
+
+Mas, por enquanto, o que você fez já está muito bom.
+
+Anotação pronta para você guardar
+Arquitetura atual do projeto:
+
+1. pages/
+Responsável por montar a tela.
+A página junta os componentes e organiza o layout.
+Não deve concentrar lógica de negócio.
+
+2. hooks/
+Responsável por encapsular lógica reutilizável ligada ao React.
+Aqui ficam ações que usam contexto, estado e envio de comandos.
+Exemplo: useLedActions.ts
+
+3. components/controls/
+Responsável por componentes genéricos e reutilizáveis da interface.
+Esses componentes não conhecem a regra de negócio.
+Exemplo: ToggleControl.tsx
+
+4. components/PainelComponents/
+Responsável por componentes específicos do domínio da máquina.
+Esses componentes conectam a lógica do domínio com componentes genéricos.
+Exemplo: LedControl.tsx
+
+Fluxo:
+HomePage monta a tela
+LedControl representa o controle específico do LED
+useLedActions guarda a lógica do LED
+ToggleControl renderiza os botões de forma genérica
