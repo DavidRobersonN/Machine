@@ -1,7 +1,7 @@
 type ScreenSidebarProps = {
-  led: string
-  databaseConnection: string
-  arduinoConnection: string
+  led?: string
+  databaseConnection?: string
+  arduinoConnection?: string
   extraLabel?: string
   extraValue?: string
   progressLabel?: string
@@ -12,48 +12,62 @@ export function ScreenSidebar({
   led,
   databaseConnection,
   arduinoConnection,
-  extraLabel = 'Vai Receber Props',
-  extraValue = 'Valor',
-  progressLabel = 'Progress',
-  progressValue = 50,
+  extraLabel,
+  extraValue,
+  progressLabel,
+  progressValue,
 }: ScreenSidebarProps) {
   return (
     <div className="screen-sidebar">
-      <div className="screen-row">
-        <span>Led:</span>
-        <span>{led}</span>
-      </div>
+      {led !== undefined && (
+        <div className="screen-row">
+          <span>Led:</span>
+          <span>{led}</span>
+        </div>
+      )}
 
-      <div className="screen-row">
-        <span>Data Base</span>
-        <span>{databaseConnection}</span>
-      </div>
+      {databaseConnection !== undefined && (
+        <div className="screen-row">
+          <span>Data Base</span>
+          <span>{databaseConnection}</span>
+        </div>
+      )}
 
-      <div className="screen-row">
-        <span>Arduino</span>
-        <span>{arduinoConnection}</span>
-      </div>
+      {arduinoConnection !== undefined && (
+        <div className="screen-row">
+          <span>Arduino</span>
+          <span>{arduinoConnection}</span>
+        </div>
+      )}
 
-      <div className="screen-divider" />
+      {(extraLabel !== undefined || extraValue !== undefined) && (
+        <>
+          <div className="screen-divider" />
 
-      <div className="screen-row">
-        <span>{extraLabel}</span>
-        <span>{extraValue}</span>
-      </div>
+          <div className="screen-row">
+            <span>{extraLabel ?? '-'}</span>
+            <span>{extraValue ?? '-'}</span>
+          </div>
+        </>
+      )}
 
-      <div className="screen-divider" />
+      {progressValue !== undefined && (
+        <>
+          <div className="screen-divider" />
 
-      <div className="screen-progress-label">
-        <span>{progressLabel}</span>
-        <span>{progressValue}%</span>
-      </div>
+          <div className="screen-progress-label">
+            <span>{progressLabel ?? 'Progresso'}</span>
+            <span>{progressValue}%</span>
+          </div>
 
-      <div className="screen-progress">
-        <div
-          className="screen-progress-fill"
-          style={{ width: `${progressValue}%` }}
-        />
-      </div>
+          <div className="screen-progress">
+            <div
+              className="screen-progress-fill"
+              style={{ width: `${progressValue}%` }}
+            />
+          </div>
+        </>
+      )}
     </div>
   )
 }

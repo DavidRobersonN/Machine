@@ -1,6 +1,5 @@
-import { ScreenSidebar } from './ScreenSideBar'
+import type { ReactNode } from 'react'
 import { ScreenLogs } from '../../components/Screen/ScreenLogs'
-import { ScreenStatusBar } from './ScreenStatusBar'
 
 type LogDirection = 'sent' | 'received'
 
@@ -11,46 +10,23 @@ type ScreenLogItem = {
 
 type ScreenMainProps = {
   logs: ScreenLogItem[]
-  led: string
-  databaseConnection: string
-  arduinoConnection: string
-  extraLabel?: string
-  extraValue?: string
-  progressLabel?: string
-  progressValue?: number
+  sidebar?: ReactNode
+  statusBar?: ReactNode
 }
 
 export function ScreenMain({
   logs,
-  led = 'Desligado',
-  databaseConnection = 'Desconectado',
-  arduinoConnection = 'Desconectado',
-  extraLabel = 'Estatico',
-  extraValue = 'Estatico',
-  progressLabel = 'Estatico',
-  progressValue = 50,
-
-
+  sidebar,
+  statusBar,
 }: ScreenMainProps) {
   return (
     <>
       <div className="screen-main">
         <ScreenLogs logs={logs} />
-
-        <ScreenSidebar
-          led={led}
-          databaseConnection={databaseConnection}
-          arduinoConnection={arduinoConnection}
-          extraLabel={extraLabel}
-          extraValue={extraValue}
-          progressLabel={progressLabel}
-          progressValue={progressValue}
-        />
+        {sidebar}
       </div>
-      <ScreenStatusBar
-        arduinoConnection={arduinoConnection}
-        led={led}
-      />
+
+      {statusBar}
     </>
   )
 }
