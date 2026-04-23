@@ -1,5 +1,6 @@
 import { ScreenSidebar } from './ScreenSideBar'
 import { ScreenLogs } from '../../components/Screen/ScreenLogs'
+import { ScreenStatusBar } from './ScreenStatusBar'
 
 type LogDirection = 'sent' | 'received'
 
@@ -21,27 +22,35 @@ type ScreenMainProps = {
 
 export function ScreenMain({
   logs,
-  led,
-  databaseConnection,
-  arduinoConnection,
-  extraLabel = 'Porta COM',
-  extraValue = 'COM5',
-  progressLabel = 'Progress',
+  led = 'Desligado',
+  databaseConnection = 'Desconectado',
+  arduinoConnection = 'Desconectado',
+  extraLabel = 'Estatico',
+  extraValue = 'Estatico',
+  progressLabel = 'Estatico',
   progressValue = 50,
+
+
 }: ScreenMainProps) {
   return (
-    <div className="screen-main">
-      <ScreenLogs logs={logs} />
+    <>
+      <div className="screen-main">
+        <ScreenLogs logs={logs} />
 
-      <ScreenSidebar
-        led={led}
-        databaseConnection={databaseConnection}
+        <ScreenSidebar
+          led={led}
+          databaseConnection={databaseConnection}
+          arduinoConnection={arduinoConnection}
+          extraLabel={extraLabel}
+          extraValue={extraValue}
+          progressLabel={progressLabel}
+          progressValue={progressValue}
+        />
+      </div>
+      <ScreenStatusBar
         arduinoConnection={arduinoConnection}
-        extraLabel={extraLabel}
-        extraValue={extraValue}
-        progressLabel={progressLabel}
-        progressValue={progressValue}
+        led={led}
       />
-    </div>
+    </>
   )
 }

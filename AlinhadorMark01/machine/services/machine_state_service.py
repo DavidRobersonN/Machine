@@ -40,6 +40,10 @@ class MachineStateService:
         state, _ = MachineState.objects.get_or_create(id=1)
 
         state.arduino_connected = self.serial_service.is_connected()
+
+        if not state.arduino_connected:
+            state.led = 'OFF'
+
         state.save()
 
         return self.serialize_state(state)

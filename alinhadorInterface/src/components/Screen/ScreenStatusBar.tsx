@@ -1,19 +1,15 @@
 type ScreenStatusBarProps = {
-  connected: boolean
+  arduinoConnection: string
   led: string
 }
 
 export function ScreenStatusBar({
-  connected,
+  arduinoConnection,
   led,
-
 }: ScreenStatusBarProps) {
   return (
     <div className="screen-statusbar">
-      {/* Mostra se a máquina está conectada ou não */}
-      <span>{connected ? 'Online' : 'Offline'}</span>
-
-      {/* Estado atual do LED */}
+      <span>{arduinoConnection}</span>
       <span>Led {led}</span>
     </div>
   )

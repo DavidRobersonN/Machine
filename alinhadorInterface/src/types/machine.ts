@@ -1,27 +1,11 @@
 export type LedBackendState = 'ON' | 'OFF'
 export type LedUiState = 'Ligado' | 'Desligado'
 export type ArduinoConnectionState = 'Conectado' | 'Desconectado'
-export type MotorDirection = 'tighten' | 'loosen'
 export type SelectedSerialPortState = string | null
 
-/*
-  Representa um item do histórico de logs da aplicação.
-
-  direction:
-  - 'sent'     -> algo enviado pelo frontend ou backend
-  - 'received' -> algo recebido pelo frontend ou backend
-
-  message:
-  - texto que será exibido na interface
-*/
 export type MachineLog = {
   direction: 'sent' | 'received'
   message: string
-}
-
-/*Envia para o Backend*/ 
-export interface ListSerialPortsCommand {
-  action: 'list_serial_ports'
 }
 
 export type SerialPortInfo = {
@@ -30,9 +14,7 @@ export type SerialPortInfo = {
   hwid: string
 }
 
-/*
-  Estado global da máquina usado no React.
-*/
+/* ESTADO GLOBAL DA APLICAÇÃO */
 export interface MachineState {
   connected: boolean
   led: LedUiState
@@ -42,91 +24,128 @@ export interface MachineState {
   selected_port: SelectedSerialPortState
 }
 
+/* COMMANDS: frontend -> backend */
+export interface ListSerialPortsCommand {
+  action: 'list_serial_ports'
+}
+
+export interface SelectPortCommand {
+  action: 'select_serial_port'
+  port: string
+}
+
+export interface PingCommand {
+  action: 'ping'
+}
+
+export interface LedOnCommand {
+  action: 'led_on'
+}
+
+export interface LedOffCommand {
+  action: 'led_off'
+}
+
+export interface ReadMachineStateCommand {
+  action: 'read_machine_state'
+}
+
+export type MachineCommand =
+  | ListSerialPortsCommand
+  | SelectPortCommand
+  | PingCommand
+  | LedOnCommand
+  | LedOffCommand
+  | ReadMachineStateCommand
+
+/* MESSAGES: backend -> frontend */
 export interface AvailablePortsMessage {
   type: 'available_ports'
   ports: SerialPortInfo[]
+  selected_port?: SelectedSerialPortState
 }
 
-/*
-  Payload enviado pelo backend quando houver atualização
-  do estado da máquina.
-*/
 export interface MachineUpdatePayload {
   led?: LedBackendState
   arduino_connected?: boolean
   selected_port?: SelectedSerialPortState
 }
 
-/*
-  Mensagem principal de atualização da máquina.
-*/
 export interface MachineUpdateMessage {
   type: 'machine_update'
   payload: MachineUpdatePayload
 }
 
-/*
-  Mensagem opcional para informar status de conexão.
-*/
 export interface ConnectionMessage {
   type: 'connection'
   status: 'connected' | 'disconnected'
   message: string
 }
 
-/*
-  Mensagem de erro enviada pelo backend.
-*/
 export interface ErrorMessage {
   type: 'error'
   message: string
 }
 
-/*
-  Mensagem informativa genérica.
-*/
 export interface InfoMessage {
   type: 'info'
   message: string
   received?: unknown
 }
 
-/*
-  Mensagem específica de log enviada pelo backend.
-
-  Exemplo:
-  {
-    type: 'log',
-    direction: 'received',
-    message: 'Mensagem recebida do frontend: ...'
-  }
-*/
 export interface LogMessage {
   type: 'log'
   direction: 'sent' | 'received'
   message: string
 }
 
-export interface SelectPortCommand {
-  action: 'select_port'
+export interface SerialPortSelectedMessage {
+  type: 'serial_port_selected'
   port: string
+  message: string
 }
 
-/*
-  União de todas as mensagens que podem chegar
-  do backend pelo WebSocket.
-*/
+export interface LedStatusMessage {
+  type: 'led_status'
+  state: LedBackendState
+  serial: {
+    success: boolean
+    message: string
+    command: string
+    response: string | null
+    arduino_connected: boolean
+  }
+}
+
+export interface MachineReadMessage {
+  type: 'machine_read'
+  serial: {
+    success: boolean
+    message: string
+    command: string
+    response: string | null
+    arduino_connected: boolean
+  }
+}
+
+export interface PongMessage {
+  type: 'pong'
+  message: string
+}
+
 export type MachineMessage =
+  | AvailablePortsMessage
   | MachineUpdateMessage
   | ConnectionMessage
   | ErrorMessage
   | InfoMessage
   | LogMessage
-  | AvailablePortsMessage
-  | ListSerialPortsCommand
-/*
-  Ações que o reducer entende.
-*/
+  | SerialPortSelectedMessage
+  | LedStatusMessage
+  | MachineReadMessage
+  | PongMessage
+
+/* ACTIONS: usadas pelo reducer */
 export type MachineAction =
   | { type: 'SOCKET_CONNECTED' }
   | { type: 'SOCKET_DISCONNECTED' }

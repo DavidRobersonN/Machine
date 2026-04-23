@@ -8,9 +8,9 @@ export function useScreenMainData() {
     led: state.led,
     databaseConnection: state.connected ? 'Conectado' : 'Desconectado',
     arduinoConnection: state.arduino_connected,
-    extraLabel: 'Porta COM',
-    extraValue: 'COM5',
-    progressLabel: 'Progress',
+    extraLabel: 'Estatico',
+    extraValue: 'Estatico',
+    progressLabel: 'Estatico',
     progressValue: 50,
   }
 }

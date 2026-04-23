@@ -20,6 +20,10 @@ class MachineConsumer(WebsocketConsumer):
 
         current_state = self.machine_state_service.get_current_state()
 
+        print('[MachineConsumer][connect] Estado inicial enviado ao frontend:')
+        print(current_state)
+
+
         self.send(text_data=json.dumps({
             'type': 'machine_update',
             'payload': current_state,
