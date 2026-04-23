@@ -1,5 +1,5 @@
-import { BotaoQuadradoLaranja } from '../../components/BotoesGenericos/BotaoQuadradoLaranja'
-import { useSerialPortActions } from '../../hooks/machine/useSerialPortActions'
+import { BotaoQuadradoLaranja } from '../../BotoesGenericos/BotaoQuadradoLaranja'
+import { useSerialPortActions } from '../../../hooks/machine/useSerialPortActions'
 
 export function SerialPortList() {
   const { listAvailableSerialPorts } = useSerialPortActions()

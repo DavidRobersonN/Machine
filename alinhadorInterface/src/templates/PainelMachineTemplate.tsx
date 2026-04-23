@@ -2,18 +2,16 @@ import type { ReactNode } from 'react'
 
 type PainelMachineProps = {
   screenMain: ReactNode
-  screenStatusBar: ReactNode
-  screenPainelControls: ReactNode
-  botaoled: ReactNode
-  botaoSerialPortList: ReactNode
+  screenStatusBar?: ReactNode
+  sideControls?: ReactNode
+  bottomControls?: ReactNode
 }
 
 export function PainelMachineTemplate({
   screenMain,
   screenStatusBar,
-  screenPainelControls,
-  botaoled,
-  botaoSerialPortList,
+  sideControls,
+  bottomControls,
 }: PainelMachineProps) {
   return (
     <section className="painel-machine">
@@ -25,15 +23,16 @@ export function PainelMachineTemplate({
               {screenStatusBar}
             </div>
           </div>
-          {screenPainelControls}
-          
+
+          {sideControls}
         </div>
-        <div className="led-buttons">
-          {botaoled}
-          {botaoSerialPortList}
-        </div>
+
+        {bottomControls && (
+          <div className="panel-bottom-controls">
+            {bottomControls}
+          </div>
+        )}
       </div>
-      
     </section>
   )
 }
