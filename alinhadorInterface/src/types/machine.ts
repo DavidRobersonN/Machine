@@ -50,9 +50,19 @@ export interface ReadMachineStateCommand {
   action: 'read_machine_state'
 }
 
+export interface DisconnectSerialPortCommand {
+  action: 'disconnect_serial_port'
+}
+
+export interface SerialPortDisconnectedMessage {
+  type: 'serial_port_disconnected'
+  message: string
+}
+
 export type MachineCommand =
   | ListSerialPortsCommand
   | SelectPortCommand
+  | DisconnectSerialPortCommand
   | PingCommand
   | LedOnCommand
   | LedOffCommand
@@ -141,6 +151,7 @@ export type MachineMessage =
   | InfoMessage
   | LogMessage
   | SerialPortSelectedMessage
+  | SerialPortDisconnectedMessage
   | LedStatusMessage
   | MachineReadMessage
   | PongMessage

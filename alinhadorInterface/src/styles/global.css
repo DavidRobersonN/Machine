@@ -1,3 +1,57 @@
+.serial-ports-box {
+  width: 100%;
+  height: 220px;
+  min-height: 220px;
+  border: 2px solid #b7c4de;
+  background: #f8fafc;
+  padding: 8px;
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+}
+
+.serial-port-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.serial-port-item {
+  width: 100%;
+  border: 2px solid #b7c4de;
+  background: #ffffff;
+  color: #1d3260;
+  padding: 10px 12px;
+  border-radius: 8px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.serial-port-item:hover {
+  background: #eef3ff;
+}
+
+.serial-port-item.selected {
+  border-color: #11953b;
+  background: #eaf8ef;
+}
+
+.serial-port-device {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.serial-port-description {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
 .painel-machine {
   min-height: 100vh;
   display: flex;
@@ -36,6 +90,7 @@
   flex: 1;
   display: flex;
   justify-content: center;
+  min-width: 0;
 }
 
 .display-screen {
@@ -44,33 +99,72 @@
   width: 100%;
   max-width: 100%;
   overflow: hidden;
+  min-width: 0;
 }
 
+/* ÁREA PRINCIPAL DA TELA */
 .screen-main {
   display: flex;
-  height: 250px;
+  height: 380px;
   overflow: hidden;
+  background: #ffffff;
+  border: 2px solid #b7c4de;
 }
 
-.screen-canvas {
+.screen-main-content {
   flex: 1;
   min-width: 0;
   min-height: 0;
+  padding: 16px;
+  box-sizing: border-box;
   background:
     linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
     #ffffff;
   background-size: 20px 20px;
   border-right: 2px solid #b7c4de;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.screen-sidebar {
+.screen-main-logs {
+  width: 260px;
+  min-width: 260px;
+  background: #f8fafc;
+  border-right: 2px solid #b7c4de;
+  min-height: 0;
+  display: flex;
+}
+
+.screen-main-sidebar {
   width: 125px;
+  min-width: 125px;
   background: #eef3ff;
+  min-height: 0;
+  display: flex;
+}
+
+.screen-main-statusbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 11px;
+  padding: 6px 8px;
+  border-top: 2px solid #b7c4de;
+  background: #f2f5fb;
+  color: #2f3d5c;
+}
+
+/* SIDEBAR INTERNA */
+.screen-sidebar {
+  width: 100%;
+  height: 100%;
   padding: 10px 8px;
   box-sizing: border-box;
   font-size: 12px;
   color: #1d3260;
+  background: #eef3ff;
 }
 
 .screen-row {
@@ -106,17 +200,38 @@
   background: linear-gradient(90deg, #1c2e57 0%, #3d63b3 100%);
 }
 
-.screen-statusbar {
+/* TELAS INTERNAS */
+.screen-page {
+  width: 100%;
+  height: 100%;
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  font-size: 11px;
-  padding: 6px 8px;
-  border-top: 2px solid #b7c4de;
-  background: #f2f5fb;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: flex-start;
+}
+
+.screen-page-title {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.1;
+  color: #1d3260;
+  white-space: nowrap;
+}
+
+.screen-page-text {
+  margin: 0;
+  font-size: 14px;
   color: #2f3d5c;
 }
 
+.screen-page-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* CONTROLES */
 .painel-controls-area {
   width: 220px;
   display: flex;
@@ -210,6 +325,7 @@
   min-height: 74px;
 }
 
+/* CONTROLES INFERIORES */
 .panel-bottom-controls {
   display: flex;
   flex-wrap: wrap;
@@ -223,6 +339,7 @@
   min-width: 90px;
 }
 
+/* RESPONSIVIDADE */
 @media (max-width: 860px) {
   .painel-inner {
     flex-direction: column;
@@ -240,4 +357,64 @@
   .panel-bottom-controls {
     justify-content: center;
   }
+
+  .screen-main {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .screen-main-content,
+  .screen-main-logs,
+  .screen-main-sidebar {
+    width: 100%;
+    min-width: 0;
+    border-right: none;
+  }
+
+  .screen-main-content,
+  .screen-main-logs {
+    border-bottom: 2px solid #b7c4de;
+  }
+
+.screen-main-content {
+  flex: 1.4;
+  min-width: 0;
+  min-height: 0;
+  padding: 16px;
+  box-sizing: border-box;
+  background:
+    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    #ffffff;
+  background-size: 20px 20px;
+  border-right: 2px solid #b7c4de;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.screen-main-logs {
+  width: 220px;
+  min-width: 220px;
+  background: #f8fafc;
+  border-right: 2px solid #b7c4de;
+  min-height: 0;
+  display: flex;
+}
+
+.screen-main-sidebar {
+  min-height: 120px;
+}
+}
+
+.logs-screen-box {
+  width: 100%;
+  height: 220px;
+  min-height: 220px;
+  border: 2px solid #b7c4de;
+  background: #f8fafc;
+  padding: 8px;
+  box-sizing: border-box;
+  display: flex;
+  overflow: hidden;
 }

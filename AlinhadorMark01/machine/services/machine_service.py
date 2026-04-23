@@ -1,6 +1,8 @@
-from machine.services.serial_service import SerialService
-from machine.services.machine_state_service import MachineStateService
 from serial.tools import list_ports
+
+from machine.services.machine_state_service import MachineStateService
+from machine.services.serial_service import SerialService
+
 
 class MachineService:
     """
@@ -25,18 +27,13 @@ class MachineService:
         action = data.get('action')
 
         if action == 'list_serial_ports':
-            ports = []
-            for port in list_ports.comports():
-                ports.append({
-                    'device': port.device,
-                    'description': port.description,
-                    'hwid': port.hwid,
-                })
+            return self.list_serial_ports()
 
-            return {
-                'type': 'available_ports',
-                'ports': ports,
-            }
+        if action == 'select_serial_port':
+            return self.select_serial_port(data)
+        
+        if action == 'disconnect_serial_port':
+            return self.disconnect_serial_port()
 
         if action == 'ping':
             return {
@@ -56,6 +53,64 @@ class MachineService:
         return {
             'type': 'error',
             'message': f'Ação inválida: {action}',
+        }
+
+    def list_serial_ports(self) -> dict:
+        ports = []
+
+        for port in list_ports.comports():
+            ports.append({
+                'device': port.device,
+                'description': port.description,
+                'hwid': port.hwid,
+            })
+
+        return {
+            'type': 'available_ports',
+            'ports': ports,
+            'selected_port': self.serial_service.port,
+        }
+
+    def select_serial_port(self, data: dict) -> dict:
+        port = data.get('port')
+
+        if not port:
+            return {
+                'type': 'error',
+                'message': 'Nenhuma porta serial foi informada',
+            }
+
+        self.serial_service.set_port(port)
+        connected = self.serial_service.connect()
+
+        self.machine_state_service.update_state({})
+
+        return {
+            'type': 'serial_port_selected',
+            'port': port,
+            'message': (
+                f'Porta {port} selecionada com sucesso'
+                if connected
+                else f'Porta {port} selecionada, mas não foi possível conectar ao Arduino'
+            ),
+        }
+    
+    def disconnect_serial_port(self) -> dict:
+        current_port = self.serial_service.port
+
+        self.serial_service.disconnect()
+
+        self.machine_state_service.update_state({
+            'led': 'OFF',
+        })
+
+        return {
+            'type': 'serial_port_disconnected',
+            'message': (
+                f'Arduino desconectado da porta {current_port}'
+                if current_port
+                else 'Arduino desconectado'
+            ),
         }
 
     def turn_led_on(self) -> dict:

@@ -47,13 +47,11 @@ class MachineStateService:
         state.save()
 
         return self.serialize_state(state)
+    
 
     def serialize_state(self, state: MachineState) -> dict:
-        """
-        Converte o model para o formato esperado pelo frontend.
-        """
-
         return {
             'led': state.led,
             'arduino_connected': state.arduino_connected,
+            'selected_port': self.serial_service.port,
         }

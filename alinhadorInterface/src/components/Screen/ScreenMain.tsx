@@ -1,22 +1,12 @@
 import type { ReactNode } from 'react'
-import { ScreenLogs } from '../../components/Screen/ScreenLogs'
-
-type LogDirection = 'sent' | 'received'
-
-type ScreenLogItem = {
-  direction: LogDirection
-  message: string
-}
 
 type ScreenMainProps = {
-  logs: ScreenLogItem[]
   sidebar?: ReactNode
   statusBar?: ReactNode
   children?: ReactNode
 }
 
 export function ScreenMain({
-  logs,
   sidebar,
   statusBar,
   children,
@@ -28,12 +18,18 @@ export function ScreenMain({
           {children}
         </div>
 
-        <ScreenLogs logs={logs} />
-
-        {sidebar}
+        {sidebar && (
+          <div className="screen-main-sidebar">
+            {sidebar}
+          </div>
+        )}
       </div>
 
-      {statusBar}
+      {statusBar && (
+        <div className="screen-main-statusbar">
+          {statusBar}
+        </div>
+      )}
     </>
   )
 }
