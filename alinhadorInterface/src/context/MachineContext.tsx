@@ -14,7 +14,7 @@ import type {
   MachineCommand,
   MachineMessage,
   MachineState,
-} from '../types/machine'
+} from '../types/machine/machine'
 
 type MachineContextValue = {
   state: MachineState

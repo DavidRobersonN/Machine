@@ -1,5 +1,5 @@
 import { ScreenLogs } from '../ScreenGenerico/ScreenLogs'
-import type { MachineLog } from '../../types/machine'
+import type { MachineLog } from '../../types/machine/machine'
 
 type LogsScreenProps = {
   logs: MachineLog[]

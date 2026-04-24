@@ -1,7 +1,7 @@
 import type {
   SelectedSerialPortState,
   SerialPortInfo,
-} from '../../types/machine'
+} from '../../types/machine/machine'
 
 type SerialPortsScreenProps = {
   ports: SerialPortInfo[]

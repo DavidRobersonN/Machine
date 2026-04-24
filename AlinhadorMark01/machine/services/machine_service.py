@@ -15,6 +15,10 @@ class MachineService:
     - devolve mensagens para o frontend
     """
 
+    SPEED_STEP = 10
+    MIN_SPEED = 0
+    MAX_SPEED = 1000
+
     def __init__(self):
         self.serial_service = SerialService(
             port='COM9',
@@ -41,6 +45,12 @@ class MachineService:
 
         if action == 'motor_roda_set_counter_clockwise':
             return self.motor_roda_set_counter_clockwise()
+
+        if action == 'motor_roda_increase_speed':
+            return self.motor_roda_increase_speed()
+
+        if action == 'motor_roda_decrease_speed':
+            return self.motor_roda_decrease_speed()
 
         # =========================
         # PORTA SERIAL
@@ -190,10 +200,6 @@ class MachineService:
     # =========================
 
     def read_machine_state(self) -> dict:
-        """
-        Pede ao Arduino que envie o estado atual da máquina.
-        Aqui você pode evoluir depois para sensores, motor, etc.
-        """
         serial_result = self.serial_service.send_command('READ_STATE')
 
         self.machine_state_service.update_state({})
@@ -266,43 +272,74 @@ class MachineService:
                 'Comando enviado: motor da roda sentido anti-horário',
             ),
         }
-    
+
     def motor_roda_increase_speed(self) -> dict:
-        serial_result = self.serial_service.send_command('MOTOR_RODA_INCREASE_SPEED')
+        current_state = self.machine_state_service.get_current_state()
 
-        self.machine_state_service.update_state({})
+        current_speed = current_state.get('speed_motor_roda', 0)
+        new_speed = min(current_speed + self.SPEED_STEP, self.MAX_SPEED)
+
+        serial_result = self.serial_service.send_command(
+            'MOTOR_RODA_INCREASE_SPEED'
+        )
+
+        self.machine_state_service.update_state({
+            'speed_motor_roda': new_speed,
+        })
+
+        print(
+            'Aumentar velocidade do motor da roda:',
+            {
+                'current_speed': current_speed,
+                'new_speed': new_speed,
+                'serial_result': serial_result,
+            },
+        )
 
         return {
             'type': 'log',
             'direction': 'received',
             'message': self.get_serial_message(
                 serial_result,
-                'Comando enviado: aumentar velocidade do motor da roda',
+                f'Velocidade do motor da roda aumentada para {new_speed}',
             ),
         }
-    
+
     def motor_roda_decrease_speed(self) -> dict:
-        serial_result = self.serial_service.send_command('MOTOR_RODA_DECREASE_SPEED')
+        current_state = self.machine_state_service.get_current_state()
 
-        self.machine_state_service.update_state({})
+        current_speed = current_state.get('speed_motor_roda', 0)
+        new_speed = max(current_speed - self.SPEED_STEP, self.MIN_SPEED)
+
+        serial_result = self.serial_service.send_command(
+            'MOTOR_RODA_DECREASE_SPEED'
+        )
+
+        self.machine_state_service.update_state({
+            'speed_motor_roda': new_speed,
+        })
+
+        print(
+            'Diminuir velocidade do motor da roda:',
+            {
+                'current_speed': current_speed,
+                'new_speed': new_speed,
+                'serial_result': serial_result,
+            },
+        )
 
         return {
             'type': 'log',
             'direction': 'received',
             'message': self.get_serial_message(
                 serial_result,
-                'Comando enviado: diminuir velocidade do motor da roda',
+                f'Velocidade do motor da roda diminuída para {new_speed}',
             ),
         }
+
     # =========================
     # AUXILIAR
     # =========================
 
     def get_serial_message(self, serial_result: dict, fallback: str) -> str:
-        """
-        Pega uma mensagem segura vinda do SerialService.
-
-        Se o SerialService retornar uma mensagem, usamos ela.
-        Se não retornar, usamos uma mensagem padrão.
-        """
         return serial_result.get('message') or fallback

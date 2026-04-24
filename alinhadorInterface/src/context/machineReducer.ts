@@ -1,4 +1,4 @@
-import type { MachineAction, MachineState } from '../types/machine'
+import type { MachineAction, MachineState } from '../types/machine/machine'
 
 export const initialMachineState: MachineState = {
   connected: false,
@@ -10,6 +10,8 @@ export const initialMachineState: MachineState = {
   speed_motor_roda: 0,
 }
 
+
+// esses case, vem do backend. O backend envia mensagens do tipo MachineMessage, e o reducer atualiza o estado global da aplicação
 export function machineReducer(
   state: MachineState,
   action: MachineAction,
@@ -50,6 +52,12 @@ export function machineReducer(
       return {
         ...state,
         logs: [],
+      }
+      
+        case 'SET_SPEED_MOTOR_RODA':
+      return {
+        ...state,
+        speed_motor_roda: action.payload,
       }
 
     case 'MACHINE_UPDATED':

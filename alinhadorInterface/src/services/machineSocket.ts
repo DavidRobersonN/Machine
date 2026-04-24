@@ -1,4 +1,4 @@
-import type { MachineMessage } from '../types/machine'
+import type { MachineMessage } from '../types/machine/machine'
 
 /*
   Esta função é responsável por CRIAR e CONFIGURAR o WebSocket da máquina.
