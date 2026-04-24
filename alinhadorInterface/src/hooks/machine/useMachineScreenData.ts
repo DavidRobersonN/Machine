@@ -5,6 +5,8 @@ export function useMachineScreenData() {
 
   return {
     logs: state.logs,
+    availablePorts: state.available_ports,
+    selectedPort: state.selected_port,
 
     sidebarProps: {
       led: state.led,

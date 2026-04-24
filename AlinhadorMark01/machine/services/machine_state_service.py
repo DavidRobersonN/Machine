@@ -47,13 +47,74 @@ class MachineStateService:
         state.save()
 
         return self.serialize_state(state)
+    
 
     def serialize_state(self, state: MachineState) -> dict:
-        """
-        Converte o model para o formato esperado pelo frontend.
-        """
-
         return {
             'led': state.led,
             'arduino_connected': state.arduino_connected,
+            'selected_port': self.serial_service.port,
+        }
+    
+    def motor_roda_start(self):
+        serial = self.serial_service.send_command('MOTOR_RODA_START')
+
+        return {
+            'type': 'log',
+            'direction': 'received',
+            'message': 'Motor da roda iniciado',
+            'serial': serial,
+        }
+
+
+    def motor_roda_stop(self):
+        serial = self.serial_service.send_command('MOTOR_RODA_STOP')
+
+        return {
+            'type': 'log',
+            'direction': 'received',
+            'message': 'Motor da roda parado',
+            'serial': serial,
+        }
+
+
+    def motor_roda_set_clockwise(self):
+        serial = self.serial_service.send_command('MOTOR_RODA_SET_CLOCKWISE')
+
+        return {
+            'type': 'log',
+            'direction': 'received',
+            'message': 'Motor da roda definido para sentido horário',
+            'serial': serial,
+        }
+
+
+    def motor_roda_set_counter_clockwise(self):
+        serial = self.serial_service.send_command('MOTOR_RODA_SET_COUNTER_CLOCKWISE')
+
+        return {
+            'type': 'log',
+            'direction': 'received',
+            'message': 'Motor da roda definido para sentido anti-horário',
+            'serial': serial,
+        }
+    
+    def motor_roda_increase_speed(self):
+        serial = self.serial_service.send_command('MOTOR_RODA_INCREASE_SPEED')
+
+        return {
+            'type': 'log',
+            'direction': 'received',
+            'message': 'Velocidade do motor da roda aumentada',
+            'serial': serial,
+        }
+
+    def motor_roda_decrease_speed(self):
+        serial = self.serial_service.send_command('MOTOR_RODA_DECREASE_SPEED')
+
+        return {
+            'type': 'log',
+            'direction': 'received',
+            'message': 'Velocidade do motor da roda diminuída',
+            'serial': serial,
         }
