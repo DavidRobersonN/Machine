@@ -2,6 +2,7 @@ type MenuScreenProps = {
   onSelectLed: () => void
   onSelectLogs: () => void
   onSelectSerial: () => void
+  onSelectMotors: () => void
   onBack: () => void
 }
 
@@ -9,6 +10,8 @@ export function MenuScreen({
   onSelectLed,
   onSelectLogs,
   onSelectSerial,
+  onSelectMotors,
+
   onBack,
 }: MenuScreenProps) {
   return (
@@ -18,6 +21,10 @@ export function MenuScreen({
       <div className="screen-page-actions">
         <button className="btn btn-green" onClick={onSelectLed}>
           LED
+        </button>
+
+        <button className="btn btn-green" onClick={onSelectMotors}>
+          Motores
         </button>
 
         <button className="btn btn-green" onClick={onSelectLogs}>

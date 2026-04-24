@@ -14,6 +14,12 @@ export type SerialPortInfo = {
   hwid: string
 }
 
+export type MotorRodaCommand =
+  | { action: 'motor_roda_start' }
+  | { action: 'motor_roda_stop' }
+  | { action: 'motor_roda_set_clockwise' }
+  | { action: 'motor_roda_set_counter_clockwise' }
+
 /* ESTADO GLOBAL DA APLICAÇÃO */
 export interface MachineState {
   connected: boolean
@@ -67,6 +73,7 @@ export type MachineCommand =
   | LedOnCommand
   | LedOffCommand
   | ReadMachineStateCommand
+  | MotorRodaCommand
 
 /* MESSAGES: backend -> frontend */
 export interface AvailablePortsMessage {

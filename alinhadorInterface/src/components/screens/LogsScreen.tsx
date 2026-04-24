@@ -1,12 +1,11 @@
-import { ScreenLogs } from '../Screen/ScreenLogs'
+import { ScreenLogs } from '../ScreenGenerico/ScreenLogs'
 import type { MachineLog } from '../../types/machine'
 
 type LogsScreenProps = {
   logs: MachineLog[]
-  onBack: () => void
 }
 
-export function LogsScreen({ logs, onBack }: LogsScreenProps) {
+export function LogsScreen({ logs }: LogsScreenProps) {
   return (
     <div className="screen-page">
       <h2 className="screen-page-title">Logs</h2>
@@ -14,12 +13,7 @@ export function LogsScreen({ logs, onBack }: LogsScreenProps) {
       <div className="logs-screen-box">
         <ScreenLogs logs={logs} />
       </div>
-
-      <div className="screen-page-actions">
-        <button className="btn btn-orange" onClick={onBack}>
-          Voltar para o menu
-        </button>
-      </div>
+      
     </div>
   )
 }

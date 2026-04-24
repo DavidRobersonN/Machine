@@ -1,94 +1,114 @@
 /*
   ============================================================
-  PROJETO: Alinhador - Controle inicial apenas do LED
+  PROJETO: Alinhador - Controle inicial do LED + Motor da Roda
   ARQUIVO ÚNICO para usar no Arduino IDE
   ============================================================
 
-  O que este código faz:
-  - abre comunicação serial com o computador
-  - recebe comandos enviados pelo Django
-  - liga ou desliga o LED da placa
-  - responde de volta pela serial
-
   Comandos aceitos:
+
+  LED:
   - LED_ON
   - LED_OFF
   - LED_STATUS
+
+  TESTE:
   - PING
 
-  Respostas:
-  - {"success":true,"type":"led_status","state":"ON","message":"LED ligado"}
-  - {"success":true,"type":"led_status","state":"OFF","message":"LED desligado"}
-  - {"success":true,"type":"pong","message":"Arduino conectado"}
-  - {"success":false,"type":"error","message":"Comando desconhecido"}
-
-  Observação:
-  - usamos LED_BUILTIN, que normalmente é o LED interno da placa
-  - em muitos Arduinos esse LED fica no pino 13
+  MOTOR DA RODA:
+  - MOTOR_RODA_START
+  - MOTOR_RODA_STOP
+  - MOTOR_RODA_SET_CLOCKWISE
+  - MOTOR_RODA_SET_COUNTER_CLOCKWISE
 */
+
+// =======================
+// PINOS
+// =======================
 
 const int LED_PIN = LED_BUILTIN;
 
-// Guarda o estado atual do LED em memória.
-// Isso facilita responder ao comando LED_STATUS.
+// Ajuste esses pinos conforme sua ligação no driver do motor.
+const int MOTOR_RODA_STEP_PIN = 2;
+const int MOTOR_RODA_DIR_PIN = 3;
+
+// =======================
+// ESTADOS
+// =======================
+
 bool ledState = false;
 
+// Indica se o motor da roda está girando ou parado.
+bool motorRodaRunning = false;
+
+// Guarda o sentido atual do motor.
+// true = horário
+// false = anti-horário
+bool motorRodaClockwise = true;
+
+// Controle de velocidade do motor.
+// Quanto menor o intervalo, mais rápido o motor gira.
+unsigned long motorRodaStepIntervalMicros = 800;
+
+// Guarda o último momento em que um passo foi dado.
+unsigned long lastMotorRodaStepMicros = 0;
+
+// Estado atual do pulso STEP.
+// Usamos isso para alternar HIGH/LOW sem travar o Arduino.
+bool motorRodaStepState = LOW;
+
 // String usada para acumular os caracteres recebidos pela serial.
-// Vamos ler até encontrar a quebra de linha \n.
 String inputBuffer = "";
 
 void setup() {
-  // Inicia a comunicação serial.
-  // Use a mesma velocidade configurada no backend, se ele depender disso.
   Serial.begin(9600);
 
-  // Define o pino do LED como saída.
   pinMode(LED_PIN, OUTPUT);
 
-  // Garante que o LED comece desligado.
+  pinMode(MOTOR_RODA_STEP_PIN, OUTPUT);
+  pinMode(MOTOR_RODA_DIR_PIN, OUTPUT);
+
   digitalWrite(LED_PIN, LOW);
   ledState = false;
 
-  // Pequena pausa para estabilizar a serial.
+  digitalWrite(MOTOR_RODA_STEP_PIN, LOW);
+  digitalWrite(MOTOR_RODA_DIR_PIN, HIGH);
+
+  motorRodaRunning = false;
+  motorRodaClockwise = true;
+
   delay(300);
 
-  // Mensagem inicial para confirmar que o Arduino subiu.
   Serial.println("{\"success\":true,\"type\":\"startup\",\"message\":\"Arduino iniciado com sucesso\"}");
 }
 
 void loop() {
   readSerialCommands();
+  updateMotorRoda();
 }
 
 /*
   ------------------------------------------------------------
-  Função responsável por ler a serial caractere por caractere.
-  Quando encontra '\n', entende que um comando completo chegou.
+  Lê a serial caractere por caractere.
+  Quando encontra '\n', processa o comando completo.
   ------------------------------------------------------------
 */
 void readSerialCommands() {
   while (Serial.available() > 0) {
     char receivedChar = Serial.read();
 
-    // Ignora retorno de carro.
-    // Isso ajuda quando o Serial Monitor envia \r\n.
     if (receivedChar == '\r') {
       continue;
     }
 
-    // Quando chega a quebra de linha, processamos o comando.
     if (receivedChar == '\n') {
       inputBuffer.trim();
 
-      // Só processa se houver algo escrito.
       if (inputBuffer.length() > 0) {
         handleCommand(inputBuffer);
       }
 
-      // Limpa o buffer para o próximo comando.
       inputBuffer = "";
     } else {
-      // Continua montando o comando recebido.
       inputBuffer += receivedChar;
     }
   }
@@ -96,11 +116,15 @@ void readSerialCommands() {
 
 /*
   ------------------------------------------------------------
-  Interpreta o comando recebido e executa a ação correspondente.
+  Interpreta o comando recebido.
   ------------------------------------------------------------
 */
 void handleCommand(String command) {
   command.trim();
+
+  // =======================
+  // LED
+  // =======================
 
   if (command == "LED_ON") {
     turnLedOn();
@@ -117,8 +141,36 @@ void handleCommand(String command) {
     return;
   }
 
+  // =======================
+  // TESTE DE CONEXÃO
+  // =======================
+
   if (command == "PING") {
     sendPong();
+    return;
+  }
+
+  // =======================
+  // MOTOR DA RODA
+  // =======================
+
+  if (command == "MOTOR_RODA_START") {
+    startMotorRoda();
+    return;
+  }
+
+  if (command == "MOTOR_RODA_STOP") {
+    stopMotorRoda();
+    return;
+  }
+
+  if (command == "MOTOR_RODA_SET_CLOCKWISE") {
+    setMotorRodaClockwise();
+    return;
+  }
+
+  if (command == "MOTOR_RODA_SET_COUNTER_CLOCKWISE") {
+    setMotorRodaCounterClockwise();
     return;
   }
 
@@ -127,8 +179,68 @@ void handleCommand(String command) {
 
 /*
   ------------------------------------------------------------
-  Liga o LED e atualiza a variável de estado.
-  Depois responde pela serial.
+  Atualiza o motor da roda sem travar o loop.
+  
+  Isso é importante porque, mesmo com o motor girando,
+  o Arduino continua conseguindo ler novos comandos da serial.
+  ------------------------------------------------------------
+*/
+void updateMotorRoda() {
+  if (!motorRodaRunning) {
+    return;
+  }
+
+  unsigned long currentMicros = micros();
+
+  if (currentMicros - lastMotorRodaStepMicros >= motorRodaStepIntervalMicros) {
+    lastMotorRodaStepMicros = currentMicros;
+
+    motorRodaStepState = !motorRodaStepState;
+
+    digitalWrite(MOTOR_RODA_STEP_PIN, motorRodaStepState);
+  }
+}
+
+/*
+  ------------------------------------------------------------
+  MOTOR DA RODA
+  ------------------------------------------------------------
+*/
+void startMotorRoda() {
+  motorRodaRunning = true;
+  lastMotorRodaStepMicros = micros();
+
+  Serial.println("{\"success\":true,\"type\":\"motor_roda_status\",\"state\":\"RUNNING\",\"message\":\"Motor da roda iniciado\"}");
+}
+
+void stopMotorRoda() {
+  motorRodaRunning = false;
+  motorRodaStepState = LOW;
+
+  digitalWrite(MOTOR_RODA_STEP_PIN, LOW);
+
+  Serial.println("{\"success\":true,\"type\":\"motor_roda_status\",\"state\":\"STOPPED\",\"message\":\"Motor da roda parado\"}");
+}
+
+void setMotorRodaClockwise() {
+  motorRodaClockwise = true;
+
+  digitalWrite(MOTOR_RODA_DIR_PIN, HIGH);
+
+  Serial.println("{\"success\":true,\"type\":\"motor_roda_status\",\"direction\":\"CLOCKWISE\",\"message\":\"Motor da roda definido para sentido horario\"}");
+}
+
+void setMotorRodaCounterClockwise() {
+  motorRodaClockwise = false;
+
+  digitalWrite(MOTOR_RODA_DIR_PIN, LOW);
+
+  Serial.println("{\"success\":true,\"type\":\"motor_roda_status\",\"direction\":\"COUNTER_CLOCKWISE\",\"message\":\"Motor da roda definido para sentido anti-horario\"}");
+}
+
+/*
+  ------------------------------------------------------------
+  LED
   ------------------------------------------------------------
 */
 void turnLedOn() {
@@ -138,12 +250,6 @@ void turnLedOn() {
   Serial.println("{\"success\":true,\"type\":\"led_status\",\"state\":\"ON\",\"message\":\"LED ligado\"}");
 }
 
-/*
-  ------------------------------------------------------------
-  Desliga o LED e atualiza a variável de estado.
-  Depois responde pela serial.
-  ------------------------------------------------------------
-*/
 void turnLedOff() {
   digitalWrite(LED_PIN, LOW);
   ledState = false;
@@ -151,12 +257,6 @@ void turnLedOff() {
   Serial.println("{\"success\":true,\"type\":\"led_status\",\"state\":\"OFF\",\"message\":\"LED desligado\"}");
 }
 
-/*
-  ------------------------------------------------------------
-  Envia o estado atual do LED.
-  Esse comando é útil para o backend consultar o estado.
-  ------------------------------------------------------------
-*/
 void sendLedStatus() {
   if (ledState) {
     Serial.println("{\"success\":true,\"type\":\"led_status\",\"state\":\"ON\",\"message\":\"LED atualmente ligado\"}");
@@ -167,7 +267,7 @@ void sendLedStatus() {
 
 /*
   ------------------------------------------------------------
-  Resposta simples para testar se o Arduino está conectado.
+  PING
   ------------------------------------------------------------
 */
 void sendPong() {
@@ -176,7 +276,7 @@ void sendPong() {
 
 /*
   ------------------------------------------------------------
-  Resposta enviada quando o comando não existe.
+  ERRO
   ------------------------------------------------------------
 */
 void sendUnknownCommandError(String command) {
