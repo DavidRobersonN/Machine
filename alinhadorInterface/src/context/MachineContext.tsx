@@ -5,23 +5,24 @@ import {
   useMemo,
   useReducer,
 } from 'react'
-import type { ReactNode } from 'react'
+import type { Dispatch, ReactNode } from 'react'
 
 import { useMachineSocket } from '../hooks/useMachineSocket'
 import { initialMachineState, machineReducer } from './machineReducer'
-import type { MachineMessage, MachineState } from '../types/machine'
+import type {
+  MachineAction,
+  MachineCommand,
+  MachineMessage,
+  MachineState,
+} from '../types/machine'
 
 type MachineContextValue = {
   state: MachineState
-  sendCommand: (payload: unknown) => boolean
+  dispatch: Dispatch<MachineAction>
+  send: (payload: MachineCommand) => boolean
+  sendCommand: (payload: MachineCommand) => boolean
 }
 
-/*
-  Criamos o contexto.
-
-  Ele começa como undefined porque só existirá
-  dentro do Provider.
-*/
 const MachineContext = createContext<MachineContextValue | undefined>(undefined)
 
 type MachineProviderProps = {
@@ -29,16 +30,8 @@ type MachineProviderProps = {
 }
 
 export function MachineProvider({ children }: MachineProviderProps) {
-  /*
-    Estado global da máquina controlado pelo reducer.
-  */
   const [state, dispatch] = useReducer(machineReducer, initialMachineState)
 
-  /*
-    Quando o WebSocket conecta com sucesso,
-    marcamos a aplicação como conectada
-    e registramos um log visual.
-  */
   const handleConnected = useCallback(() => {
     dispatch({ type: 'SOCKET_CONNECTED' })
 
@@ -51,10 +44,6 @@ export function MachineProvider({ children }: MachineProviderProps) {
     })
   }, [])
 
-  /*
-    Quando o WebSocket desconecta,
-    atualizamos o estado e registramos um log.
-  */
   const handleDisconnected = useCallback(() => {
     dispatch({ type: 'SOCKET_DISCONNECTED' })
 
@@ -67,28 +56,42 @@ export function MachineProvider({ children }: MachineProviderProps) {
     })
   }, [])
 
-  /*
-    Essa função analisa cada mensagem recebida do backend.
-
-    Aqui centralizamos toda a interpretação
-    do que chega pelo WebSocket.
-  */
   const handleMachineMessage = useCallback((message: MachineMessage) => {
-    /*
-      1) Atualização real do estado da máquina
-    */
-    if (message.type === 'machine_update') {
+
+    if (message.type === 'serial_port_disconnected') {
       dispatch({
         type: 'MACHINE_UPDATED',
-        payload: message.payload,
+        payload: {
+          led: 'OFF',
+          arduino_connected: false,
+          selected_port: null,
+        },
+      })
+
+      dispatch({
+        type: 'SET_SELECTED_PORT',
+        payload: null,
+      })
+
+      dispatch({
+        type: 'ADD_LOG',
+        payload: {
+          direction: 'received',
+          message: message.message,
+        },
       })
 
       return
     }
 
-    /*
-      2) Mensagem de log enviada pelo backend
-    */
+    if (message.type === 'machine_update') {
+      dispatch({
+        type: 'MACHINE_UPDATED',
+        payload: message.payload,
+      })
+      return
+    }
+
     if (message.type === 'log') {
       dispatch({
         type: 'ADD_LOG',
@@ -97,16 +100,9 @@ export function MachineProvider({ children }: MachineProviderProps) {
           message: message.message,
         },
       })
-
       return
     }
 
-    /*
-      3) Mensagem de erro
-
-      Aqui nós também transformamos o erro em log visual,
-      para o usuário conseguir enxergar na interface.
-    */
     if (message.type === 'error') {
       dispatch({
         type: 'ADD_LOG',
@@ -115,13 +111,9 @@ export function MachineProvider({ children }: MachineProviderProps) {
           message: `Erro: ${message.message}`,
         },
       })
-
       return
     }
 
-    /*
-      4) Mensagem informativa genérica
-    */
     if (message.type === 'info') {
       dispatch({
         type: 'ADD_LOG',
@@ -130,16 +122,9 @@ export function MachineProvider({ children }: MachineProviderProps) {
           message: message.message,
         },
       })
-
       return
     }
 
-    /*
-      5) Mensagem de status de conexão enviada pelo backend
-
-      Mesmo já tendo o estado local do socket,
-      esse tipo pode ser útil para logs mais explicativos.
-    */
     if (message.type === 'connection') {
       dispatch({
         type: 'ADD_LOG',
@@ -148,55 +133,106 @@ export function MachineProvider({ children }: MachineProviderProps) {
           message: message.message,
         },
       })
+      return
     }
 
-    /* 6) Mensagem de portas disponíveis */
     if (message.type === 'available_ports') {
       dispatch({
-      type: 'SET_AVAILABLE_PORTS',
-      payload: message.ports,
+        type: 'SET_AVAILABLE_PORTS',
+        payload: message.ports,
+      })
+
+      if (message.selected_port !== undefined) {
+        dispatch({
+          type: 'SET_SELECTED_PORT',
+          payload: message.selected_port,
+        })
+      }
+
+      dispatch({
+        type: 'ADD_LOG',
+        payload: {
+          direction: 'received',
+          message: `Portas encontradas: ${message.ports.length}`,
+        },
+      })
+      return
+    }
+
+    if (message.type === 'serial_port_selected') {
+      dispatch({
+        type: 'SET_SELECTED_PORT',
+        payload: message.port,
       })
 
       dispatch({
         type: 'ADD_LOG',
         payload: {
-        direction: 'received',
-        message: `Portas encontradas: ${message.ports.length}`,
+          direction: 'received',
+          message: message.message,
+        },
+      })
+      return
+    }
+
+    if (message.type === 'led_status') {
+      dispatch({
+        type: 'MACHINE_UPDATED',
+        payload: {
+          led: message.state,
+          arduino_connected: message.serial.arduino_connected,
         },
       })
 
-    return
-}
+      dispatch({
+        type: 'ADD_LOG',
+        payload: {
+          direction: 'received',
+          message: message.serial.message,
+        },
+      })
+      return
+    }
+
+    if (message.type === 'machine_read') {
+      dispatch({
+        type: 'MACHINE_UPDATED',
+        payload: {
+          arduino_connected: message.serial.arduino_connected,
+        },
+      })
+
+      dispatch({
+        type: 'ADD_LOG',
+        payload: {
+          direction: 'received',
+          message: message.serial.message,
+        },
+      })
+      return
+    }
+
+    if (message.type === 'pong') {
+      dispatch({
+        type: 'ADD_LOG',
+        payload: {
+          direction: 'received',
+          message: message.message,
+        },
+      })
+    }
   }, [])
 
-  /*
-    Hook responsável por abrir e manter a conexão WebSocket.
-
-    Ele recebe callbacks para avisar o Provider sobre:
-    - conexão aberta
-    - conexão fechada
-    - mensagens recebidas
-  */
   const { send } = useMachineSocket({
     onConnected: handleConnected,
     onDisconnected: handleDisconnected,
     onMachineMessage: handleMachineMessage,
   })
 
-  /*
-    Essa função encapsula o envio de comandos.
-
-    Além de enviar para o backend, ela também registra
-    no histórico de logs o que o frontend tentou mandar.
-  */
   const sendCommand = useCallback(
-    (payload: unknown) => {
+    (payload: MachineCommand) => {
       const success = send(payload)
 
-      /*
-        Só adicionamos o log como "sent"
-        se o envio realmente aconteceu.
-      */
       if (success) {
         dispatch({
           type: 'ADD_LOG',
@@ -206,10 +242,6 @@ export function MachineProvider({ children }: MachineProviderProps) {
           },
         })
       } else {
-        /*
-          Se não conseguiu enviar, também registramos isso,
-          porque ajuda muito na depuração.
-        */
         dispatch({
           type: 'ADD_LOG',
           payload: {
@@ -224,16 +256,14 @@ export function MachineProvider({ children }: MachineProviderProps) {
     [send],
   )
 
-  /*
-    Memoizamos o valor do contexto para evitar recriações
-    desnecessárias a cada renderização.
-  */
   const value = useMemo(
     () => ({
       state,
+      dispatch,
+      send,
       sendCommand,
     }),
-    [state, sendCommand],
+    [state, dispatch, send, sendCommand],
   )
 
   return (
@@ -243,17 +273,9 @@ export function MachineProvider({ children }: MachineProviderProps) {
   )
 }
 
-/*
-  Hook customizado para facilitar o uso do contexto.
-*/
 export function useMachineContext() {
   const context = useContext(MachineContext)
 
-  /*
-    Proteção:
-    se alguém tentar usar o contexto fora do Provider,
-    mostramos um erro claro.
-  */
   if (!context) {
     throw new Error(
       'useMachineContext precisa ser usado dentro de MachineProvider',

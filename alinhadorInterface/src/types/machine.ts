@@ -22,9 +22,18 @@ export interface MachineState {
   logs: MachineLog[]
   available_ports: SerialPortInfo[]
   selected_port: SelectedSerialPortState
+  speed_motor_roda: number
 }
 
 /* COMMANDS: frontend -> backend */
+export type MotorRodaCommand =
+  | { action: 'motor_roda_start' }
+  | { action: 'motor_roda_stop' }
+  | { action: 'motor_roda_set_clockwise' }
+  | { action: 'motor_roda_set_counter_clockwise' }
+  | { action: 'motor_roda_increase_speed' }
+  | { action: 'motor_roda_decrease_speed' }
+
 export interface ListSerialPortsCommand {
   action: 'list_serial_ports'
 }
@@ -50,13 +59,24 @@ export interface ReadMachineStateCommand {
   action: 'read_machine_state'
 }
 
+export interface DisconnectSerialPortCommand {
+  action: 'disconnect_serial_port'
+}
+
+export interface SerialPortDisconnectedMessage {
+  type: 'serial_port_disconnected'
+  message: string
+}
+
 export type MachineCommand =
   | ListSerialPortsCommand
   | SelectPortCommand
+  | DisconnectSerialPortCommand
   | PingCommand
   | LedOnCommand
   | LedOffCommand
   | ReadMachineStateCommand
+  | MotorRodaCommand
 
 /* MESSAGES: backend -> frontend */
 export interface AvailablePortsMessage {
@@ -69,6 +89,7 @@ export interface MachineUpdatePayload {
   led?: LedBackendState
   arduino_connected?: boolean
   selected_port?: SelectedSerialPortState
+  speed_motor_roda?: number
 }
 
 export interface MachineUpdateMessage {
@@ -141,6 +162,7 @@ export type MachineMessage =
   | InfoMessage
   | LogMessage
   | SerialPortSelectedMessage
+  | SerialPortDisconnectedMessage
   | LedStatusMessage
   | MachineReadMessage
   | PongMessage
@@ -154,3 +176,4 @@ export type MachineAction =
   | { type: 'CLEAR_LOGS' }
   | { type: 'SET_AVAILABLE_PORTS'; payload: SerialPortInfo[] }
   | { type: 'SET_SELECTED_PORT'; payload: SelectedSerialPortState }
+  | { type: 'SET_SPEED_MOTOR_RODA'; payload: number }

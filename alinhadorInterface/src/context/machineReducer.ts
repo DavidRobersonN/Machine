@@ -7,6 +7,7 @@ export const initialMachineState: MachineState = {
   logs: [],
   available_ports: [],
   selected_port: null,
+  speed_motor_roda: 0,
 }
 
 export function machineReducer(
@@ -72,6 +73,11 @@ export function machineReducer(
           action.payload.selected_port !== undefined
             ? action.payload.selected_port
             : state.selected_port,
+            
+        speed_motor_roda:
+          action.payload.speed_motor_roda !== undefined
+            ? action.payload.speed_motor_roda
+            : state.speed_motor_roda,
       }
 
     default:
