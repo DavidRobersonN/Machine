@@ -3,7 +3,6 @@ type MenuScreenProps = {
   onSelectLogs: () => void
   onSelectSerial: () => void
   onSelectMotors: () => void
-  onBack: () => void
 }
 
 export function MenuScreen({
@@ -12,7 +11,6 @@ export function MenuScreen({
   onSelectSerial,
   onSelectMotors,
 
-  onBack,
 }: MenuScreenProps) {
   return (
     <div className="screen-page">
@@ -35,9 +33,6 @@ export function MenuScreen({
           Portas COM
         </button>
 
-        <button className="btn btn-orange" onClick={onBack}>
-          Voltar
-        </button>
       </div>
     </div>
   )

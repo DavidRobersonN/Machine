@@ -8,8 +8,6 @@ type SerialPortsScreenProps = {
   selectedPort: SelectedSerialPortState
   arduinoConnected: 'Conectado' | 'Desconectado'
   onSelectPort: (port: string) => void
-  onDisconnect: () => void
-  onBack: () => void
 }
 
 export function SerialPortsScreen({
@@ -17,8 +15,6 @@ export function SerialPortsScreen({
   selectedPort,
   arduinoConnected,
   onSelectPort,
-  onDisconnect,
-  onBack,
 }: SerialPortsScreenProps) {
   return (
     <div className="screen-page">
@@ -60,16 +56,6 @@ export function SerialPortsScreen({
             })}
           </div>
         )}
-      </div>
-
-      <div className="screen-page-actions">
-        <button className="btn btn-red" onClick={onDisconnect}>
-          Desconectar
-        </button>
-
-        <button className="btn btn-orange" onClick={onBack}>
-          Voltar para o menu
-        </button>
       </div>
     </div>
   )

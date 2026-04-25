@@ -10,64 +10,17 @@
   font-size: 18px;
   font-weight: 700;
   color: #14346b;
-  margin-bottom: 8px;
+  margin: 0 0 6px;
 }
 
-.speed-gauge-arc {
-  position: relative;
+.speed-gauge-svg {
   width: 160px;
-  height: 90px;
-  overflow: hidden;
-}
-
-.speed-gauge-ring {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  background:
-    conic-gradient(
-      from 180deg,
-      #35b44a 0deg 40deg,
-      #b7d63d 40deg 75deg,
-      #ffd31a 75deg 110deg,
-      #ff9f1a 110deg 145deg,
-      #e6302a 145deg 180deg,
-      transparent 180deg 360deg
-    );
-  mask: radial-gradient(circle, transparent 56px, black 57px);
-  -webkit-mask: radial-gradient(circle, transparent 56px, black 57px);
-}
-
-.speed-gauge-needle {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: 4px;
-  height: 70px;
-  background: #1f1f1f;
-  border-radius: 4px;
-  transform-origin: bottom center;
-  transition: transform 0.35s ease;
-}
-
-.speed-gauge-center {
-  position: absolute;
-  left: 50%;
-  bottom: -2px;
-  transform: translateX(-50%);
-  width: 18px;
-  height: 18px;
-  background: #1f1f1f;
-  border-radius: 50%;
-  border: 3px solid #d9d9d9;
+  height: 105px;
+  overflow: visible;
 }
 
 .speed-gauge-value {
-  margin-top: 8px;
+  margin-top: 4px;
   font-size: 20px;
   font-weight: 700;
   color: #14346b;

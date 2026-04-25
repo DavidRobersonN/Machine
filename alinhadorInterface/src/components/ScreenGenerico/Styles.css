@@ -1,53 +1,177 @@
-.screen-logs-wrapper {
+/* =========================
+   LAYOUT DO SCREEN MAIN
+========================= */
+
+.screen-main-layout {
   width: 100%;
-  height: 100%;
-  padding: 12px;
-  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+}
+
+/* Área que segura a tela branca */
+.painel-display-area {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+
+/* Tela principal */
+.display-screen {
+  width: 100%;
+  max-width: 100%;
   overflow: hidden;
+  min-width: 0;
   display: flex;
-  min-height: 0;
+  flex-direction: column;
 }
 
-.screen-log {
+/* Corpo da tela */
+.screen-main {
+  display: flex;
+  height: 600px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 2px solid #b7c4de;
+}
+
+/* Conteúdo dinâmico da tela */
+.screen-main-content {
+  flex: 1.4;
+  min-width: 0;
+  min-height: 0;
+  padding: 16px;
+  box-sizing: border-box;
+  background:
+    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    #ffffff;
+  background-size: 20px 20px;
+  border-right: 2px solid #b7c4de;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Sidebar interna da tela */
+.screen-main-sidebar {
+  width: 125px;
+  min-width: 125px;
+  background: #eef3ff;
+  min-height: 0;
+  display: flex;
+}
+
+/* Barra inferior de status dentro da tela */
+.screen-main-statusbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 11px;
+  padding: 6px 8px;
+  border-top: 2px solid #b7c4de;
+  background: #f2f5fb;
+  color: #2f3d5c;
+}
+
+/* Área lateral externa onde entram os botões do ScreenMain */
+.screen-main-painel-controls {
+  width: 220px;
+  min-width: 220px;
+  min-height: 600px;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+
+/* =========================
+   SIDEBAR INTERNA
+========================= */
+
+.screen-sidebar {
   width: 100%;
   height: 100%;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  padding: 10px 8px;
+  box-sizing: border-box;
+  font-size: 12px;
+  color: #1d3260;
+  background: #eef3ff;
+}
+
+.screen-row {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   gap: 8px;
-  font-family: monospace;
-  font-size: 13px;
+  margin-bottom: 6px;
 }
 
-.screen-log-empty {
-  opacity: 0.6;
+.screen-divider {
+  height: 1px;
+  background: #9fb1d8;
+  margin: 10px 0;
 }
 
-.screen-log-line {
+.screen-progress-label {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 6px 8px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.04);
+  justify-content: space-between;
+  margin-bottom: 6px;
 }
 
-.screen-log-line.sent {
-  border-left: 3px solid #22c55e;
+.screen-progress {
+  width: 100%;
+  height: 12px;
+  background: #d8dfef;
+  border: 1px solid #8da1c8;
+  overflow: hidden;
 }
 
-.screen-log-line.received {
-  border-left: 3px solid #f59e0b;
+.screen-progress-fill {
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, #1c2e57 0%, #3d63b3 100%);
 }
 
-.log-type {
-  font-size: 11px;
-  font-weight: bold;
-  opacity: 0.8;
-}
 
-.log-message {
-  word-break: break-word;
+/* =========================
+   RESPONSIVIDADE DO SCREEN MAIN
+========================= */
+
+@media (max-width: 860px) {
+  .screen-main-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .painel-display-area {
+    width: 100%;
+  }
+
+  .screen-main-painel-controls {
+    width: 100%;
+    min-width: 0;
+    min-height: auto;
+  }
+
+  .screen-main {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .screen-main-content,
+  .screen-main-sidebar {
+    width: 100%;
+    min-width: 0;
+    border-right: none;
+  }
+
+  .screen-main-content {
+    border-bottom: 2px solid #b7c4de;
+  }
+
+  .screen-main-sidebar {
+    min-height: 120px;
+  }
 }
