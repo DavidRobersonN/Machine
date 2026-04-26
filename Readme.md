@@ -756,3 +756,17 @@ HomePage monta a tela
 LedControl representa o controle específico do LED
 useLedActions guarda a lógica do LED
 ToggleControl renderiza os botões de forma genérica
+
+
+*modelo arquitetura do estado no front*
+state.ts
+O que a aplicação guarda no estado
+
+commands.ts
+O que o React envia para o Django
+
+messages.ts
+O que o Django envia para o React
+
+actions.ts
+O que o reducer usa internamente

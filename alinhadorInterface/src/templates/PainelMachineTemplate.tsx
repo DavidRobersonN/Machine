@@ -1,28 +1,18 @@
 import type { ReactNode } from 'react'
 
-type PainelMachineProps = {
+type PainelMachineTemplateProps = {
   screenMain: ReactNode
-  sideControls?: ReactNode
   bottomControls?: ReactNode
 }
 
 export function PainelMachineTemplate({
   screenMain,
-  sideControls,
   bottomControls,
-}: PainelMachineProps) {
+}: PainelMachineTemplateProps) {
   return (
     <section className="painel-machine">
       <div className="painel-shell">
-        <div className="painel-inner">
-          <div className="painel-display-area">
-            <div className="display-screen">
-              {screenMain}
-            </div>
-          </div>
-
-          {sideControls}
-        </div>
+        {screenMain}
 
         {bottomControls && (
           <div className="panel-bottom-controls">

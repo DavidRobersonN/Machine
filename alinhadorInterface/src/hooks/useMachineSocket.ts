@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { createMachineSocket, sendSocketMessage } from '../services/machineSocket'
-import type { MachineMessage } from '../types/machine'
+import type { MachineMessage } from '../types/machine/machine'
 
 type UseMachineSocketParams = {
   onConnected: () => void
