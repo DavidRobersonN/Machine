@@ -1,9 +1,11 @@
-type PainelControlsProps = {}
+type PainelControlsProps = {
+  children?: React.ReactNode
+}
 
-export function PainelControls({}: PainelControlsProps) {
+export function PainelControls({ children }: PainelControlsProps) {
   return (
     <div className="painel-controls-area">
-      teste
+     {children}
     </div>
   )
 }
