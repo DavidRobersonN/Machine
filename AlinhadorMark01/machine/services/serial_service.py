@@ -49,18 +49,30 @@ class SerialService:
         Atualiza a porta serial usada pelo Arduino.
 
         Regras:
-        - se a porta vier vazia ou indefinida, não troca
+        - se receber None, limpa a porta selecionada
         - se a porta for igual à atual, não faz nada
         - se a porta for diferente, fecha a conexão atual antes de trocar
-
-        Isso evita ficar desconectando e reconectando sem necessidade.
         """
-        if not port:
-            print('[SerialService] Porta não informada. Mantendo porta atual.')
+
+        # Se vier None, significa que queremos limpar a porta selecionada
+        if port is None:
+            if self.connection and self.connection.is_open:
+                self.disconnect()
+
+            self.port = None
+            print('[SerialService] Porta serial selecionada foi limpa.')
+            return
+
+        # Se vier string vazia, aí sim é um erro de uso
+        if port == '':
+            print('[SerialService] Porta vazia informada. Mantendo porta atual.')
             return
 
         if port == self.port:
-            print(f'[SerialService] Porta {port} já está selecionada. Nenhuma troca necessária.')
+            print(
+                f'[SerialService] Porta {port} já está selecionada. '
+                'Nenhuma troca necessária.'
+            )
             return
 
         if self.connection and self.connection.is_open:
@@ -111,40 +123,29 @@ class SerialService:
             return False
         
 
-    def disconnect(self) -> None:
-        """
-        Fecha a conexão serial, caso ela esteja aberta.
+    def disconnect_serial_port(self) -> dict:
+        current_port = self.serial_service.port
 
-        Esse método não é executado automaticamente quando o Arduino
-        é removido fisicamente. Ele só roda se for chamado no código.
-        """
-        try:
-            if self.connection and self.connection.is_open:
-                self.connection.close()
-                print('[SerialService] Arduino desconectado com sucesso')
-        except serial.SerialException as error:
-            print(f'[SerialService] Erro ao fechar conexão: {error}')
-        finally:
-            self.connection = None
+        self.serial_service.disconnect()
 
-    def _invalidate_connection(self) -> None:
-        """
-        Invalida a conexão atual.
+        # Agora isso vai funcionar, porque set_port aceita None
+        self.serial_service.set_port(None)
 
-        Esse método é útil quando acontece um erro de leitura/escrita.
-        Em vez de manter um objeto serial quebrado dentro da classe,
-        nós limpamos a conexão para forçar uma nova tentativa de conexão
-        no próximo comando.
-        """
-        try:
-            if self.connection and self.connection.is_open:
-                self.connection.close()
-        except Exception:
-            pass
-        finally:
-            self.connection = None
-            print('[SerialService] Conexão serial marcada como inválida')
+        self.machine_state_service.update_state({
+            'led': 'OFF',
+            'selected_port': None,
+        })
 
+        return {
+            'type': 'serial_port_disconnected',
+            'selected_port': None,
+            'message': (
+                f'Arduino desconectado da porta {current_port}'
+                if current_port
+                else 'Arduino desconectado'
+            ),
+        }
+    
     def is_connected(self) -> bool:
         """
         Verifica se a conexão serial parece ativa.
