@@ -321,14 +321,867 @@ Adicione:
 | 'alignment'
 ```
 
+*12. Atualizar o useHomeMachinePage*
+
+No retorno do seu hook, adicione estes dois valores:
+
+```ts
+  lateralMisalignmentCurrent: state.lateral_misalignment_current,
+  lateralMisalignmentHistory: state.lateral_misalignment_history,
+```
 
 
 
+Implementando função de verificar desalinhamento lateral
+1. Atualize os tipos do estado
 
+Arquivo:
 
+src/types/machine/state.ts
 
+Adicione o tipo do ponto do gráfico:
 
+export type MisalignmentPoint = {
+  id: number
+  value: number
+}
 
+Depois adicione os novos campos no MachineState:
+
+export interface MachineState {
+  connected: boolean
+  led: LedUiState
+  arduino_connected: ArduinoConnectionState
+  logs: MachineLog[]
+  available_ports: SerialPortInfo[]
+  selected_port: SelectedSerialPortState
+  speed_motor_roda: number
+
+  lateral_misalignment_current: number
+  lateral_misalignment_history: MisalignmentPoint[]
+}
+2. Atualize o estado inicial
+
+Arquivo:
+
+src/context/machineReducer.ts
+
+No initialMachineState, adicione:
+
+export const initialMachineState: MachineState = {
+  connected: false,
+  led: 'Desligado',
+  arduino_connected: 'Desconectado',
+  logs: [],
+  available_ports: [],
+  selected_port: null,
+  speed_motor_roda: 0,
+
+  lateral_misalignment_current: 0,
+  lateral_misalignment_history: [],
+}
+3. Adicione as actions no reducer
+
+Arquivo:
+
+src/types/machine/actions.ts
+
+Adicione no MachineAction:
+
+| { type: 'SET_LATERAL_MISALIGNMENT_CURRENT'; payload: number }
+| { type: 'ADD_LATERAL_MISALIGNMENT_POINT'; payload: number }
+
+Arquivo completo ficaria assim:
+
+import type {
+  MachineLog,
+  SelectedSerialPortState,
+  SerialPortInfo,
+} from './state'
+
+import type { MachineUpdatePayload } from './messages'
+
+export type MachineAction =
+  | { type: 'SOCKET_CONNECTED' }
+  | { type: 'SOCKET_DISCONNECTED' }
+  | { type: 'MACHINE_UPDATED'; payload: MachineUpdatePayload }
+  | { type: 'ADD_LOG'; payload: MachineLog }
+  | { type: 'CLEAR_LOGS' }
+  | { type: 'SET_AVAILABLE_PORTS'; payload: SerialPortInfo[] }
+  | { type: 'SET_SELECTED_PORT'; payload: SelectedSerialPortState }
+  | { type: 'SET_SPEED_MOTOR_RODA'; payload: number }
+  | { type: 'SET_LATERAL_MISALIGNMENT_CURRENT'; payload: number }
+  | { type: 'ADD_LATERAL_MISALIGNMENT_POINT'; payload: number }
+4. Atualize o reducer
+
+Arquivo:
+
+src/context/machineReducer.ts
+
+Adicione estes dois case no switch:
+
+case 'SET_LATERAL_MISALIGNMENT_CURRENT':
+  return {
+    ...state,
+    lateral_misalignment_current: action.payload,
+  }
+
+case 'ADD_LATERAL_MISALIGNMENT_POINT': {
+  const newPoint = {
+    id: Date.now(),
+    value: action.payload,
+  }
+
+  const updatedHistory = [
+    ...state.lateral_misalignment_history,
+    newPoint,
+  ].slice(-100)
+
+  return {
+    ...state,
+    lateral_misalignment_history: updatedHistory,
+  }
+}
+
+Esse .slice(-100) mantém apenas os últimos 100 pontos do gráfico.
+
+5. Crie o tipo da mensagem WebSocket
+
+Arquivo:
+
+src/types/machine/messages.ts
+
+Adicione:
+
+export type LateralMisalignmentMessage = {
+  type: 'lateral_misalignment'
+  value: number
+  raw?: number
+  unit?: string
+}
+
+Depois coloque no union principal:
+
+export type MachineMessage =
+  | MachineUpdateMessage
+  | AvailablePortsMessage
+  | SerialPortSelectedMessage
+  | SerialPortDisconnectedMessage
+  | LedStatusMessage
+  | MachineReadMessage
+  | ConnectionMessage
+  | LogMessage
+  | ErrorMessage
+  | InfoMessage
+  | PongMessage
+  | LateralMisalignmentMessage
+
+A mensagem que o backend deve mandar será assim:
+
+{
+  "type": "lateral_misalignment",
+  "value": 0.28,
+  "raw": 523,
+  "unit": "mm"
+}
+6. Atualize o machine.ts
+
+Arquivo:
+
+src/types/machine/machine.ts
+
+Como você separou os tipos em arquivos menores, deixe o machine.ts como centralizador:
+
+export type {
+  LedBackendState,
+  LedUiState,
+  ArduinoConnectionState,
+  SelectedSerialPortState,
+  MachineLog,
+  SerialPortInfo,
+  MisalignmentPoint,
+  MachineState,
+} from './state'
+
+export type {
+  MachineUpdatePayload,
+  MachineUpdateMessage,
+  AvailablePortsMessage,
+  SerialPortSelectedMessage,
+  SerialPortDisconnectedMessage,
+  LedStatusMessage,
+  MachineReadMessage,
+  ConnectionMessage,
+  LogMessage,
+  ErrorMessage,
+  InfoMessage,
+  PongMessage,
+  LateralMisalignmentMessage,
+  MachineMessage,
+} from './messages'
+
+export type { MachineAction } from './actions'
+
+export type MotorRodaCommand =
+  | { action: 'motor_roda_start' }
+  | { action: 'motor_roda_stop' }
+  | { action: 'motor_roda_set_clockwise' }
+  | { action: 'motor_roda_set_counter_clockwise' }
+  | { action: 'motor_roda_increase_speed' }
+  | { action: 'motor_roda_decrease_speed' }
+
+export interface ListSerialPortsCommand {
+  action: 'list_serial_ports'
+}
+
+export interface SelectPortCommand {
+  action: 'select_serial_port'
+  port: string
+}
+
+export interface DisconnectSerialPortCommand {
+  action: 'disconnect_serial_port'
+}
+
+export interface PingCommand {
+  action: 'ping'
+}
+
+export interface LedOnCommand {
+  action: 'led_on'
+}
+
+export interface LedOffCommand {
+  action: 'led_off'
+}
+
+export interface ReadMachineStateCommand {
+  action: 'read_machine_state'
+}
+
+export interface LateralSensorStatusCommand {
+  action: 'lateral_sensor_status'
+}
+
+export interface LateralSensorCalibrateZeroCommand {
+  action: 'lateral_sensor_calibrate_zero'
+}
+
+export type MachineCommand =
+  | ListSerialPortsCommand
+  | SelectPortCommand
+  | DisconnectSerialPortCommand
+  | PingCommand
+  | LedOnCommand
+  | LedOffCommand
+  | ReadMachineStateCommand
+  | MotorRodaCommand
+  | LateralSensorStatusCommand
+  | LateralSensorCalibrateZeroCommand
+7. Atualize o MachineContext
+
+Arquivo:
+
+src/context/MachineContext.tsx
+
+No import do React, adicione:
+
+useEffect,
+useRef,
+
+Ficando assim:
+
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+} from 'react'
+
+Dentro do MachineProvider, logo após o useReducer, adicione:
+
+const latestLateralValueRef = useRef(0)
+const hasReceivedLateralValueRef = useRef(false)
+
+Depois adicione o useEffect:
+
+useEffect(() => {
+  const intervalId = window.setInterval(() => {
+    if (!hasReceivedLateralValueRef.current) {
+      return
+    }
+
+    dispatch({
+      type: 'ADD_LATERAL_MISALIGNMENT_POINT',
+      payload: latestLateralValueRef.current,
+    })
+  }, 100)
+
+  return () => {
+    window.clearInterval(intervalId)
+  }
+}, [])
+
+Dentro do handleMachineMessage, adicione:
+
+if (message.type === 'lateral_misalignment') {
+  latestLateralValueRef.current = message.value
+  hasReceivedLateralValueRef.current = true
+
+  dispatch({
+    type: 'SET_LATERAL_MISALIGNMENT_CURRENT',
+    payload: message.value,
+  })
+
+  return
+}
+
+Esse fluxo faz o valor atual atualizar imediatamente, mas o gráfico só recebe pontos a cada 100ms.
+
+8. Crie o componente do gráfico
+
+Crie a pasta:
+
+src/components/OscillationChart/
+
+Crie o arquivo:
+
+src/components/OscillationChart/OscillationChart.tsx
+
+Código:
+
+import type { MisalignmentPoint } from '../../types/machine/machine'
+import './OscillationChart.css'
+
+type OscillationChartProps = {
+  title: string
+  value: number
+  points: MisalignmentPoint[]
+  minValue?: number
+  maxValue?: number
+  unit?: string
+}
+
+export function OscillationChart({
+  title,
+  value,
+  points,
+  minValue = -2,
+  maxValue = 2,
+  unit = ' mm',
+}: OscillationChartProps) {
+  const width = 520
+  const height = 180
+  const padding = 20
+
+  const usableWidth = width - padding * 2
+  const usableHeight = height - padding * 2
+
+  function normalizeY(pointValue: number) {
+    const percentage = (pointValue - minValue) / (maxValue - minValue)
+
+    return height - padding - percentage * usableHeight
+  }
+
+  function normalizeX(index: number) {
+    if (points.length <= 1) {
+      return padding
+    }
+
+    return padding + (index / (points.length - 1)) * usableWidth
+  }
+
+  const linePoints = points
+    .map((point, index) => {
+      const x = normalizeX(index)
+      const y = normalizeY(point.value)
+
+      return `${x},${y}`
+    })
+    .join(' ')
+
+  const centerY = normalizeY(0)
+
+  return (
+    <div className="oscillation-chart">
+      <div className="oscillation-chart-header">
+        <div>
+          <h2 className="oscillation-chart-title">{title}</h2>
+
+          <p className="oscillation-chart-subtitle">
+            Desalinhamento lateral em tempo real
+          </p>
+        </div>
+
+        <strong className="oscillation-chart-value">
+          {value.toFixed(2)}
+          {unit}
+        </strong>
+      </div>
+
+      <svg
+        className="oscillation-chart-svg"
+        viewBox={`0 0 ${width} ${height}`}
+        role="img"
+        aria-label={title}
+      >
+        <rect
+          x={padding}
+          y={padding}
+          width={usableWidth}
+          height={usableHeight}
+          className="oscillation-chart-border"
+        />
+
+        <line
+          x1={padding}
+          y1={centerY}
+          x2={width - padding}
+          y2={centerY}
+          className="oscillation-chart-center-line"
+        />
+
+        {points.length > 1 && (
+          <polyline
+            points={linePoints}
+            className="oscillation-chart-line"
+          />
+        )}
+      </svg>
+    </div>
+  )
+}
+9. Crie o CSS do gráfico
+
+Arquivo:
+
+src/components/OscillationChart/OscillationChart.css
+
+Código:
+
+.oscillation-chart {
+  width: 100%;
+  background: #07111f;
+  border: 1px solid rgba(0, 255, 170, 0.25);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 0 20px rgba(0, 255, 170, 0.08);
+}
+
+.oscillation-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.oscillation-chart-title {
+  margin: 0;
+  font-size: 18px;
+  color: #e8fff7;
+}
+
+.oscillation-chart-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #78a99a;
+}
+
+.oscillation-chart-value {
+  font-size: 28px;
+  color: #00ffaa;
+  font-family: monospace;
+}
+
+.oscillation-chart-svg {
+  width: 100%;
+  height: 180px;
+  display: block;
+}
+
+.oscillation-chart-border {
+  fill: rgba(0, 0, 0, 0.15);
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1;
+}
+
+.oscillation-chart-center-line {
+  stroke: rgba(255, 255, 255, 0.25);
+  stroke-width: 1;
+  stroke-dasharray: 6 6;
+}
+
+.oscillation-chart-line {
+  fill: none;
+  stroke: #00ffaa;
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(0, 255, 170, 0.7));
+}
+10. Crie a tela de alinhamento lateral
+
+Crie a pasta:
+
+src/components/screens/LateralAlignmentScreen/
+
+Crie o arquivo:
+
+src/components/screens/LateralAlignmentScreen/LateralAlignmentScreen.tsx
+
+Código:
+
+import type { MisalignmentPoint } from '../../../types/machine/machine'
+import { OscillationChart } from '../../OscillationChart/OscillationChart'
+import './LateralAlignmentScreen.css'
+
+type LateralAlignmentScreenProps = {
+  value: number
+  history: MisalignmentPoint[]
+}
+
+export function LateralAlignmentScreen({
+  value,
+  history,
+}: LateralAlignmentScreenProps) {
+  const maxValue =
+    history.length > 0
+      ? Math.max(...history.map((point) => point.value))
+      : 0
+
+  const minValue =
+    history.length > 0
+      ? Math.min(...history.map((point) => point.value))
+      : 0
+
+  const averageValue =
+    history.length > 0
+      ? history.reduce((total, point) => total + point.value, 0) /
+        history.length
+      : 0
+
+  return (
+    <div className="screen-page lateral-alignment-screen">
+      <h2 className="screen-page-title">Alinhamento lateral</h2>
+
+      <OscillationChart
+        title="Gráfico de oscilação"
+        value={value}
+        points={history}
+        minValue={-2}
+        maxValue={2}
+        unit=" mm"
+      />
+
+      <div className="lateral-alignment-cards">
+        <div className="lateral-alignment-card">
+          <span>Atual</span>
+          <strong>{value.toFixed(2)} mm</strong>
+        </div>
+
+        <div className="lateral-alignment-card">
+          <span>Máximo</span>
+          <strong>{maxValue.toFixed(2)} mm</strong>
+        </div>
+
+        <div className="lateral-alignment-card">
+          <span>Mínimo</span>
+          <strong>{minValue.toFixed(2)} mm</strong>
+        </div>
+
+        <div className="lateral-alignment-card">
+          <span>Média</span>
+          <strong>{averageValue.toFixed(2)} mm</strong>
+        </div>
+      </div>
+    </div>
+  )
+}
+11. Crie o CSS da tela
+
+Arquivo:
+
+src/components/screens/LateralAlignmentScreen/LateralAlignmentScreen.css
+
+Código:
+
+.lateral-alignment-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lateral-alignment-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.lateral-alignment-card {
+  background: #07111f;
+  border: 1px solid rgba(0, 255, 170, 0.2);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.lateral-alignment-card span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #78a99a;
+}
+
+.lateral-alignment-card strong {
+  font-size: 18px;
+  color: #e8fff7;
+  font-family: monospace;
+}
+12. Atualize o tipo AppScreen
+
+Arquivo:
+
+src/types/navigation.ts
+
+Adicione:
+
+| 'alignment'
+
+Exemplo:
+
+export type AppScreen =
+  | 'start'
+  | 'menu'
+  | 'led'
+  | 'motors'
+  | 'alignment'
+  | 'logs'
+  | 'serial'
+13. Atualize o useHomeMachinePage
+
+Arquivo:
+
+src/hooks/machine/useHomeMachinePage.ts
+
+No return, adicione:
+
+lateralMisalignmentCurrent: state.lateral_misalignment_current,
+lateralMisalignmentHistory: state.lateral_misalignment_history,
+
+Exemplo:
+
+return {
+  currentScreen,
+  logs,
+  availablePorts,
+  selectedPort,
+  sidebarProps,
+  statusBarProps,
+  led: state.led,
+  arduinoConnected: statusBarProps.arduinoConnection,
+  speedMotorRoda: state.speed_motor_roda,
+
+  lateralMisalignmentCurrent: state.lateral_misalignment_current,
+  lateralMisalignmentHistory: state.lateral_misalignment_history,
+
+  bottomActions,
+
+  goToScreen,
+  handleListSerialPorts,
+  handleSelectPort,
+  handleClearLogs,
+  handleDisconnectPort,
+}
+
+No getBottomActions, adicione:
+
+case 'alignment':
+  return [
+    {
+      label: 'Voltar ao menu',
+      onClick: () => goToScreen('menu'),
+      variant: 'orange' as const,
+    },
+  ]
+14. Atualize a HomePage
+
+Arquivo:
+
+src/pages/HomePage.tsx
+
+Pegue os dois valores do hook:
+
+lateralMisalignmentCurrent,
+lateralMisalignmentHistory,
+
+E passe para o MachineScreenRenderer:
+
+<MachineScreenRenderer
+  led={led}
+  currentScreen={currentScreen}
+  logs={logs}
+  availablePorts={availablePorts}
+  selectedPort={selectedPort}
+  arduinoConnected={arduinoConnected}
+  speedMotorRoda={speedMotorRoda}
+  lateralMisalignmentCurrent={lateralMisalignmentCurrent}
+  lateralMisalignmentHistory={lateralMisalignmentHistory}
+  onSelectPort={handleSelectPort}
+  onGoToScreen={goToScreen}
+  onListSerialPorts={handleListSerialPorts}
+/>
+15. Atualize o MachineScreenRenderer
+
+Arquivo:
+
+src/components/screens/MachineScreenRender.tsx
+
+Importe a tela:
+
+import { LateralAlignmentScreen } from './LateralAlignmentScreen/LateralAlignmentScreen'
+
+Importe o tipo:
+
+import type {
+  MachineLog,
+  SelectedSerialPortState,
+  SerialPortInfo,
+  ArduinoConnectionState,
+  LedUiState,
+  MisalignmentPoint,
+} from '../../types/machine'
+
+Adicione nas props:
+
+lateralMisalignmentCurrent: number
+lateralMisalignmentHistory: MisalignmentPoint[]
+
+Receba na função:
+
+lateralMisalignmentCurrent,
+lateralMisalignmentHistory,
+
+Adicione no MenuScreen:
+
+onSelectAlignment={() => onGoToScreen('alignment')}
+
+E adicione o case:
+
+case 'alignment':
+  return (
+    <LateralAlignmentScreen
+      value={lateralMisalignmentCurrent}
+      history={lateralMisalignmentHistory}
+    />
+  )
+16. Atualize o MenuScreen
+
+Arquivo:
+
+src/components/screens/MenuScreen.tsx
+
+Adicione a prop:
+
+onSelectAlignment: () => void
+
+Código final:
+
+type MenuScreenProps = {
+  onSelectLed: () => void
+  onSelectLogs: () => void
+  onSelectSerial: () => void
+  onSelectMotors: () => void
+  onSelectAlignment: () => void
+}
+
+export function MenuScreen({
+  onSelectLed,
+  onSelectLogs,
+  onSelectSerial,
+  onSelectMotors,
+  onSelectAlignment,
+}: MenuScreenProps) {
+  return (
+    <div className="screen-page">
+      <h2 className="screen-page-title">Menu principal</h2>
+
+      <div className="screen-page-actions">
+        <button className="btn btn-green" onClick={onSelectLed}>
+          LED
+        </button>
+
+        <button className="btn btn-green" onClick={onSelectMotors}>
+          Motores
+        </button>
+
+        <button className="btn btn-green" onClick={onSelectAlignment}>
+          Alinhamento lateral
+        </button>
+
+        <button className="btn btn-green" onClick={onSelectLogs}>
+          Logs
+        </button>
+
+        <button className="btn btn-green" onClick={onSelectSerial}>
+          Portas COM
+        </button>
+      </div>
+    </div>
+  )
+}
+Resultado final do fluxo
+
+Depois disso, o frontend fica assim:
+
+Backend envia:
+{ type: "lateral_misalignment", value: 0.28 }
+
+MachineContext recebe
+↓
+atualiza lateral_misalignment_current
+↓
+guarda último valor no useRef
+↓
+a cada 100ms adiciona valor no lateral_misalignment_history
+↓
+LateralAlignmentScreen recebe value e history
+↓
+OscillationChart desenha o gráfico
+
+Agora sua arquitetura fica bem organizada:
+
+types/machine/state.ts
+  estado global
+
+types/machine/messages.ts
+  mensagens backend → frontend
+
+types/machine/actions.ts
+  actions do reducer
+
+context/MachineContext.tsx
+  recebe mensagens do WebSocket
+
+context/machineReducer.ts
+  atualiza o estado global
+
+hooks/machine/useHomeMachinePage.ts
+  prepara dados da página
+
+pages/HomePage.tsx
+  passa dados para a tela
+
+components/screens/MachineScreenRender.tsx
+  decide qual tela renderizar
+
+components/screens/LateralAlignmentScreen/
+  tela visual do desalinhamento
+
+components/OscillationChart/
+  gráfico reutilizável
 
 
 
