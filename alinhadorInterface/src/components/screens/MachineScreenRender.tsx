@@ -1,4 +1,4 @@
-import { LedScreen } from './LedScreen'
+import { LedScreen } from './LedScreen/LedScreen'
 import { LogsScreen } from './LogsScreen'
 import { MenuScreen } from './MenuScreen'
 import { SerialPortsScreen } from './SerialPortsScreen'
@@ -15,6 +15,7 @@ import type {
   SelectedSerialPortState,
   SerialPortInfo,
   ArduinoConnectionState,
+  LedUiState,
 } from '../../types/machine'
 
 type MachineScreenRendererProps = {
@@ -24,6 +25,7 @@ type MachineScreenRendererProps = {
   selectedPort: SelectedSerialPortState
   arduinoConnected: ArduinoConnectionState
   speedMotorRoda: number
+  led: LedUiState
   onSelectPort: (port: string) => void
   onGoToScreen: (screen: AppScreen) => void
   onListSerialPorts: () => void
@@ -36,6 +38,7 @@ export function MachineScreenRenderer({
   selectedPort,
   arduinoConnected,
   speedMotorRoda,
+  led,
   onSelectPort,
   onGoToScreen,
   onListSerialPorts,
@@ -55,7 +58,9 @@ export function MachineScreenRenderer({
       )
 
     case 'led':
-      return <LedScreen />
+      return <LedScreen 
+        led={led}
+      />
 
     case 'motors':
       return (

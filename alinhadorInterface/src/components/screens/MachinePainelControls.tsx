@@ -2,6 +2,7 @@ import { PainelControls } from '../PainelComponents/PainelControls/PainelControl
 import { MotorRodaControl } from '../PainelComponents/Motors/MotorRodaControl'
 
 import type { AppScreen } from '../../types/navigation'
+import { LedControl } from '../PainelComponents/led/LedControl'
 
 // Este componente é responsável por renderizar os controles específicos de cada tela do painel
 
@@ -15,6 +16,9 @@ export function MachinePainelControls({
   switch (currentScreen) {
     case 'motors':
       return <MotorRodaControl />
+
+    case 'led':
+      return <LedControl />
 
     default:
       return <PainelControls />

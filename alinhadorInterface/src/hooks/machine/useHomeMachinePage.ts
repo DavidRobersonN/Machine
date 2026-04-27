@@ -5,6 +5,10 @@ import { useMachineScreenData } from './useMachineScreenData'
 
 import type { AppScreen } from '../../types/navigation'
 
+// Este hook é responsável por gerenciar a lógica da página principal da máquina, 
+// que inclui a navegação entre telas, gerenciamento de ações comuns (como listar 
+// portas seriais, limpar logs, etc) e fornecer os dados necessários para renderizar as telas.
+
 export function useHomeMachinePage() {
   const {
     logs,
@@ -12,6 +16,7 @@ export function useHomeMachinePage() {
     selectedPort,
     sidebarProps,
     statusBarProps,
+
   } = useMachineScreenData()
 
   const { state, sendCommand, dispatch } = useMachineContext()
@@ -64,7 +69,7 @@ export function useHomeMachinePage() {
     selectedPort,
     sidebarProps,
     statusBarProps,
-
+    led: state.led,
     arduinoConnected: statusBarProps.arduinoConnection,
     speedMotorRoda: state.speed_motor_roda,
 

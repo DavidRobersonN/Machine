@@ -243,6 +243,55 @@ Passo 9: *Backend: responder ao comando*
                       'message': 'Ação desconhecida',
                   }
 ```
+
+
+
+
+
+
+*Atualiazando o componente Led para a nova arquitetura*
+
+1 Passo
+  MachinePainelControls
+    Este componente é responsável por renderizar os controles específicos de cada tela do painel
+
+  -Foi adicionado led ao case, retornando o <LedControl/>
+
+2 Passo
+  useHomeMachinePage.ts
+  // Este hook é responsável por gerenciar a lógica da página principal da máquina, 
+  // que inclui a navegação entre telas, gerenciamento de ações comuns (como listar 
+  // portas seriais, limpar logs, etc) e fornecer os dados necessários para renderizar as telas.
+
+  -Foi adicionado o state.led ao retorno do hook
+
+3 Passo
+  MachineScreenRender.tsx
+  // Este componente é responsável por renderizar a tela principal do painel, exibindo o conteúdo de acordo 
+  // com a tela selecionada no menu lateral. Ele recebe as informações 
+  // necessárias para cada tela e as funções de controle como props, garantindo que a lógica de navegação e controle esteja centralizada aqui.
+
+  -foi adicionado state.led as Props
+    led: LedUiState
+    e adicionado as cases
+```ts        
+    case 'led':
+      return <LedScreen 
+        led={led}
+      />
+```
+
+
+
+
+
+
+
+
+
+
+
+
 A lógica de navegação
 
 Fica em um container/page, por exemplo:

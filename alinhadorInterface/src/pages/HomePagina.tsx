@@ -5,7 +5,7 @@ import { ScreenSidebar } from '../components/ScreenGenerico/ScreenSideBar'
 import { ScreenStatusBar } from '../components/ScreenGenerico/ScreenStatusBar'
 
 import { MachinePainelControls } from '../components/screens/MachinePainelControls'
-import { MachineScreenRenderer } from '../components/screens/MachineScreenRenderer'
+import { MachineScreenRenderer } from '../components/screens/MachineScreenRender'
 
 import { useHomeMachinePage } from '../hooks/machine/useHomeMachinePage'
 
@@ -22,6 +22,9 @@ export function HomePage() {
     sidebarProps,
     statusBarProps,
     bottomActions,
+    led,
+
+
     goToScreen,
     handleListSerialPorts,
     handleSelectPort,
@@ -38,6 +41,7 @@ export function HomePage() {
           }
         >
           <MachineScreenRenderer
+            led={led}
             currentScreen={currentScreen}
             logs={logs}
             availablePorts={availablePorts}
