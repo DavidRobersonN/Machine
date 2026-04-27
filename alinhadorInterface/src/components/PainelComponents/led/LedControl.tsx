@@ -1,8 +1,20 @@
 import { ToggleControl } from '../../controls/ToggleControl/ToggleControl'
-import { useLedActions } from '../../../hooks/machine/useLedActions'
+import { useMachineContext } from '../../../context/MachineContext'
 
 export function LedControl() {
-  const { turnLedOn, turnLedOff } = useLedActions()
+  const { sendCommand } = useMachineContext()
+  
+    function turnLedOn() {
+      sendCommand({
+        action: 'led_on',
+      })
+    }
+  
+    function turnLedOff() {
+      sendCommand({
+        action: 'led_off',
+      })
+    }
 
   return (
     <ToggleControl

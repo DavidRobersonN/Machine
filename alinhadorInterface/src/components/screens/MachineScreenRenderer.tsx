@@ -4,8 +4,12 @@ import { MenuScreen } from './MenuScreen'
 import { SerialPortsScreen } from './SerialPortsScreen'
 import { StartScreen } from './StartScreen'
 import { MotorsScreen } from './MotorsScreen'
-
 import type { AppScreen } from '../../types/navigation'
+
+// Este componente é responsável por renderizar a tela principal do painel, exibindo o conteúdo de acordo 
+// com a tela selecionada no menu lateral. Ele recebe as informações 
+// necessárias para cada tela e as funções de controle como props, garantindo que a lógica de navegação e controle esteja centralizada aqui.
+
 import type {
   MachineLog,
   SelectedSerialPortState,
