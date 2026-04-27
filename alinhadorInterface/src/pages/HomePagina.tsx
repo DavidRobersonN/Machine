@@ -19,11 +19,12 @@ export function HomePage() {
     selectedPort,
     arduinoConnected,
     speedMotorRoda,
+    lateralMisalignmentCurrent,
+    lateralMisalignmentHistory,
     sidebarProps,
     statusBarProps,
     bottomActions,
     led,
-
 
     goToScreen,
     handleListSerialPorts,
@@ -48,6 +49,8 @@ export function HomePage() {
             selectedPort={selectedPort}
             arduinoConnected={arduinoConnected}
             speedMotorRoda={speedMotorRoda}
+            lateralMisalignmentCurrent={lateralMisalignmentCurrent}
+            lateralMisalignmentHistory={lateralMisalignmentHistory}
             onSelectPort={handleSelectPort}
             onGoToScreen={goToScreen}
             onListSerialPorts={handleListSerialPorts}

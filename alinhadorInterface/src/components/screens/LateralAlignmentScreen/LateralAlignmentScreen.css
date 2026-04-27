@@ -1,0 +1,31 @@
+.lateral-alignment-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lateral-alignment-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.lateral-alignment-card {
+  background: #07111f;
+  border: 1px solid rgba(0, 255, 170, 0.2);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.lateral-alignment-card span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #78a99a;
+}
+
+.lateral-alignment-card strong {
+  font-size: 18px;
+  color: #e8fff7;
+  font-family: monospace;
+}

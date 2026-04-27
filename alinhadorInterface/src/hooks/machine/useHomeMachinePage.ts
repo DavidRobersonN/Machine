@@ -77,7 +77,8 @@ export function useHomeMachinePage() {
     led: state.led,
     arduinoConnected: statusBarProps.arduinoConnection,
     speedMotorRoda: state.speed_motor_roda,
-
+    lateralMisalignmentCurrent: state.lateral_misalignment_current,
+    lateralMisalignmentHistory: state.lateral_misalignment_history,
     bottomActions,
 
     goToScreen,
@@ -170,6 +171,15 @@ function getBottomActions({
           label: 'Voltar ao menu',
           onClick: () => goToScreen('menu'),
           variant: 'green' as const,
+        },
+      ]
+
+    case 'alignment':
+      return [
+        {
+          label: 'Voltar ao menu',
+          onClick: () => goToScreen('menu'),
+          variant: 'orange' as const,
         },
       ]
 

@@ -47,6 +47,7 @@ back que definimos em MachineContext..
 
 
 
+
 Componentes
 
 Exemplo de Componente Botao Led
@@ -88,6 +89,263 @@ Utilizar ele dentro de um Componente que vai fazer a Função de Led
                                               </>
                                             )
                                 
+
+
+
+*Implementando Função de Verificar desalinhamento*
+
+*1 Passo* 
+ *Atualize seus tipos*
+
+src/types/machine/state.ts
+
+```ts
+  export type MisalignmentPoint = {
+    id: number
+    value: number
+  }
+```
+
+  Agora adicione no seu MachineState
+/* ESTADO GLOBAL DA APLICAÇÃO */
+```ts
+export interface MachineState {
+  connected: boolean
+  led: LedUiState
+  arduino_connected: ArduinoConnectionState
+  logs: MachineLog[]
+  available_ports: SerialPortInfo[]
+  selected_port: SelectedSerialPortState
+  speed_motor_roda: number
+
+  lateral_misalignment_current: number
+  lateral_misalignment_history: MisalignmentPoint[]
+}
+```
+
+
+
+
+*2 Passo Atualize o estado inicial*
+
+No seu initialMachineState, adicione os dois novos campos:
+
+```ts
+export const initialMachineState: MachineState = {
+  connected: false,
+  led: 'Desligado',
+  arduino_connected: 'Desconectado',
+  logs: [],
+  available_ports: [],
+  selected_port: null,
+  speed_motor_roda: 0,
+  lateral_misalignment_current: 0,
+  lateral_misalignment_history: [],
+}
+```
+
+
+
+
+*3 Passo Adicione as actions no MachineAction*
+
+No seu tipo MachineAction, adicione essas duas actions:
+
+```ts
+| { type: 'SET_LATERAL_MISALIGNMENT_CURRENT'; payload: number }
+| { type: 'ADD_LATERAL_MISALIGNMENT_POINT'; payload: number }
+```
+
+
+
+
+
+*4 Passo Atualize o reducer*
+
+No seu machineReducer, adicione estes dois case:
+
+```ts
+  case 'SET_LATERAL_MISALIGNMENT_CURRENT':
+    return {
+      ...state,
+      lateral_misalignment_current: action.payload,
+    }
+
+  case 'ADD_LATERAL_MISALIGNMENT_POINT': {
+    const newPoint = {
+      id: Date.now(),
+      value: action.payload,
+    }
+
+    const updatedHistory = [
+      ...state.lateral_misalignment_history,
+      newPoint,
+    ].slice(-100)
+
+    return {
+      ...state,
+      lateral_misalignment_history: updatedHistory,
+    }
+  }
+```
+
+
+
+
+*5. Crie o tipo da mensagem WebSocket*
+
+No arquivo onde você tipa suas mensagens do backend, adicione:
+
+
+```ts
+export type LateralMisalignmentMessage = {
+  type: 'lateral_misalignment'
+  value: number
+}
+```
+E coloque no union principal:
+
+```ts
+export type MachineMessage =
+  | MachineUpdateMessage
+  | AvailablePortsMessage
+  | LogMessage
+  | LateralMisalignmentMessage
+
+```
+Exemplo da mensagem que o backend deve mandar:
+```ts
+{
+  "type": "lateral_misalignment",
+  "value": 0.28
+}
+```
+
+
+
+
+*6. Atualize seu useMachineContext*
+
+  Aqui é a parte mais importante.
+
+  Você vai usar useRef para guardar o último valor recebido sem atualizar o gráfico a cada mensagem.
+
+  No seu hook, importe:
+
+```ts
+
+  const latestLateralValueRef = useRef(0)
+  const hasReceivedLateralValueRef = useRef(false)
+
+  // Sempre que receber um valor de desalinhamento lateral, atualizamos a referência mais recente e marcamos que já recebemos um valor
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      if (!hasReceivedLateralValueRef.current) {
+        return
+      }
+
+      dispatch({
+        type: 'ADD_LATERAL_MISALIGNMENT_POINT',
+        payload: latestLateralValueRef.current,
+      })
+      //e o intervalo 100
+    }, 100)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [])
+```
+  E dentro de HandleMachineMessage:
+
+  ```ts
+
+      if (message.type === 'lateral_misalignment') {
+        latestLateralValueRef.current = message.value
+        hasReceivedLateralValueRef.current = true
+
+        dispatch({
+          type: 'SET_LATERAL_MISALIGNMENT_CURRENT',
+          payload: message.value,
+        })
+
+        return
+      }
+  ```
+
+
+*7. Crie o componente do gráfico*
+
+  Crie a pasta:
+
+  src/components/OscillationChart/
+
+  OscillationChart.tsx
+
+*8 CSS do gráfico*
+OscillationChart.css
+
+
+*9. Crie a tela de alinhamento lateral*
+
+Crie:
+
+src/components/screens/LateralAlignmentScreen/
+
+Dentro dela:
+
+LateralAlignmentScreen.tsx
+
+*10. CSS da tela*
+LateralAlignmentScreen.css
+
+
+*11. Atualizar o tipo AppScreen*
+
+Abra:
+
+src/types/navigation.ts
+
+Você provavelmente tem algo assim:
+
+export type AppScreen =
+  | 'start'
+  | 'menu'
+  | 'led'
+  | 'motors'
+  | 'logs'
+  | 'serial'
+
+Adicione:
+```ts
+| 'alignment'
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 *Arduino*

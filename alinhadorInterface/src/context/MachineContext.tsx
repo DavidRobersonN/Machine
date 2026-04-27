@@ -4,6 +4,8 @@ import {
   useContext,
   useMemo,
   useReducer,
+  useRef,
+  useEffect,
 } from 'react'
 import type { Dispatch, ReactNode } from 'react'
 
@@ -32,6 +34,29 @@ type MachineProviderProps = {
 export function MachineProvider({ children }: MachineProviderProps) {
   const [state, dispatch] = useReducer(machineReducer, initialMachineState)
 
+
+  const latestLateralValueRef = useRef(0)
+  const hasReceivedLateralValueRef = useRef(false)
+
+  // Sempre que receber um valor de desalinhamento lateral, atualizamos a referência mais recente e marcamos que já recebemos um valor
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      if (!hasReceivedLateralValueRef.current) {
+        return
+      }
+
+      dispatch({
+        type: 'ADD_LATERAL_MISALIGNMENT_POINT',
+        payload: latestLateralValueRef.current,
+      })
+    }, 100)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [])
+
+
   const handleConnected = useCallback(() => {
     dispatch({ type: 'SOCKET_CONNECTED' })
 
@@ -57,6 +82,17 @@ export function MachineProvider({ children }: MachineProviderProps) {
   }, [])
 
   const handleMachineMessage = useCallback((message: MachineMessage) => {
+
+    if (message.type === 'lateral_misalignment') {
+      latestLateralValueRef.current = message.value
+
+      dispatch({
+        type: 'SET_LATERAL_MISALIGNMENT_CURRENT',
+        payload: message.value,
+      })
+
+      return
+    }
 
     if (message.type === 'serial_port_disconnected') {
       dispatch({

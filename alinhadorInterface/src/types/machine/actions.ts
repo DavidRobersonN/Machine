@@ -1,4 +1,4 @@
-// Responsavel pela actions internas do Reducer, ou seja, as ações que o 
+// Responsavel pela actions internas do Reducer, ou seja, as ações que o
 // reducer pode executar para atualizar o estado global da aplicação.
 
 import type {
@@ -18,3 +18,5 @@ export type MachineAction =
   | { type: 'SET_AVAILABLE_PORTS'; payload: SerialPortInfo[] }
   | { type: 'SET_SELECTED_PORT'; payload: SelectedSerialPortState }
   | { type: 'SET_SPEED_MOTOR_RODA'; payload: number }
+  | { type: 'SET_LATERAL_MISALIGNMENT_CURRENT'; payload: number }
+  | { type: 'ADD_LATERAL_MISALIGNMENT_POINT'; payload: number }

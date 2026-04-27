@@ -3,6 +3,7 @@ type MenuScreenProps = {
   onSelectLogs: () => void
   onSelectSerial: () => void
   onSelectMotors: () => void
+  onSelectAlignment: () => void
 }
 
 export function MenuScreen({
@@ -10,7 +11,7 @@ export function MenuScreen({
   onSelectLogs,
   onSelectSerial,
   onSelectMotors,
-
+  onSelectAlignment,
 }: MenuScreenProps) {
   return (
     <div className="screen-page">
@@ -25,6 +26,10 @@ export function MenuScreen({
           Motores
         </button>
 
+        <button className="btn btn-green" onClick={onSelectAlignment}>
+          Alinhamento lateral
+        </button>
+
         <button className="btn btn-green" onClick={onSelectLogs}>
           Logs
         </button>
@@ -32,7 +37,6 @@ export function MenuScreen({
         <button className="btn btn-green" onClick={onSelectSerial}>
           Portas COM
         </button>
-
       </div>
     </div>
   )

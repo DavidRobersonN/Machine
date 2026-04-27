@@ -1,4 +1,4 @@
-//Responsável pelo que o backend envia para o frontend.
+// Responsável pelo que o backend envia para o frontend.
 
 import type {
   LedBackendState,
@@ -6,6 +6,13 @@ import type {
   SelectedSerialPortState,
   SerialPortInfo,
 } from './state'
+
+export type LateralMisalignmentMessage = {
+  type: 'lateral_misalignment'
+  value: number
+  raw?: number
+  unit?: string
+}
 
 export interface MachineUpdatePayload {
   led?: LedBackendState
@@ -97,3 +104,4 @@ export type MachineMessage =
   | ErrorMessage
   | InfoMessage
   | PongMessage
+  | LateralMisalignmentMessage

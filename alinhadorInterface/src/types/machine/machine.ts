@@ -1,31 +1,35 @@
-export type LedBackendState = 'ON' | 'OFF'
-export type LedUiState = 'Ligado' | 'Desligado'
-export type ArduinoConnectionState = 'Conectado' | 'Desconectado'
-export type SelectedSerialPortState = string | null
+export type {
+  LedBackendState,
+  LedUiState,
+  ArduinoConnectionState,
+  SelectedSerialPortState,
+  MachineLog,
+  SerialPortInfo,
+  MisalignmentPoint,
+  MachineState,
+} from './state'
 
-export type MachineLog = {
-  direction: 'sent' | 'received'
-  message: string
-}
+export type {
+  MachineUpdatePayload,
+  MachineUpdateMessage,
+  AvailablePortsMessage,
+  SerialPortSelectedMessage,
+  SerialPortDisconnectedMessage,
+  LedStatusMessage,
+  MachineReadMessage,
+  ConnectionMessage,
+  LogMessage,
+  ErrorMessage,
+  InfoMessage,
+  PongMessage,
+  LateralMisalignmentMessage,
+  MachineMessage,
+} from './messages'
 
-export type SerialPortInfo = {
-  device: string
-  description: string
-  hwid: string
-}
-
-/* ESTADO GLOBAL DA APLICAÇÃO */
-export interface MachineState {
-  connected: boolean
-  led: LedUiState
-  arduino_connected: ArduinoConnectionState
-  logs: MachineLog[]
-  available_ports: SerialPortInfo[]
-  selected_port: SelectedSerialPortState
-  speed_motor_roda: number
-}
+export type { MachineAction } from './actions'
 
 /* COMMANDS: frontend -> backend */
+
 export type MotorRodaCommand =
   | { action: 'motor_roda_start' }
   | { action: 'motor_roda_stop' }
@@ -41,6 +45,10 @@ export interface ListSerialPortsCommand {
 export interface SelectPortCommand {
   action: 'select_serial_port'
   port: string
+}
+
+export interface DisconnectSerialPortCommand {
+  action: 'disconnect_serial_port'
 }
 
 export interface PingCommand {
@@ -59,13 +67,12 @@ export interface ReadMachineStateCommand {
   action: 'read_machine_state'
 }
 
-export interface DisconnectSerialPortCommand {
-  action: 'disconnect_serial_port'
+export interface LateralSensorStatusCommand {
+  action: 'lateral_sensor_status'
 }
 
-export interface SerialPortDisconnectedMessage {
-  type: 'serial_port_disconnected'
-  message: string
+export interface LateralSensorCalibrateZeroCommand {
+  action: 'lateral_sensor_calibrate_zero'
 }
 
 export type MachineCommand =
@@ -77,103 +84,5 @@ export type MachineCommand =
   | LedOffCommand
   | ReadMachineStateCommand
   | MotorRodaCommand
-
-/* MESSAGES: backend -> frontend */
-export interface AvailablePortsMessage {
-  type: 'available_ports'
-  ports: SerialPortInfo[]
-  selected_port?: SelectedSerialPortState
-}
-
-export interface MachineUpdatePayload {
-  led?: LedBackendState
-  arduino_connected?: boolean
-  selected_port?: SelectedSerialPortState
-  speed_motor_roda?: number
-}
-
-export interface MachineUpdateMessage {
-  type: 'machine_update'
-  payload: MachineUpdatePayload
-}
-
-export interface ConnectionMessage {
-  type: 'connection'
-  status: 'connected' | 'disconnected'
-  message: string
-}
-
-export interface ErrorMessage {
-  type: 'error'
-  message: string
-}
-
-export interface InfoMessage {
-  type: 'info'
-  message: string
-  received?: unknown
-}
-
-export interface LogMessage {
-  type: 'log'
-  direction: 'sent' | 'received'
-  message: string
-}
-
-export interface SerialPortSelectedMessage {
-  type: 'serial_port_selected'
-  port: string
-  message: string
-}
-
-export interface LedStatusMessage {
-  type: 'led_status'
-  state: LedBackendState
-  serial: {
-    success: boolean
-    message: string
-    command: string
-    response: string | null
-    arduino_connected: boolean
-  }
-}
-
-export interface MachineReadMessage {
-  type: 'machine_read'
-  serial: {
-    success: boolean
-    message: string
-    command: string
-    response: string | null
-    arduino_connected: boolean
-  }
-}
-
-export interface PongMessage {
-  type: 'pong'
-  message: string
-}
-
-export type MachineMessage =
-  | AvailablePortsMessage
-  | MachineUpdateMessage
-  | ConnectionMessage
-  | ErrorMessage
-  | InfoMessage
-  | LogMessage
-  | SerialPortSelectedMessage
-  | SerialPortDisconnectedMessage
-  | LedStatusMessage
-  | MachineReadMessage
-  | PongMessage
-
-/* ACTIONS: usadas pelo reducer */
-export type MachineAction =
-  | { type: 'SOCKET_CONNECTED' }
-  | { type: 'SOCKET_DISCONNECTED' }
-  | { type: 'MACHINE_UPDATED'; payload: MachineUpdatePayload }
-  | { type: 'ADD_LOG'; payload: MachineLog }
-  | { type: 'CLEAR_LOGS' }
-  | { type: 'SET_AVAILABLE_PORTS'; payload: SerialPortInfo[] }
-  | { type: 'SET_SELECTED_PORT'; payload: SelectedSerialPortState }
-  | { type: 'SET_SPEED_MOTOR_RODA'; payload: number }
+  | LateralSensorStatusCommand
+  | LateralSensorCalibrateZeroCommand

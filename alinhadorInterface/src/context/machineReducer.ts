@@ -1,5 +1,10 @@
 import type { MachineAction, MachineState } from '../types/machine/machine'
 
+/// O reducer é uma função pura que recebe o estado atual e uma ação, e 
+// retorna um novo estado atualizado com base na ação recebida. Ele é usado para gerenciar o estado global da aplicação de forma previsível e eficiente.
+
+// O estado inicial da máquina, que é usado para inicializar o estado global da aplicação. Ele define os valores padrão para todas as propriedades do estado, 
+// garantindo que a aplicação tenha um estado consistente desde o início.
 export const initialMachineState: MachineState = {
   connected: false,
   led: 'Desligado',
@@ -8,6 +13,8 @@ export const initialMachineState: MachineState = {
   available_ports: [],
   selected_port: null,
   speed_motor_roda: 0,
+  lateral_misalignment_current: 0,
+  lateral_misalignment_history: [],
 }
 
 
@@ -17,6 +24,29 @@ export function machineReducer(
   action: MachineAction,
 ): MachineState {
   switch (action.type) {
+      case 'SET_LATERAL_MISALIGNMENT_CURRENT':
+        return {
+          ...state,
+          lateral_misalignment_current: action.payload,
+        }
+
+      case 'ADD_LATERAL_MISALIGNMENT_POINT': {
+        const newPoint = {
+          id: Date.now(),
+          value: action.payload,
+        }
+
+        const updatedHistory = [
+          ...state.lateral_misalignment_history,
+          newPoint,
+        ].slice(-100)
+
+        return {
+          ...state,
+          lateral_misalignment_history: updatedHistory,
+        }
+      }
+      
     case 'SET_SELECTED_PORT':
       return {
         ...state,

@@ -18,6 +18,11 @@ export type SerialPortInfo = {
   hwid: string
 }
 
+export type MisalignmentPoint = {
+  id: number
+  value: number
+}
+
 export interface MachineState {
   connected: boolean
   led: LedUiState
@@ -26,4 +31,7 @@ export interface MachineState {
   available_ports: SerialPortInfo[]
   selected_port: SelectedSerialPortState
   speed_motor_roda: number
+
+  lateral_misalignment_current: number
+  lateral_misalignment_history: MisalignmentPoint[]
 }

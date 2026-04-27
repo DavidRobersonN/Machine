@@ -4,11 +4,9 @@ import { MenuScreen } from './MenuScreen'
 import { SerialPortsScreen } from './SerialPortsScreen'
 import { StartScreen } from './StartScreen'
 import { MotorsScreen } from './MotorsScreen'
-import type { AppScreen } from '../../types/navigation'
+import { LateralAlignmentScreen } from './LateralAlignmentScreen/LateralAlignmentScreen'
 
-// Este componente é responsável por renderizar a tela principal do painel, exibindo o conteúdo de acordo 
-// com a tela selecionada no menu lateral. Ele recebe as informações 
-// necessárias para cada tela e as funções de controle como props, garantindo que a lógica de navegação e controle esteja centralizada aqui.
+import type { AppScreen } from '../../types/navigation'
 
 import type {
   MachineLog,
@@ -16,7 +14,13 @@ import type {
   SerialPortInfo,
   ArduinoConnectionState,
   LedUiState,
+  MisalignmentPoint,
 } from '../../types/machine'
+
+// Este componente é responsável por renderizar a tela principal do painel,
+// exibindo o conteúdo de acordo com a tela selecionada no menu lateral.
+// Ele recebe as informações necessárias para cada tela e as funções de controle como props,
+// garantindo que a lógica de navegação e controle esteja centralizada aqui.
 
 type MachineScreenRendererProps = {
   currentScreen: AppScreen
@@ -26,6 +30,10 @@ type MachineScreenRendererProps = {
   arduinoConnected: ArduinoConnectionState
   speedMotorRoda: number
   led: LedUiState
+
+  lateralMisalignmentCurrent: number
+  lateralMisalignmentHistory: MisalignmentPoint[]
+
   onSelectPort: (port: string) => void
   onGoToScreen: (screen: AppScreen) => void
   onListSerialPorts: () => void
@@ -39,6 +47,8 @@ export function MachineScreenRenderer({
   arduinoConnected,
   speedMotorRoda,
   led,
+  lateralMisalignmentCurrent,
+  lateralMisalignmentHistory,
   onSelectPort,
   onGoToScreen,
   onListSerialPorts,
@@ -54,18 +64,29 @@ export function MachineScreenRenderer({
           onSelectLogs={() => onGoToScreen('logs')}
           onSelectSerial={onListSerialPorts}
           onSelectMotors={() => onGoToScreen('motors')}
+          onSelectAlignment={() => onGoToScreen('alignment')}
         />
       )
 
     case 'led':
-      return <LedScreen 
-        led={led}
-      />
+      return (
+        <LedScreen
+          led={led}
+        />
+      )
 
     case 'motors':
       return (
         <MotorsScreen
           speedPercent={speedMotorRoda}
+        />
+      )
+
+    case 'alignment':
+      return (
+        <LateralAlignmentScreen
+          value={lateralMisalignmentCurrent}
+          history={lateralMisalignmentHistory}
         />
       )
 
