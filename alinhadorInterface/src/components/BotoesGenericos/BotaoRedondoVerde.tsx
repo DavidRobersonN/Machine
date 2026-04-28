@@ -7,10 +7,10 @@ type BotaoProps = {
 export function BotaoRedondoVerde({
   nome,
   onClick,
-  className = "btn btn-round btn-green btn-reset",
+  className = 'btn btn-round btn-green btn-reset',
 }: BotaoProps) {
   return (
-    <button className={className} onClick={onClick}>
+    <button type="button" className={className} onClick={onClick}>
       {nome}
     </button>
   )

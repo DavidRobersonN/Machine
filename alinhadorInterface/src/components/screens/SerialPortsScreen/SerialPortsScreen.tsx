@@ -1,7 +1,9 @@
 import type {
   SelectedSerialPortState,
   SerialPortInfo,
-} from '../../types/machine/machine'
+} from '../../../types/machine/machine'
+
+import './SerialPortsScreen.css'
 
 type SerialPortsScreenProps = {
   ports: SerialPortInfo[]
@@ -17,7 +19,7 @@ export function SerialPortsScreen({
   onSelectPort,
 }: SerialPortsScreenProps) {
   return (
-    <div className="screen-page">
+    <div className="screen-page serial-ports-screen">
       <h2 className="screen-page-title">Portas COM</h2>
 
       <p className="screen-page-text">

@@ -1,56 +1,111 @@
+/* =========================
+   OSCILLATION CHART
+========================= */
+
+/*
+  Card principal do gráfico de oscilação.
+
+  Este componente deve controlar apenas:
+  - card escuro do gráfico
+  - cabeçalho do gráfico
+  - valor atual
+  - SVG interno do gráfico
+*/
 .oscillation-chart {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
   background: #07111f;
   border: 1px solid rgba(0, 255, 170, 0.25);
   border-radius: 18px;
   padding: 16px;
+
+  box-sizing: border-box;
   box-shadow: 0 0 20px rgba(0, 255, 170, 0.08);
+
+  overflow: hidden;
 }
 
+/* Cabeçalho do gráfico */
 .oscillation-chart-header {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+
   margin-bottom: 12px;
+
+  box-sizing: border-box;
 }
 
+/* Área de textos do cabeçalho */
+.oscillation-chart-header > div {
+  min-width: 0;
+}
+
+/* Título do gráfico */
 .oscillation-chart-title {
   margin: 0;
+
   font-size: 18px;
+  line-height: 1.1;
   color: #e8fff7;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+/* Subtítulo do gráfico */
 .oscillation-chart-subtitle {
   margin: 4px 0 0;
+
   font-size: 13px;
+  line-height: 1.25;
   color: #78a99a;
 }
 
+/* Valor atual exibido no canto direito */
 .oscillation-chart-value {
+  flex-shrink: 0;
+
   font-size: 28px;
+  line-height: 1.1;
   color: #00ffaa;
   font-family: monospace;
+
+  white-space: nowrap;
 }
 
+/* SVG do gráfico */
 .oscillation-chart-svg {
   width: 100%;
+  max-width: 100%;
   height: 180px;
+
   display: block;
 }
 
+/* Retângulo interno do gráfico */
 .oscillation-chart-border {
   fill: rgba(0, 0, 0, 0.15);
   stroke: rgba(255, 255, 255, 0.08);
   stroke-width: 1;
 }
 
+/* Linha central do gráfico */
 .oscillation-chart-center-line {
   stroke: rgba(255, 255, 255, 0.25);
   stroke-width: 1;
   stroke-dasharray: 6 6;
 }
 
+/* Linha da oscilação */
 .oscillation-chart-line {
   fill: none;
   stroke: #00ffaa;
@@ -60,7 +115,28 @@
   filter: drop-shadow(0 0 6px rgba(0, 255, 170, 0.7));
 }
 
+/* Textos dos eixos */
 .oscillation-chart-axis-text {
   fill: rgba(232, 255, 247, 0.75);
   font-size: 10px;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 560px) {
+  .oscillation-chart-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .oscillation-chart-value {
+    font-size: 24px;
+  }
+
+  .oscillation-chart-svg {
+    height: 150px;
+  }
 }

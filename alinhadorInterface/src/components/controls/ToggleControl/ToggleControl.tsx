@@ -1,6 +1,8 @@
 import { BotaoRedondoVermelho } from '../../BotoesGenericos/BotaoRedondoVermelho'
 import { BotaoRedondoVerde } from '../../BotoesGenericos/BotaoRedondoVerde'
 
+import './ToggleControl.css'
+
 type ToggleControlProps = {
   onAction: () => void
   offAction: () => void
@@ -15,7 +17,7 @@ export function ToggleControl({
   offLabel,
 }: ToggleControlProps) {
   return (
-    <>
+    <div className="toggle-control">
       {/* Botão genérico de ação "ligar / ativar / iniciar" */}
       <BotaoRedondoVerde
         nome={onLabel}
@@ -27,6 +29,6 @@ export function ToggleControl({
         nome={offLabel}
         onClick={offAction}
       />
-    </>
+    </div>
   )
 }

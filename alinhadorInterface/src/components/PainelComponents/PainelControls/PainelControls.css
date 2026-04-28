@@ -1,0 +1,23 @@
+/* =========================
+   PAINEL CONTROLS
+========================= */
+
+/*
+  Área lateral externa onde ficam os controles da tela atual.
+
+  Exemplo:
+  - botões do motor
+  - controles direcionais
+  - botões específicos de cada tela
+*/
+.painel-controls-area {
+  width: 100%;
+  max-width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center;
+
+  box-sizing: border-box;
+}

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import './Styles.css'
+import './ScreenLogs.css'
 
 type LogDirection = 'sent' | 'received'
 

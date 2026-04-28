@@ -1,0 +1,120 @@
+/* =========================
+   SCREEN LOGS
+========================= */
+
+/*
+  Wrapper externo dos logs.
+
+  Ele ocupa toda a área recebida pela tela de logs.
+*/
+.screen-logs-wrapper {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  height: 100%;
+  min-height: 0;
+
+  padding: 8px;
+  box-sizing: border-box;
+
+  display: flex;
+
+  overflow: hidden;
+}
+
+/*
+  Área rolável dos logs.
+*/
+.screen-log {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  height: 100%;
+  min-height: 0;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  font-family: monospace;
+  font-size: 13px;
+
+  box-sizing: border-box;
+}
+
+/*
+  Mensagem exibida quando ainda não há logs.
+*/
+.screen-log-empty {
+  margin: 0;
+
+  opacity: 0.6;
+  color: #1d3260;
+}
+
+/*
+  Linha individual do log.
+*/
+.screen-log-line {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  padding: 8px 10px;
+
+  border-radius: 6px;
+  background: rgba(29, 50, 96, 0.04);
+
+  box-sizing: border-box;
+
+  overflow: hidden;
+}
+
+/*
+  Log enviado pelo frontend.
+*/
+.screen-log-line.sent {
+  border-left: 4px solid #22c55e;
+}
+
+/*
+  Log recebido do backend.
+*/
+.screen-log-line.received {
+  border-left: 4px solid #f59e0b;
+}
+
+/*
+  Tipo do log: Enviado ou Recebido.
+*/
+.log-type {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1d3260;
+  opacity: 0.85;
+}
+
+/*
+  Mensagem do log.
+
+  white-space: pre-wrap preserva quebras de linha.
+  overflow-wrap e word-break impedem que JSON grande estoure a tela.
+*/
+.log-message {
+  max-width: 100%;
+
+  color: #111827;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}

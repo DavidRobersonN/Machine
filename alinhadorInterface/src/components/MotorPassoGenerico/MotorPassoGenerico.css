@@ -1,0 +1,63 @@
+/* =========================
+   MOTOR PASSO GENÉRICO
+========================= */
+
+/*
+  Container dos controles do motor.
+
+  Esse componente normalmente aparece na lateral direita
+  dentro da área .screen-main-painel-controls.
+*/
+.motor-passo-generico {
+  width: 100%;
+  max-width: 220px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  box-sizing: border-box;
+}
+
+/* Título do controle */
+.motor-passo-title {
+  margin: 0 0 12px;
+
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+
+  text-align: left;
+}
+
+/* Linha dos botões principais: iniciar/parar */
+.motor-passo-actions-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Grupo vertical de botões */
+.motor-passo-actions-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/*
+  Botões dentro do MotorPassoGenerico.
+
+  Mantém o estilo global .btn, mas garante
+  uma largura boa dentro da lateral.
+*/
+.motor-passo-generico .btn {
+  width: 100%;
+}
+
+/*
+  Na linha iniciar/parar, os botões dividem o espaço.
+*/
+.motor-passo-actions-row .btn {
+  flex: 1;
+  min-width: 0;
+}

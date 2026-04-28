@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 
+import './Styles.css'
+
 type ScreenMainProps = {
   sidebar?: ReactNode
   statusBar?: ReactNode
@@ -17,7 +19,7 @@ export function ScreenMain({
     <div className="screen-main-layout">
       <div className="painel-display-area">
         <div className="display-screen">
-          <div className="screen-main">
+          <div className={`screen-main ${sidebar ? 'has-sidebar' : 'no-sidebar'}`}>
             <div className="screen-main-content">
               {children}
             </div>

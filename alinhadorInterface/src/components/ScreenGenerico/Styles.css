@@ -6,72 +6,133 @@
   width: 100%;
   display: flex;
   align-items: flex-start;
+  justify-content: center;
   gap: 28px;
+  box-sizing: border-box;
 }
 
 /* Área que segura a tela branca */
 .painel-display-area {
-  flex: 1;
-  min-width: 0;
+  flex: 0 0 auto;
   display: flex;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 /* Tela principal */
 .display-screen {
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-  min-width: 0;
+  /*
+    Essa é a largura real da tela + statusbar.
+
+    Mantemos 900px porque já ficou bom para o conteúdo
+    da tela de alinhamento lateral.
+  */
+  width: 900px;
+  min-width: 900px;
+  max-width: 900px;
+
   display: flex;
   flex-direction: column;
+
+  box-sizing: border-box;
 }
 
 /* Corpo da tela */
 .screen-main {
-  display: flex;
+  width: 100%;
   height: 600px;
-  overflow: hidden;
+
+  display: flex;
+
   background: #ffffff;
   border: 2px solid #b7c4de;
+
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 /* Conteúdo dinâmico da tela */
 .screen-main-content {
-  flex: 1.4;
+  /*
+    Ocupa o espaço restante depois da sidebar.
+
+    Como a sidebar tem 125px:
+    900px - 125px = área principal larga suficiente.
+  */
+  flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
+
   padding: 16px;
   box-sizing: border-box;
+
   background:
     linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
     #ffffff;
   background-size: 20px 20px;
+
   border-right: 2px solid #b7c4de;
+
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
+
+  /*
+    Evita barra horizontal.
+    Se a tela precisar, só terá rolagem vertical.
+  */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Quando não tiver sidebar, remove a borda da direita */
+.screen-main.no-sidebar .screen-main-content {
+  border-right: none;
 }
 
 /* Sidebar interna da tela */
 .screen-main-sidebar {
+  /*
+    Sidebar fixa na direita.
+  */
   width: 125px;
   min-width: 125px;
+  max-width: 125px;
+  flex: 0 0 125px;
+
   background: #eef3ff;
   min-height: 0;
+
   display: flex;
+  overflow: hidden;
 }
 
 /* Barra inferior de status dentro da tela */
 .screen-main-statusbar {
+  width: 100%;
+
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+
   font-size: 11px;
   padding: 6px 8px;
+
   border-top: 2px solid #b7c4de;
   background: #f2f5fb;
   color: #2f3d5c;
+
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Conteúdo interno da barra de status */
+.screen-statusbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
 }
 
 /* Área lateral externa onde entram os botões do ScreenMain */
@@ -94,18 +155,28 @@
 .screen-sidebar {
   width: 100%;
   height: 100%;
+
   padding: 10px 8px;
   box-sizing: border-box;
+
   font-size: 12px;
   color: #1d3260;
   background: #eef3ff;
+
+  overflow: hidden;
 }
 
 .screen-row {
   display: flex;
   justify-content: space-between;
   gap: 8px;
+
   margin-bottom: 6px;
+}
+
+.screen-row span {
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .screen-divider {
@@ -123,9 +194,12 @@
 .screen-progress {
   width: 100%;
   height: 12px;
+
   background: #d8dfef;
   border: 1px solid #8da1c8;
+
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .screen-progress-fill {
@@ -136,10 +210,33 @@
 
 
 /* =========================
+   PROTEÇÃO GENÉRICA CONTRA ESTOURO HORIZONTAL
+========================= */
+
+/*
+  Garante que qualquer tela interna respeite a largura
+  do conteúdo principal.
+*/
+.screen-main-content > * {
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+
+/* =========================
    RESPONSIVIDADE DO SCREEN MAIN
 ========================= */
 
-@media (max-width: 860px) {
+@media (max-width: 1180px) {
+  .display-screen {
+    width: 820px;
+    min-width: 820px;
+    max-width: 820px;
+  }
+}
+
+@media (max-width: 980px) {
   .screen-main-layout {
     flex-direction: column;
     align-items: center;
@@ -149,6 +246,12 @@
     width: 100%;
   }
 
+  .display-screen {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .screen-main-painel-controls {
     width: 100%;
     min-width: 0;
@@ -156,6 +259,7 @@
   }
 
   .screen-main {
+    width: 100%;
     flex-direction: column;
     height: auto;
   }
@@ -164,6 +268,7 @@
   .screen-main-sidebar {
     width: 100%;
     min-width: 0;
+    max-width: none;
     border-right: none;
   }
 
@@ -172,6 +277,7 @@
   }
 
   .screen-main-sidebar {
+    flex: none;
     min-height: 120px;
   }
 }

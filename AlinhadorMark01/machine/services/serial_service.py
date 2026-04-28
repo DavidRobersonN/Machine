@@ -7,38 +7,21 @@ class SerialService:
     """
     Service responsável por conversar diretamente com o Arduino.
 
-    Essa classe centraliza toda a comunicação serial.
-    Ou seja, ela cuida de:
-    - abrir a conexão com a porta COM
-    - verificar se está conectado
-    - enviar comandos
-    - ler respostas
-    - encerrar a conexão
-
-    Esta versão foi ajustada para:
-    - perceber desconexão com mais rapidez
-    - limpar a conexão quando ocorrer erro
-    - tentar evitar que a aplicação fique presa em um objeto serial inválido
+    Essa classe centraliza toda a comunicação serial:
+    - seleciona a porta
+    - abre conexão
+    - verifica conexão
+    - envia comandos
+    - lê respostas
+    - fecha conexão
     """
 
     def __init__(
         self,
         port: str | None = None,
         baudrate: int = 9600,
-        timeout: float = 0.3,
+        timeout: float = 1.0,
     ):
-        """
-        Método executado assim que a classe é instanciada.
-
-        Parâmetros:
-        - port: porta serial usada pelo Arduino
-        - baudrate: velocidade da comunicação
-        - timeout: tempo máximo de espera por leitura
-
-        Observação:
-        - deixei o timeout menor para a aplicação perceber mais rápido
-          quando não há resposta.
-        """
         self.port = port
         self.baudrate = baudrate
         self.timeout = timeout
@@ -48,35 +31,24 @@ class SerialService:
         """
         Atualiza a porta serial usada pelo Arduino.
 
-        Regras:
-        - se receber None, limpa a porta selecionada
-        - se a porta for igual à atual, não faz nada
-        - se a porta for diferente, fecha a conexão atual antes de trocar
+        Se a porta mudar, fecha a conexão atual antes.
         """
 
-        # Se vier None, significa que queremos limpar a porta selecionada
         if port is None:
-            if self.connection and self.connection.is_open:
-                self.disconnect()
-
+            self.disconnect()
             self.port = None
             print('[SerialService] Porta serial selecionada foi limpa.')
             return
 
-        # Se vier string vazia, aí sim é um erro de uso
         if port == '':
             print('[SerialService] Porta vazia informada. Mantendo porta atual.')
             return
 
         if port == self.port:
-            print(
-                f'[SerialService] Porta {port} já está selecionada. '
-                'Nenhuma troca necessária.'
-            )
+            print(f'[SerialService] Porta {port} já está selecionada.')
             return
 
-        if self.connection and self.connection.is_open:
-            self.disconnect()
+        self.disconnect()
 
         self.port = port
         print(f'[SerialService] Porta serial atualizada para: {self.port}')
@@ -85,10 +57,9 @@ class SerialService:
         """
         Tenta abrir a conexão serial com o Arduino.
 
-        Retorna:
-        - True  -> se conectou com sucesso
-        - False -> se não conseguiu conectar
+        Retorna True se conectar e False se falhar.
         """
+
         if self.connection and self.connection.is_open:
             return True
 
@@ -98,6 +69,7 @@ class SerialService:
             return False
 
         try:
+            print(f'[SerialService] Tentando conectar na porta {self.port}...')
 
             self.connection = serial.Serial(
                 port=self.port,
@@ -106,82 +78,86 @@ class SerialService:
                 write_timeout=self.timeout,
             )
 
-            # Pequena pausa para o Arduino reiniciar ao abrir a serial.
+            # O Arduino normalmente reinicia quando a serial abre.
             time.sleep(2)
 
-            # Limpa buffers antigos para evitar ler lixo de inicialização.
             self.connection.reset_input_buffer()
             self.connection.reset_output_buffer()
+
             print('[SerialService] Conexão com Arduino estabelecida com sucesso')
 
             return True
 
         except serial.SerialException as error:
             print('[SerialService] Erro ao conectar com o Arduino')
+            print(f'[SerialService] Porta: {self.port}')
             print(f'[SerialService] Detalhes do erro: {error}')
-            self.connection = None
+
+            self._invalidate_connection()
+
             return False
-        
 
-    def disconnect_serial_port(self) -> dict:
-        current_port = self.serial_service.port
+        except Exception as error:
+            print('[SerialService] Erro inesperado ao conectar com o Arduino')
+            print(f'[SerialService] Porta: {self.port}')
+            print(f'[SerialService] Detalhes do erro: {error}')
 
-        self.serial_service.disconnect()
+            self._invalidate_connection()
 
-        # Agora isso vai funcionar, porque set_port aceita None
-        self.serial_service.set_port(None)
+            return False
 
-        self.machine_state_service.update_state({
-            'led': 'OFF',
-            'selected_port': None,
-        })
+    def disconnect(self) -> None:
+        """
+        Fecha a conexão serial atual.
+        """
 
-        return {
-            'type': 'serial_port_disconnected',
-            'selected_port': None,
-            'message': (
-                f'Arduino desconectado da porta {current_port}'
-                if current_port
-                else 'Arduino desconectado'
-            ),
-        }
-    
+        if self.connection:
+            try:
+                if self.connection.is_open:
+                    self.connection.close()
+                    print('[SerialService] Conexão serial fechada')
+            except Exception as error:
+                print('[SerialService] Erro ao fechar conexão serial')
+                print(f'[SerialService] Detalhes do erro: {error}')
+            finally:
+                self.connection = None
+
+    def _invalidate_connection(self) -> None:
+        """
+        Limpa a conexão quando ocorre erro.
+        """
+
+        try:
+            if self.connection and self.connection.is_open:
+                self.connection.close()
+        except Exception:
+            pass
+        finally:
+            self.connection = None
+
     def is_connected(self) -> bool:
         """
-        Verifica se a conexão serial parece ativa.
-
-        Importante:
-        - `is_open` apenas informa se o objeto serial está aberto no Python.
-        - Isso NÃO garante 100% que o Arduino continua fisicamente conectado.
-        - A confirmação real normalmente acontece quando tentamos ler ou escrever.
+        Verifica se existe uma conexão serial aberta.
         """
+
         return bool(self.connection and self.connection.is_open)
 
     def ensure_connection(self) -> bool:
         """
-        Garante que exista uma conexão pronta para uso.
-
-        Fluxo:
-        - se já estiver conectado, retorna True
-        - se não estiver, tenta conectar
+        Garante que exista uma conexão ativa.
         """
+
         if self.is_connected():
             return True
 
-        print('[SerialService] Conexão não estava ativa. Tentando reconectar...')
+        print('[SerialService] Conexão não estava ativa. Tentando conectar...')
         return self.connect()
 
     def send_command(self, command: str) -> dict:
         """
         Envia um comando para o Arduino e tenta ler uma resposta.
-
-        Fluxo:
-        1. garante conexão
-        2. limpa buffer de entrada para evitar resposta antiga
-        3. envia comando
-        4. tenta ler resposta
-        5. se ocorrer erro, invalida a conexão
         """
+
         if not self.ensure_connection():
             return {
                 'success': False,
@@ -194,13 +170,16 @@ class SerialService:
         try:
             command_to_send = f'{command}\n'
 
-            # Limpa o buffer de entrada para não pegar sobra de mensagem antiga.
+            print(f'[SerialService] Enviando comando: {command}')
+
             self.connection.reset_input_buffer()
 
             self.connection.write(command_to_send.encode('utf-8'))
             self.connection.flush()
 
             response = self.read_line()
+
+            print(f'[SerialService] Resposta recebida: {response}')
 
             return {
                 'success': True,
@@ -213,6 +192,7 @@ class SerialService:
         except (serial.SerialException, OSError) as error:
             print('[SerialService] Erro ao enviar comando')
             print(f'[SerialService] Detalhes do erro: {error}')
+
             self._invalidate_connection()
 
             return {
@@ -226,15 +206,8 @@ class SerialService:
     def read_line(self) -> str | None:
         """
         Lê uma linha da serial.
-
-        Retorna:
-        - string -> quando recebe uma linha válida
-        - None   -> quando não chegou nada ou houve erro
-
-        Observação:
-        - se o Arduino foi desconectado, esse método pode lançar erro;
-          nesse caso a conexão é invalidada para permitir reconexão futura.
         """
+
         if not self.is_connected():
             print('[SerialService] Tentativa de leitura sem conexão ativa')
             return None
@@ -246,28 +219,30 @@ class SerialService:
                 return None
 
             decoded_data = raw_data.decode('utf-8', errors='ignore').strip()
+
             return decoded_data
 
         except (serial.SerialException, OSError) as error:
             print('[SerialService] Erro ao ler serial')
             print(f'[SerialService] Detalhes do erro: {error}')
+
             self._invalidate_connection()
+
             return None
 
         except Exception as error:
             print('[SerialService] Erro inesperado ao ler serial')
             print(f'[SerialService] Detalhes do erro: {error}')
+
             self._invalidate_connection()
+
             return None
 
     def read_json(self) -> dict | None:
         """
         Lê uma linha da serial e tenta converter para JSON.
-
-        Retorna:
-        - dict -> se a linha recebida for um JSON válido
-        - None -> se não vier nada ou se o conteúdo não for JSON
         """
+
         line = self.read_line()
 
         if not line:
@@ -277,4 +252,5 @@ class SerialService:
             return json.loads(line)
         except json.JSONDecodeError:
             print('[SerialService] A resposta recebida não era um JSON válido')
+            print(f'[SerialService] Conteúdo recebido: {line}')
             return None

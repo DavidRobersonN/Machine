@@ -1,0 +1,51 @@
+/* =========================
+   MENU SCREEN
+========================= */
+
+/*
+  Tela do menu principal.
+
+  Ela usa a base .screen-page do global.css,
+  mas recebe ajustes próprios aqui.
+*/
+.menu-screen {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+
+  box-sizing: border-box;
+}
+
+/*
+  Área dos botões do menu.
+*/
+.menu-screen-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  align-items: center;
+  justify-content: flex-start;
+
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/*
+  Botões do menu principal.
+*/
+.menu-screen-actions .btn {
+  min-width: 86px;
+}
+
+/*
+  O botão "Alinhamento lateral" é maior,
+  então deixamos ele confortável.
+*/
+.menu-screen-actions .btn-long {
+  min-width: 180px;
+}

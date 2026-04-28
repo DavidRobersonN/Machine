@@ -1,0 +1,53 @@
+/* =========================
+   TELA DE MOTORES
+========================= */
+
+.motors-screen {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/*
+  Área onde fica o medidor de velocidade.
+
+  Centraliza o SpeedGauge sem deixar ele estourar
+  a área da tela principal.
+*/
+.motors-speed-area {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 560px) {
+  .motors-screen {
+    gap: 12px;
+  }
+
+  .motors-speed-area {
+    align-items: flex-start;
+    padding-top: 12px;
+  }
+}

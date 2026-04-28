@@ -1,0 +1,22 @@
+/* =========================
+   TOGGLE CONTROL
+========================= */
+
+/*
+  Controle genérico de ligar/desligar.
+
+  Usado, por exemplo, no controle do LED:
+  - Ligar
+  - Desligar
+*/
+.toggle-control {
+  width: 100%;
+  max-width: 220px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  box-sizing: border-box;
+}

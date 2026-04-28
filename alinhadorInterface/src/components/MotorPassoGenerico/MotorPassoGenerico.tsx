@@ -1,3 +1,5 @@
+import './MotorPassoGenerico.css'
+
 type MotorPassoGenericoProps = {
   title: string
 
@@ -24,13 +26,12 @@ export function MotorPassoGenerico({
   onDecreaseSpeed,
   clockwiseLabel,
   counterClockwiseLabel,
-
 }: MotorPassoGenericoProps) {
   return (
-    <div className="screen-page">
-      <h3>{title}</h3>
+    <div className="motor-passo-generico">
+      <h3 className="motor-passo-title">{title}</h3>
 
-      <div className="screen-page-actions">
+      <div className="motor-passo-actions-row">
         <button className="btn btn-green" onClick={onStart}>
           Iniciar
         </button>
@@ -38,7 +39,9 @@ export function MotorPassoGenerico({
         <button className="btn btn-red" onClick={onStop}>
           Parar
         </button>
+      </div>
 
+      <div className="motor-passo-actions-column">
         <button className="btn btn-blue" onClick={onIncreaseSpeed}>
           Aumentar Velocidade
         </button>
@@ -46,9 +49,7 @@ export function MotorPassoGenerico({
         <button className="btn btn-blue" onClick={onDecreaseSpeed}>
           Diminuir Velocidade
         </button>
-      </div>
 
-      <div className="screen-page">
         <button className="btn btn-orange" onClick={onClockwise}>
           {clockwiseLabel}
         </button>

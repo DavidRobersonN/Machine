@@ -9,8 +9,8 @@ export function ScreenStatusBar({
 }: ScreenStatusBarProps) {
   return (
     <div className="screen-statusbar">
-      <span>{arduinoConnection}</span>
-      <span>Led {led}</span>
+      <span>Arduino: {arduinoConnection}</span>
+      <span>LED: {led}</span>
     </div>
   )
 }

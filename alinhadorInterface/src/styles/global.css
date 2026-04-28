@@ -1,4 +1,25 @@
 /* =========================
+   RESET GLOBAL
+========================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #d9d9d9;
+}
+
+
+/* =========================
    PAINEL / CARCAÇA PRINCIPAL
 ========================= */
 
@@ -7,49 +28,83 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
   background: #d9d9d9;
+
   padding: 24px;
   box-sizing: border-box;
+
+  /*
+    Se o painel ficar maior que a tela do navegador,
+    aparece rolagem horizontal em vez de cortar.
+  */
+  overflow-x: auto;
 }
 
+/*
+  Carcaça principal do painel.
+
+  Ela acompanha automaticamente a largura real do conteúdo.
+  Isso evita a tela interna sair para fora da carcaça.
+*/
 .painel-shell {
-  width: 980px;
-  max-width: 100%;
+  width: fit-content;
+  max-width: none;
+
   background: linear-gradient(180deg, #f5f5f5 0%, #e9e9e9 100%);
   border-radius: 18px;
-  padding: 26px;
+
+  padding: 36px 42px;
+
   box-sizing: border-box;
+
   box-shadow:
     0 10px 30px rgba(0, 0, 0, 0.18),
     inset 0 2px 4px rgba(255, 255, 255, 0.8),
     inset 0 -2px 6px rgba(0, 0, 0, 0.08);
+
   border: 1px solid #cfcfcf;
 }
 
 
 /* =========================
-   TELAS INTERNAS
+   TELAS INTERNAS GENÉRICAS
 ========================= */
 
+/*
+  Classe base para telas internas como:
+  - LedScreen
+  - LogsScreen
+  - MotorsScreen
+  - SerialPortsScreen
+  - LateralAlignmentScreen
+*/
 .screen-page {
   width: 100%;
   height: 100%;
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
   gap: 16px;
   justify-content: flex-start;
+
+  box-sizing: border-box;
 }
 
 .screen-page-title {
   margin: 0;
+
   font-size: 32px;
   line-height: 1.1;
   color: #1d3260;
+
   white-space: nowrap;
 }
 
 .screen-page-text {
   margin: 0;
+
   font-size: 14px;
   color: #2f3d5c;
 }
@@ -63,242 +118,7 @@
 
 
 /* =========================
-   LOGS
-========================= */
-
-.screen-logs-wrapper {
-  width: 100%;
-  height: 100%;
-  padding: 12px;
-  box-sizing: border-box;
-  overflow: hidden;
-  display: flex;
-  min-height: 0;
-}
-
-.screen-log {
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-family: monospace;
-  font-size: 13px;
-}
-
-.screen-log-empty {
-  opacity: 0.6;
-}
-
-.screen-log-line {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 6px 8px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.screen-log-line.sent {
-  border-left: 3px solid #22c55e;
-}
-
-.screen-log-line.received {
-  border-left: 3px solid #f59e0b;
-}
-
-.log-type {
-  font-size: 11px;
-  font-weight: bold;
-  opacity: 0.8;
-}
-
-.log-message {
-  word-break: break-word;
-}
-
-.logs-screen-box {
-  width: 100%;
-  height: 220px;
-  min-height: 220px;
-  border: 2px solid #b7c4de;
-  background: #f8fafc;
-  padding: 8px;
-  box-sizing: border-box;
-  display: flex;
-  overflow: hidden;
-}
-
-
-/* =========================
-   SERIAL PORTS
-========================= */
-
-.serial-ports-box {
-  width: 100%;
-  height: 220px;
-  min-height: 220px;
-  border: 2px solid #b7c4de;
-  background: #f8fafc;
-  padding: 8px;
-  box-sizing: border-box;
-  overflow: hidden;
-  display: flex;
-}
-
-.serial-port-list {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  overflow-y: auto;
-}
-
-.serial-port-item {
-  width: 100%;
-  border: 2px solid #b7c4de;
-  background: #ffffff;
-  color: #1d3260;
-  padding: 10px 12px;
-  border-radius: 8px;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.serial-port-item:hover {
-  background: #eef3ff;
-}
-
-.serial-port-item.selected {
-  border-color: #11953b;
-  background: #eaf8ef;
-}
-
-.serial-port-device {
-  font-weight: 700;
-  font-size: 15px;
-}
-
-.serial-port-description {
-  font-size: 12px;
-  opacity: 0.85;
-}
-
-
-/* =========================
-   MOTORS / SPEED GAUGE
-========================= */
-
-.motors-screen {
-  width: 100%;
-  height: 100%;
-}
-
-.motors-speed-area,
-.screen-main-right {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 6px;
-}
-
-.speed-gauge {
-  width: 150px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.speed-gauge-title {
-  margin: 0 0 8px;
-  font-size: 16px;
-  font-weight: 700;
-  color: #001f5f;
-}
-
-.speed-gauge-arc {
-  position: relative;
-  width: 120px;
-  height: 80px;
-}
-
-.speed-gauge-segment {
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  clip-path: polygon(50% 50%, 0 0, 100% 0);
-  transform-origin: center center;
-}
-
-.speed-gauge-segment-low {
-  background: #22b14c;
-  transform: rotate(210deg);
-}
-
-.speed-gauge-segment-mid {
-  background: #b7df36;
-  transform: rotate(250deg);
-}
-
-.speed-gauge-segment-high {
-  background: #ffd21f;
-  transform: rotate(290deg);
-}
-
-.speed-gauge-arc::after {
-  content: '';
-  position: absolute;
-  left: 18px;
-  top: 18px;
-  width: 84px;
-  height: 84px;
-  background: #f7f7f7;
-  border-radius: 50%;
-  z-index: 2;
-}
-
-.speed-gauge-needle {
-  position: absolute;
-  left: 58px;
-  top: 58px;
-  width: 56px;
-  height: 5px;
-  background: #202020;
-  border-radius: 999px;
-  transform-origin: left center;
-  z-index: 4;
-  transition: transform 0.35s ease;
-}
-
-.speed-gauge-center {
-  position: absolute;
-  left: 51px;
-  top: 50px;
-  width: 20px;
-  height: 20px;
-  background: #2b2b2b;
-  border: 3px solid #e9e9e9;
-  border-radius: 50%;
-  z-index: 5;
-}
-
-.speed-gauge-value {
-  margin-top: 2px;
-  font-size: 18px;
-  color: #001f5f;
-}
-
-
-/* =========================
-   BOTÕES
+   BOTÕES GENÉRICOS
 ========================= */
 
 .action-buttons {
@@ -309,17 +129,25 @@
 .btn {
   border: none;
   border-radius: 10px;
+
   min-width: 78px;
   min-height: 42px;
+
   padding: 10px 14px;
+
   font-size: 15px;
   font-weight: 700;
   color: #ffffff;
+
   cursor: pointer;
+
   box-shadow:
     0 4px 0 rgba(0, 0, 0, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
 }
 
 .btn:hover {
@@ -328,6 +156,7 @@
 
 .btn:active {
   transform: translateY(2px);
+
   box-shadow:
     0 1px 0 rgba(0, 0, 0, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
@@ -354,8 +183,10 @@
   min-width: 62px;
   height: 62px;
   min-height: 62px;
+
   border-radius: 50%;
   padding: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -366,6 +197,7 @@
   min-width: 56px;
   height: 56px;
   min-height: 56px;
+
   font-size: 22px;
   padding: 0;
 }
@@ -379,32 +211,6 @@
 
 
 /* =========================
-   CONTROLES DIRECIONAIS
-========================= */
-
-.painel-controls-area {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  align-items: center;
-}
-
-.direction-pad {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.direction-middle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-
-/* =========================
    CONTROLES INFERIORES
 ========================= */
 
@@ -412,7 +218,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+
   margin-top: 22px;
+
   align-items: center;
   justify-content: flex-start;
 }
@@ -427,15 +235,17 @@
 ========================= */
 
 @media (max-width: 860px) {
+  .painel-machine {
+    align-items: flex-start;
+  }
+
   .painel-shell {
     width: 100%;
+    max-width: 100%;
+    padding: 24px;
   }
 
   .panel-bottom-controls {
     justify-content: center;
-  }
-
-  .painel-controls-area {
-    width: 100%;
   }
 }

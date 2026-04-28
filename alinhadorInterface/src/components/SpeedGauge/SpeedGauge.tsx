@@ -1,3 +1,5 @@
+import './SpeedGauge.css'
+
 type SpeedGaugeProps = {
   value: number
 }

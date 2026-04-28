@@ -1,3 +1,5 @@
+import './PainelControls.css'
+
 type PainelControlsProps = {
   children?: React.ReactNode
 }

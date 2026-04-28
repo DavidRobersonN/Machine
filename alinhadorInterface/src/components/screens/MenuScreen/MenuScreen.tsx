@@ -1,3 +1,5 @@
+import './MenuScreen.css'
+
 type MenuScreenProps = {
   onSelectLed: () => void
   onSelectLogs: () => void
