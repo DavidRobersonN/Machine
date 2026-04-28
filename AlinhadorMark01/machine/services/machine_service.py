@@ -114,9 +114,13 @@ class MachineService:
         return {
             'type': 'available_ports',
             'ports': ports,
-            'selected_port': self.serial_service.port,
+            'selected_port': (
+                self.serial_service.port
+                if self.serial_service.is_connected()
+                else None
+            ),
         }
-
+    
     def select_serial_port(self, data: dict) -> dict:
         port = data.get('port')
 
@@ -146,12 +150,17 @@ class MachineService:
 
         self.serial_service.disconnect()
 
+        # Limpa a porta selecionada no serviço serial
+        self.serial_service.set_port(None)
+
         self.machine_state_service.update_state({
             'led': 'OFF',
+            'selected_port': None,
         })
 
         return {
             'type': 'serial_port_disconnected',
+            'selected_port': None,
             'message': (
                 f'Arduino desconectado da porta {current_port}'
                 if current_port

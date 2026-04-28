@@ -52,8 +52,13 @@ export function useHomeMachinePage() {
 
   function handleDisconnectPort() {
     sendCommand({ action: 'disconnect_serial_port' })
-  }
 
+    dispatch({
+      type: 'SET_SELECTED_PORT',
+      payload: null,
+    })
+  }
+  
   const bottomActions = getBottomActions({
     currentScreen,
     goToScreen,

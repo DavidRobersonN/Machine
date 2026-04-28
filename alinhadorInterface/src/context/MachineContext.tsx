@@ -60,17 +60,16 @@ export function MachineProvider({ children }: MachineProviderProps) {
 
     if (message.type === 'serial_port_disconnected') {
       dispatch({
-        type: 'MACHINE_UPDATED',
-        payload: {
-          led: 'OFF',
-          arduino_connected: false,
-          selected_port: null,
-        },
+        type: 'SET_SELECTED_PORT',
+        payload: null,
       })
 
       dispatch({
-        type: 'SET_SELECTED_PORT',
-        payload: null,
+        type: 'MACHINE_UPDATED',
+        payload: {
+          arduino_connected: false,
+          selected_port: null,
+        },
       })
 
       dispatch({
