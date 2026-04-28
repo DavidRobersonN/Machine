@@ -7,10 +7,37 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Node / Vite
 node_modules
 dist
 dist-ssr
 *.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+
+# Django
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Coverage / tests
+.coverage
+htmlcov/
+.pytest_cache/
 
 # Editor directories and files
 .vscode/*
