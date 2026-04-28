@@ -35,8 +35,8 @@ export function LateralAlignmentScreen({
         title="Gráfico de oscilação"
         value={value}
         points={history}
-        minValue={-2}
-        maxValue={2}
+        minValue={-15}
+        maxValue={15}
         unit=" mm"
       />
 

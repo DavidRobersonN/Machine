@@ -14,8 +14,8 @@ export function OscillationChart({
   title,
   value,
   points,
-  minValue = -2,
-  maxValue = 2,
+  minValue = -15,
+  maxValue = 15,
   unit = ' mm',
 }: OscillationChartProps) {
   const width = 520
@@ -26,7 +26,9 @@ export function OscillationChart({
   const usableHeight = height - padding * 2
 
   function normalizeY(pointValue: number) {
-    const percentage = (pointValue - minValue) / (maxValue - minValue)
+    const clampedValue = Math.max(minValue, Math.min(maxValue, pointValue))
+
+    const percentage = (clampedValue - minValue) / (maxValue - minValue)
 
     return height - padding - percentage * usableHeight
   }
@@ -94,7 +96,7 @@ export function OscillationChart({
           y={padding - 6}
           className="oscillation-chart-axis-text"
         >
-          {maxValue}
+          +{maxValue}
           {unit}
         </text>
 

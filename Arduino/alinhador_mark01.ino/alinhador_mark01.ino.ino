@@ -43,10 +43,10 @@ bool motorRodaClockwise = true;
 const unsigned long SENSOR_INTERVAL = 100;
 unsigned long lastSensorReadTime = 0;
 
-// Conversão e amplificação
-const float SENSOR_RANGE_MM = 70.0;
-const float SENSOR_BASELINE_MM = 0.20;
-const float SENSOR_GAIN = 5.0;
+// Conversão e suavização
+const float SENSOR_RANGE_MM = 30.0;
+const float SENSOR_BASELINE_MM = 15.0;
+const float SENSOR_ZERO_OFFSET_MM = 15.0;
 
 // =======================
 // ESTADOS
@@ -83,6 +83,31 @@ void loop() {
 // SENSOR LATERAL
 // =======================
 
+
+float readLateralSensorMm() {
+  long totalRaw = 0;
+  const int samples = 10;
+
+  for (int i = 0; i < samples; i++) {
+    totalRaw += analogRead(LATERAL_SENSOR_PIN);
+    delayMicroseconds(500);
+  }
+
+  float raw = totalRaw / (float)samples;
+
+  // Converte raw 0–1023 para uma escala de -15 mm até +15 mm
+  float positionMm = ((raw / 1023.0) * SENSOR_RANGE_MM) - SENSOR_HALF_RANGE_MM;
+
+  // Corrige usando um zero fixo manual
+  positionMm -= SENSOR_ZERO_RAW;
+
+  if (positionMm > -SENSOR_DEAD_ZONE_MM && positionMm < SENSOR_DEAD_ZONE_MM) {
+    positionMm = 0.0;
+  }
+
+  return positionMm;
+}
+
 void updateLateralSensor() {
   unsigned long now = millis();
 
@@ -92,22 +117,36 @@ void updateLateralSensor() {
 
   lastSensorReadTime = now;
 
-  int raw = analogRead(LATERAL_SENSOR_PIN);
-  float voltage = raw * (5.0 / 1023.0);
-
-  float positionMm = (voltage / 5.0) * SENSOR_RANGE_MM;
-  positionMm = (positionMm - SENSOR_BASELINE_MM) * SENSOR_GAIN;
+  float positionMm = readLateralSensorMm();
 
   Serial.print("POS:");
   Serial.println(positionMm, 2);
 }
 
 void sendLateralSensorNow() {
-  int raw = analogRead(LATERAL_SENSOR_PIN);
-  float voltage = raw * (5.0 / 1023.0);
+  float positionMm = readLateralSensorMm();
 
-  float positionMm = (voltage / 5.0) * SENSOR_RANGE_MM;
-  positionMm = (positionMm - SENSOR_BASELINE_MM) * SENSOR_GAIN;
+  Serial.print("POS:");
+  Serial.println(positionMm, 2);
+}
+
+void updateLateralSensor() {
+  unsigned long now = millis();
+
+  if (now - lastSensorReadTime < SENSOR_INTERVAL) {
+    return;
+  }
+
+  lastSensorReadTime = now;
+
+  float positionMm = readLateralSensorMm();
+
+  Serial.print("POS:");
+  Serial.println(positionMm, 2);
+}
+
+void sendLateralSensorNow() {
+  float positionMm = readLateralSensorMm();
 
   Serial.print("POS:");
   Serial.println(positionMm, 2);
