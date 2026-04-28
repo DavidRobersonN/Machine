@@ -20,6 +20,9 @@ class MachineStateService:
     def update_state(self, data: dict) -> MachineState:
         state, _ = MachineState.objects.get_or_create(id=1)
 
+        if 'lateral_misalignment_current' in data:
+            state.lateral_misalignment_current = data['lateral_misalignment_current']
+
         if 'led' in data:
             state.led = data['led']
 
@@ -54,6 +57,7 @@ class MachineStateService:
             'arduino_connected': state.arduino_connected,
             'selected_port': self.serial_service.port,
             'speed_motor_roda': state.speed_motor_roda,
+            'lateral_misalignment_current': state.lateral_misalignment_current,
         }
 
     def motor_roda_start(self):

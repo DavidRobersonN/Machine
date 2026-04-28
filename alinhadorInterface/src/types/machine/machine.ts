@@ -22,7 +22,6 @@ export type {
   ErrorMessage,
   InfoMessage,
   PongMessage,
-  LateralMisalignmentMessage,
   MachineMessage,
 } from './messages'
 

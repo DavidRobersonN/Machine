@@ -7,18 +7,12 @@ import type {
   SerialPortInfo,
 } from './state'
 
-export type LateralMisalignmentMessage = {
-  type: 'lateral_misalignment'
-  value: number
-  raw?: number
-  unit?: string
-}
-
 export interface MachineUpdatePayload {
   led?: LedBackendState
   arduino_connected?: boolean
   selected_port?: SelectedSerialPortState
   speed_motor_roda?: number
+  lateral_misalignment_current?: number
 }
 
 export interface MachineUpdateMessage {
@@ -104,4 +98,3 @@ export type MachineMessage =
   | ErrorMessage
   | InfoMessage
   | PongMessage
-  | LateralMisalignmentMessage

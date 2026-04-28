@@ -14,6 +14,8 @@ class MachineState(models.Model):
     arduino_connected = models.BooleanField(default=False)
 
     speed_motor_roda = models.IntegerField(default=0)
+
+    lateral_misalignment_current = models.FloatField(default=0)
     
     def __str__(self):
-        return f'MachineState #{self.id} - LED: {self.led}, Arduino: {self.arduino_connected}, Speed: {self.speed_motor_roda}'
+        return f'MachineState #{self.id} - LED: {self.led}, Arduino: {self.arduino_connected}, Speed: {self.speed_motor_roda}, Lateral Misalignment: {self.lateral_misalignment_current}'

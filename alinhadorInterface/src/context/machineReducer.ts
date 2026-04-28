@@ -90,33 +90,52 @@ export function machineReducer(
         speed_motor_roda: action.payload,
       }
 
-    case 'MACHINE_UPDATED':
-      return {
-        ...state,
-        led:
-          action.payload.led === 'ON'
-            ? 'Ligado'
-            : action.payload.led === 'OFF'
-              ? 'Desligado'
-              : state.led,
+   case 'MACHINE_UPDATED': {
+    const lateralValue = action.payload.lateral_misalignment_current
 
-        arduino_connected:
-          action.payload.arduino_connected === true
-            ? 'Conectado'
-            : action.payload.arduino_connected === false
-              ? 'Desconectado'
-              : state.arduino_connected,
+    return {
+      ...state,
+      led:
+        action.payload.led === 'ON'
+          ? 'Ligado'
+          : action.payload.led === 'OFF'
+            ? 'Desligado'
+            : state.led,
 
-        selected_port:
-          action.payload.selected_port !== undefined
-            ? action.payload.selected_port
-            : state.selected_port,
-            
-        speed_motor_roda:
-          action.payload.speed_motor_roda !== undefined
-            ? action.payload.speed_motor_roda
-            : state.speed_motor_roda,
-      }
+      arduino_connected:
+        action.payload.arduino_connected === true
+          ? 'Conectado'
+          : action.payload.arduino_connected === false
+            ? 'Desconectado'
+            : state.arduino_connected,
+
+      selected_port:
+        action.payload.selected_port !== undefined
+          ? action.payload.selected_port
+          : state.selected_port,
+
+      speed_motor_roda:
+        action.payload.speed_motor_roda !== undefined
+          ? action.payload.speed_motor_roda
+          : state.speed_motor_roda,
+
+      lateral_misalignment_current:
+        lateralValue !== undefined
+          ? lateralValue
+          : state.lateral_misalignment_current,
+
+      lateral_misalignment_history:
+        lateralValue !== undefined
+          ? [
+              ...state.lateral_misalignment_history,
+              {
+                id: Date.now(),
+                value: lateralValue,
+              },
+            ].slice(-100)
+          : state.lateral_misalignment_history,
+    }
+  }
 
     default:
       return state

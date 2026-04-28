@@ -18,6 +18,11 @@ import type {
   MachineState,
 } from '../types/machine/machine'
 
+// O contexto da máquina é responsável por armazenar o estado global da máquina, e fornecer funções 
+// para enviar comandos para o backend e receber mensagens do backend. Ele também é responsável por 
+// manter um histórico dos valores de desalinhamento lateral, que são atualizados a cada 100ms com o 
+// valor mais recente recebido do backend.
+
 type MachineContextValue = {
   state: MachineState
   dispatch: Dispatch<MachineAction>
@@ -83,17 +88,6 @@ export function MachineProvider({ children }: MachineProviderProps) {
 
   const handleMachineMessage = useCallback((message: MachineMessage) => {
 
-    if (message.type === 'lateral_misalignment') {
-      latestLateralValueRef.current = message.value
-
-      dispatch({
-        type: 'SET_LATERAL_MISALIGNMENT_CURRENT',
-        payload: message.value,
-      })
-
-      return
-    }
-
     if (message.type === 'serial_port_disconnected') {
       dispatch({
         type: 'SET_SELECTED_PORT',
@@ -124,6 +118,7 @@ export function MachineProvider({ children }: MachineProviderProps) {
         type: 'MACHINE_UPDATED',
         payload: message.payload,
       })
+      console.log('machine_update recebido:', message.payload)
       return
     }
 

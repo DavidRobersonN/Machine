@@ -1,29 +1,3 @@
-/*
-  ============================================================
-  PROJETO: Alinhador - LED + Motor da Roda com AccelStepper
-  ARQUIVO ÚNICO para usar no Arduino IDE
-  ============================================================
-
-  Comandos aceitos:
-
-  LED:
-  - LED_ON
-  - LED_OFF
-  - LED_STATUS
-
-  TESTE:
-  - PING
-
-  MOTOR DA RODA:
-  - MOTOR_RODA_START
-  - MOTOR_RODA_STOP
-  - MOTOR_RODA_SET_CLOCKWISE
-  - MOTOR_RODA_SET_COUNTER_CLOCKWISE
-  - MOTOR_RODA_INCREASE_SPEED
-  - MOTOR_RODA_DECREASE_SPEED
-  - MOTOR_RODA_SPEED_STATUS
-*/
-
 #include <AccelStepper.h>
 
 // =======================
@@ -31,6 +5,9 @@
 // =======================
 
 const int LED_PIN = LED_BUILTIN;
+
+// Sensor lateral
+const int LATERAL_SENSOR_PIN = A0;
 
 // Driver STEP/DIR
 const int MOTOR_RODA_STEP_PIN = 31;
@@ -40,7 +17,6 @@ const int MOTOR_RODA_DIR_PIN = 32;
 // MOTOR COM ACCELSTEPPER
 // =======================
 
-// DRIVER = usa pino STEP + pino DIR
 AccelStepper motorRoda(
   AccelStepper::DRIVER,
   MOTOR_RODA_STEP_PIN,
@@ -51,38 +27,39 @@ AccelStepper motorRoda(
 // CONFIGURAÇÕES DO MOTOR
 // =======================
 
-// Velocidade em passos por segundo.
-// Ajuste esses valores conforme seu motor/driver/fonte.
 const float MOTOR_RODA_MIN_SPEED = 100.0;
 const float MOTOR_RODA_MAX_SPEED = 2000.0;
 const float MOTOR_RODA_SPEED_STEP = 100.0;
-
-// Aceleração em passos por segundo ao quadrado.
 const float MOTOR_RODA_ACCELERATION = 800.0;
 
-// Velocidade inicial.
 float motorRodaSpeed = 500.0;
-
-// Indica se o motor está rodando.
 bool motorRodaRunning = false;
-
-// true = horário
-// false = anti-horário
 bool motorRodaClockwise = true;
+
+// =======================
+// SENSOR LATERAL
+// =======================
+
+const unsigned long SENSOR_INTERVAL = 100;
+unsigned long lastSensorReadTime = 0;
+
+// Conversão e amplificação
+const float SENSOR_RANGE_MM = 70.0;
+const float SENSOR_BASELINE_MM = 0.20;
+const float SENSOR_GAIN = 5.0;
 
 // =======================
 // ESTADOS
 // =======================
 
 bool ledState = false;
-
-// Buffer da serial
 String inputBuffer = "";
 
 void setup() {
   Serial.begin(9600);
 
   pinMode(LED_PIN, OUTPUT);
+  pinMode(LATERAL_SENSOR_PIN, INPUT);
 
   digitalWrite(LED_PIN, LOW);
   ledState = false;
@@ -93,19 +70,53 @@ void setup() {
 
   delay(300);
 
-  Serial.println("{\"success\":true,\"type\":\"startup\",\"message\":\"Arduino iniciado com AccelStepper\"}");
+  Serial.println("{\"success\":true,\"type\":\"startup\",\"message\":\"Arduino iniciado com sensor lateral\"}");
 }
 
 void loop() {
   readSerialCommands();
   updateMotorRoda();
+  updateLateralSensor();
 }
 
-/*
-  ------------------------------------------------------------
-  Lê comandos da serial.
-  ------------------------------------------------------------
-*/
+// =======================
+// SENSOR LATERAL
+// =======================
+
+void updateLateralSensor() {
+  unsigned long now = millis();
+
+  if (now - lastSensorReadTime < SENSOR_INTERVAL) {
+    return;
+  }
+
+  lastSensorReadTime = now;
+
+  int raw = analogRead(LATERAL_SENSOR_PIN);
+  float voltage = raw * (5.0 / 1023.0);
+
+  float positionMm = (voltage / 5.0) * SENSOR_RANGE_MM;
+  positionMm = (positionMm - SENSOR_BASELINE_MM) * SENSOR_GAIN;
+
+  Serial.print("POS:");
+  Serial.println(positionMm, 2);
+}
+
+void sendLateralSensorNow() {
+  int raw = analogRead(LATERAL_SENSOR_PIN);
+  float voltage = raw * (5.0 / 1023.0);
+
+  float positionMm = (voltage / 5.0) * SENSOR_RANGE_MM;
+  positionMm = (positionMm - SENSOR_BASELINE_MM) * SENSOR_GAIN;
+
+  Serial.print("POS:");
+  Serial.println(positionMm, 2);
+}
+
+// =======================
+// SERIAL
+// =======================
+
 void readSerialCommands() {
   while (Serial.available() > 0) {
     char receivedChar = Serial.read();
@@ -128,17 +139,8 @@ void readSerialCommands() {
   }
 }
 
-/*
-  ------------------------------------------------------------
-  Interpreta comandos recebidos.
-  ------------------------------------------------------------
-*/
 void handleCommand(String command) {
   command.trim();
-
-  // =======================
-  // LED
-  // =======================
 
   if (command == "LED_ON") {
     turnLedOn();
@@ -155,18 +157,15 @@ void handleCommand(String command) {
     return;
   }
 
-  // =======================
-  // TESTE
-  // =======================
-
   if (command == "PING") {
     sendPong();
     return;
   }
 
-  // =======================
-  // MOTOR DA RODA
-  // =======================
+  if (command == "READ_LATERAL_SENSOR") {
+    sendLateralSensorNow();
+    return;
+  }
 
   if (command == "MOTOR_RODA_START") {
     startMotorRoda();
@@ -206,14 +205,10 @@ void handleCommand(String command) {
   sendUnknownCommandError(command);
 }
 
-/*
-  ------------------------------------------------------------
-  Atualiza o motor.
+// =======================
+// MOTOR
+// =======================
 
-  Aqui está a parte mais importante:
-  o runSpeed() precisa ser chamado o tempo todo no loop().
-  ------------------------------------------------------------
-*/
 void updateMotorRoda() {
   if (!motorRodaRunning) {
     return;
@@ -222,11 +217,6 @@ void updateMotorRoda() {
   motorRoda.runSpeed();
 }
 
-/*
-  ------------------------------------------------------------
-  MOTOR DA RODA
-  ------------------------------------------------------------
-*/
 void startMotorRoda() {
   motorRodaRunning = true;
   applyMotorRodaSpeed();
@@ -271,11 +261,6 @@ void setMotorRodaCounterClockwise() {
   Serial.println(",\"message\":\"Motor da roda definido para sentido anti-horario\"}");
 }
 
-/*
-  ------------------------------------------------------------
-  VELOCIDADE DO MOTOR
-  ------------------------------------------------------------
-*/
 void increaseMotorRodaSpeed() {
   motorRodaSpeed += MOTOR_RODA_SPEED_STEP;
 
@@ -284,7 +269,6 @@ void increaseMotorRodaSpeed() {
   }
 
   applyMotorRodaSpeed();
-
   sendMotorRodaSpeedStatusMessage("Velocidade do motor da roda aumentada");
 }
 
@@ -296,7 +280,6 @@ void decreaseMotorRodaSpeed() {
   }
 
   applyMotorRodaSpeed();
-
   sendMotorRodaSpeedStatusMessage("Velocidade do motor da roda diminuida");
 }
 
@@ -336,22 +319,16 @@ int calculateMotorRodaSpeedPercent() {
 
   int percent = (currentPosition * 100.0) / range;
 
-  if (percent < 0) {
-    percent = 0;
-  }
-
-  if (percent > 100) {
-    percent = 100;
-  }
+  if (percent < 0) percent = 0;
+  if (percent > 100) percent = 100;
 
   return percent;
 }
 
-/*
-  ------------------------------------------------------------
-  LED
-  ------------------------------------------------------------
-*/
+// =======================
+// LED
+// =======================
+
 void turnLedOn() {
   digitalWrite(LED_PIN, HIGH);
   ledState = true;
@@ -374,20 +351,18 @@ void sendLedStatus() {
   }
 }
 
-/*
-  ------------------------------------------------------------
-  PING
-  ------------------------------------------------------------
-*/
+// =======================
+// PING
+// =======================
+
 void sendPong() {
   Serial.println("{\"success\":true,\"type\":\"pong\",\"message\":\"Arduino conectado\"}");
 }
 
-/*
-  ------------------------------------------------------------
-  ERRO
-  ------------------------------------------------------------
-*/
+// =======================
+// ERRO
+// =======================
+
 void sendUnknownCommandError(String command) {
   Serial.print("{\"success\":false,\"type\":\"error\",\"message\":\"Comando desconhecido: ");
   Serial.print(command);

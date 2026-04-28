@@ -2,10 +2,35 @@ import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from machine.services.machine_service import MachineService
-
+import threading
 
 class MachineConsumer(WebsocketConsumer):
     GROUP_NAME = 'machine_updates'
+
+    def start_serial_listener(self):
+        print('[Serial Listener] Iniciado')
+
+        while getattr(self, 'serial_listener_running', False):
+            try:
+                if not self.machine_service.serial_service.is_connected():
+                    continue
+
+                line = self.machine_service.serial_service.read_line()
+
+                if not line:
+                    continue
+
+                print('[Serial Listener] Recebido:', line)
+
+                if line.startswith('POS:'):
+                    value = float(line.replace('POS:', '').strip())
+
+                    self.machine_state_service.update_state({
+                        'lateral_misalignment_current': value,
+                    })
+
+            except Exception as error:
+                print('[Serial Listener] Erro:', error)
 
     def connect(self):
         self.machine_service = MachineService()
@@ -18,11 +43,17 @@ class MachineConsumer(WebsocketConsumer):
 
         self.accept()
 
+        self.serial_listener_running = True
+
+        threading.Thread(
+            target=self.start_serial_listener,
+            daemon=True,
+        ).start()
+
         current_state = self.machine_state_service.get_current_state()
 
         print('[MachineConsumer][connect] Estado inicial enviado ao frontend:')
         print(current_state)
-
 
         self.send(text_data=json.dumps({
             'type': 'machine_update',
