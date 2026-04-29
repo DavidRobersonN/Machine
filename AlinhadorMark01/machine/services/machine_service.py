@@ -23,7 +23,7 @@ class MachineService:
         self.serial_service = SerialService(
             port='COM9',
             baudrate=9600,
-            timeout=1.0,
+            timeout=0.05,
         )
         self.machine_state_service = MachineStateService(self.serial_service)
 

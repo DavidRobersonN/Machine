@@ -113,14 +113,21 @@ export function MachineProvider({ children }: MachineProviderProps) {
       return
     }
 
-    if (message.type === 'machine_update') {
-      dispatch({
-        type: 'MACHINE_UPDATED',
-        payload: message.payload,
-      })
-      console.log('machine_update recebido:', message.payload)
-      return
-    }
+if (message.type === 'machine_update') {
+  const lateralValue = message.payload.lateral_misalignment_current
+
+  if (lateralValue !== undefined) {
+    latestLateralValueRef.current = lateralValue
+    hasReceivedLateralValueRef.current = true
+  }
+
+  dispatch({
+    type: 'MACHINE_UPDATED',
+    payload: message.payload,
+  })
+
+  return
+}
 
     if (message.type === 'log') {
       dispatch({

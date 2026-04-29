@@ -61,44 +61,17 @@ export function createMachineSocket(
 
     O parâmetro "event" contém os dados enviados pelo servidor.
   */
-  socket.onmessage = (event) => {
-    try {
-      /*
-        event.data normalmente chega como texto JSON.
-        Então usamos JSON.parse para transformar esse texto
-        em um objeto JavaScript/TypeScript.
 
-        "as MachineMessage" diz ao TypeScript:
-        "considere que esse objeto tem o formato MachineMessage".
-      */
-      const data = JSON.parse(event.data) as MachineMessage
+socket.onmessage = (event) => {
+  try {
 
-      /*
-        Esse log aparece apenas no console do navegador.
-        Ele é útil para depuração, mas não substitui
-        os logs visuais da aplicação.
-      */
-      console.log('Mensagem recebida do WebSocket:', data)
+    const data = JSON.parse(event.data) as MachineMessage
 
-      /*
-        Depois de converter a mensagem,
-        chamamos a função onMessage e enviamos os dados para ela.
-
-        Assim, quem criou o socket pode decidir
-        o que fazer com a mensagem recebida.
-      */
-      onMessage(data)
-    } catch (error) {
-      /*
-        Se der erro ao converter a mensagem com JSON.parse,
-        ele entra aqui.
-
-        Isso pode acontecer se o backend mandar algo
-        que não esteja em formato JSON válido.
-      */
-      console.error('Erro ao ler mensagem do WebSocket:', error)
-    }
+    onMessage(data)
+  } catch (error) {
+    console.error('Erro ao ler mensagem do WebSocket:', error)
   }
+}
 
   /*
     No final, retornamos o socket já configurado.

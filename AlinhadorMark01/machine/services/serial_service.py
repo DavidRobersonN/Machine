@@ -20,7 +20,7 @@ class SerialService:
         self,
         port: str | None = None,
         baudrate: int = 9600,
-        timeout: float = 1.0,
+        timeout: float = 0.05,
     ):
         self.port = port
         self.baudrate = baudrate

@@ -43,17 +43,22 @@ bool motorRodaClockwise = true;
 const unsigned long SENSOR_INTERVAL = 100;
 unsigned long lastSensorReadTime = 0;
 
-// Conversão e suavização
+// O sensor vai de:
+// RAW 0    = -15 mm
+// RAW 1023 = +15 mm
 const float SENSOR_RANGE_MM = 30.0;
-const float SENSOR_BASELINE_MM = 15.0;
-const float SENSOR_ZERO_OFFSET_MM = 15.0;
-
+const float SENSOR_HALF_RANGE_MM = SENSOR_RANGE_MM / 2.0;
+float lastSentSensorMm = 999.0;
 // =======================
 // ESTADOS
 // =======================
 
 bool ledState = false;
 String inputBuffer = "";
+
+// =======================
+// SETUP
+// =======================
 
 void setup() {
   Serial.begin(9600);
@@ -73,6 +78,10 @@ void setup() {
   Serial.println("{\"success\":true,\"type\":\"startup\",\"message\":\"Arduino iniciado com sensor lateral\"}");
 }
 
+// =======================
+// LOOP
+// =======================
+
 void loop() {
   readSerialCommands();
   updateMotorRoda();
@@ -83,31 +92,36 @@ void loop() {
 // SENSOR LATERAL
 // =======================
 
-
+// Esta função lê o sensor lateral e retorna a posição em milímetros.
+// Ela é útil quando outra parte do código precisa apenas do valor em mm,
+// sem imprimir nada no Serial.
 float readLateralSensorMm() {
-  long totalRaw = 0;
-  const int samples = 10;
+  // Lê o valor bruto do sensor no pino analógico.
+  // O analogRead retorna um valor de 0 até 1023.
+  int raw = analogRead(LATERAL_SENSOR_PIN);
 
-  for (int i = 0; i < samples; i++) {
-    totalRaw += analogRead(LATERAL_SENSOR_PIN);
-    delayMicroseconds(500);
-  }
-
-  float raw = totalRaw / (float)samples;
-
-  // Converte raw 0–1023 para uma escala de -15 mm até +15 mm
+  // Converte o valor bruto RAW para milímetros.
+  //
+  // Como SENSOR_RANGE_MM = 30.0,
+  // a escala total será de 30 mm.
+  //
+  // Como SENSOR_HALF_RANGE_MM = 15.0,
+  // o resultado final fica assim:
+  //
+  // RAW 0    -> -15 mm
+  // RAW 512  -> aproximadamente 0 mm
+  // RAW 1023 -> +15 mm
   float positionMm = ((raw / 1023.0) * SENSOR_RANGE_MM) - SENSOR_HALF_RANGE_MM;
 
-  // Corrige usando um zero fixo manual
-  positionMm -= SENSOR_ZERO_RAW;
-
-  if (positionMm > -SENSOR_DEAD_ZONE_MM && positionMm < SENSOR_DEAD_ZONE_MM) {
-    positionMm = 0.0;
-  }
-
+  // Retorna o valor convertido em milímetros.
   return positionMm;
 }
 
+
+// Esta função atualiza a leitura do sensor automaticamente
+// a cada intervalo definido em SENSOR_INTERVAL.
+//
+// Ela é chamada dentro do loop().
 void updateLateralSensor() {
   unsigned long now = millis();
 
@@ -119,39 +133,32 @@ void updateLateralSensor() {
 
   float positionMm = readLateralSensorMm();
 
-  Serial.print("POS:");
-  Serial.println(positionMm, 2);
-}
-
-void sendLateralSensorNow() {
-  float positionMm = readLateralSensorMm();
-
-  Serial.print("POS:");
-  Serial.println(positionMm, 2);
-}
-
-void updateLateralSensor() {
-  unsigned long now = millis();
-
-  if (now - lastSensorReadTime < SENSOR_INTERVAL) {
+  // Só envia se a diferença for maior que 0.1 mm
+  if (abs(positionMm - lastSentSensorMm) < 0.5) {
     return;
   }
 
-  lastSensorReadTime = now;
+  lastSentSensorMm = positionMm;
 
-  float positionMm = readLateralSensorMm();
+  // Envia o valor convertido em milímetros.
+  // O número 2 significa que será mostrado com 2 casas decimais.
 
   Serial.print("POS:");
-  Serial.println(positionMm, 2);
+  Serial.println(positionMm, 1);
 }
 
+
+// Esta função envia a leitura do sensor imediatamente,
+// sem esperar o intervalo SENSOR_INTERVAL.
+//
+// Ela é usada quando o backend/React mandar o comando:
+// READ_LATERAL_SENSOR
 void sendLateralSensorNow() {
   float positionMm = readLateralSensorMm();
 
   Serial.print("POS:");
-  Serial.println(positionMm, 2);
+  Serial.println(positionMm, 1);
 }
-
 // =======================
 // SERIAL
 // =======================
@@ -358,8 +365,13 @@ int calculateMotorRodaSpeedPercent() {
 
   int percent = (currentPosition * 100.0) / range;
 
-  if (percent < 0) percent = 0;
-  if (percent > 100) percent = 100;
+  if (percent < 0) {
+    percent = 0;
+  }
+
+  if (percent > 100) {
+    percent = 100;
+  }
 
   return percent;
 }

@@ -1,8 +1,12 @@
 import json
+import threading
+import time
+
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
+
 from machine.services.machine_service import MachineService
-import threading
+
 
 class MachineConsumer(WebsocketConsumer):
     GROUP_NAME = 'machine_updates'
@@ -13,6 +17,7 @@ class MachineConsumer(WebsocketConsumer):
         while getattr(self, 'serial_listener_running', False):
             try:
                 if not self.machine_service.serial_service.is_connected():
+                    time.sleep(0.001)
                     continue
 
                 line = self.machine_service.serial_service.read_line()
@@ -20,14 +25,16 @@ class MachineConsumer(WebsocketConsumer):
                 if not line:
                     continue
 
-                print('[Serial Listener] Recebido:', line)
+                # Remove espaços, \n e \r da linha recebida
+                line = line.strip()
 
+                # O Arduino precisa enviar assim:
+                # POS:-8.50
                 if line.startswith('POS:'):
                     value = float(line.replace('POS:', '').strip())
 
-                    self.machine_state_service.update_state({
-                        'lateral_misalignment_current': value,
-                    })
+                    # Agora envia para a tela sem salvar no banco
+                    self.machine_state_service.broadcast_lateral_sensor_state(value)
 
             except Exception as error:
                 print('[Serial Listener] Erro:', error)
@@ -98,6 +105,9 @@ class MachineConsumer(WebsocketConsumer):
             }))
 
     def disconnect(self, close_code):
+        # Para a thread do listener serial
+        self.serial_listener_running = False
+
         async_to_sync(self.channel_layer.group_discard)(
             self.GROUP_NAME,
             self.channel_name,

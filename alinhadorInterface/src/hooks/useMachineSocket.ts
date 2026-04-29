@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { createMachineSocket, sendSocketMessage } from '../services/machineSocket'
 import type { MachineMessage } from '../types/machine/machine'
 
@@ -30,14 +30,14 @@ export function useMachineSocket({
     }
   }, [onConnected, onDisconnected, onMachineMessage])
 
-  function send(payload: unknown): boolean {
+  const send = useCallback((payload: unknown): boolean => {
     if (!socketRef.current) {
       console.error('Socket ainda não foi criado')
       return false
     }
 
     return sendSocketMessage(socketRef.current, payload)
-  }
+  }, [])
 
   return {
     send,
