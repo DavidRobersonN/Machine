@@ -25,15 +25,11 @@ class MachineConsumer(WebsocketConsumer):
                 if not line:
                     continue
 
-                # Remove espaços, \n e \r da linha recebida
                 line = line.strip()
 
-                # O Arduino precisa enviar assim:
-                # POS:-8.50
                 if line.startswith('POS:'):
                     value = float(line.replace('POS:', '').strip())
 
-                    # Agora envia para a tela sem salvar no banco
                     self.machine_state_service.broadcast_lateral_sensor_state(value)
 
             except Exception as error:
@@ -71,8 +67,6 @@ class MachineConsumer(WebsocketConsumer):
         try:
             data = json.loads(text_data)
 
-            # LOG 1:
-            # registra que o backend recebeu uma mensagem do frontend
             self.send(text_data=json.dumps({
                 'type': 'log',
                 'direction': 'received',
@@ -81,15 +75,12 @@ class MachineConsumer(WebsocketConsumer):
 
             response = self.machine_service.handle_command(data)
 
-            # LOG 2:
-            # registra que o backend vai enviar uma resposta ao frontend
             self.send(text_data=json.dumps({
                 'type': 'log',
                 'direction': 'sent',
                 'message': f'Resposta enviada pelo backend: {response}',
             }))
 
-            # resposta principal da aplicação
             self.send(text_data=json.dumps(response))
 
         except json.JSONDecodeError:
@@ -105,7 +96,6 @@ class MachineConsumer(WebsocketConsumer):
             }))
 
     def disconnect(self, close_code):
-        # Para a thread do listener serial
         self.serial_listener_running = False
 
         async_to_sync(self.channel_layer.group_discard)(

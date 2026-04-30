@@ -1,12 +1,12 @@
-import { useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import { useMachineContext } from '../../context/MachineContext'
 import { useMachineScreenData } from './useMachineScreenData'
 
 import type { AppScreen } from '../../types/navigation'
 
-// Este hook é responsável por gerenciar a lógica da página principal da máquina, 
-// que inclui a navegação entre telas, gerenciamento de ações comuns (como listar 
+// Este hook é responsável por gerenciar a lógica da página principal da máquina,
+// que inclui a navegação entre telas, gerenciamento de ações comuns (como listar
 // portas seriais, limpar logs, etc) e fornecer os dados necessários para renderizar as telas.
 
 export function useHomeMachinePage() {
@@ -16,56 +16,66 @@ export function useHomeMachinePage() {
     selectedPort,
     sidebarProps,
     statusBarProps,
-
   } = useMachineScreenData()
 
   const { state, sendCommand, dispatch } = useMachineContext()
 
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('start')
 
-  function goToScreen(screen: AppScreen) {
+  const goToScreen = useCallback((screen: AppScreen) => {
     setCurrentScreen(screen)
-  }
+  }, [])
 
-  function handleListSerialPorts() {
+  const handleListSerialPorts = useCallback(() => {
     sendCommand({ action: 'list_serial_ports' })
     setCurrentScreen('serial')
-  }
+  }, [sendCommand])
 
-  function handleSelectPort(port: string) {
-    const success = sendCommand({
-      action: 'select_serial_port',
-      port,
-    })
-
-    if (success) {
-      dispatch({
-        type: 'SET_SELECTED_PORT',
-        payload: port,
+  const handleSelectPort = useCallback(
+    (port: string) => {
+      const success = sendCommand({
+        action: 'select_serial_port',
+        port,
       })
-    }
-  }
 
-  function handleClearLogs() {
+      if (success) {
+        dispatch({
+          type: 'SET_SELECTED_PORT',
+          payload: port,
+        })
+      }
+    },
+    [sendCommand, dispatch],
+  )
+
+  const handleClearLogs = useCallback(() => {
     dispatch({ type: 'CLEAR_LOGS' })
-  }
+  }, [dispatch])
 
-  function handleDisconnectPort() {
+  const handleDisconnectPort = useCallback(() => {
     sendCommand({ action: 'disconnect_serial_port' })
 
     dispatch({
       type: 'SET_SELECTED_PORT',
       payload: null,
     })
-  }
-  
-  const bottomActions = getBottomActions({
+  }, [sendCommand, dispatch])
+
+  const bottomActions = useMemo(() => {
+    return getBottomActions({
+      currentScreen,
+      goToScreen,
+      handleClearLogs,
+      handleListSerialPorts,
+      handleDisconnectPort,
+    })
+  }, [
     currentScreen,
     goToScreen,
     handleClearLogs,
     handleListSerialPorts,
     handleDisconnectPort,
-  })
+  ])
 
   return {
     currentScreen,

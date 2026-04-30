@@ -1,13 +1,18 @@
+import { memo } from 'react'
+import type { ReactNode } from 'react'
+
 import './PainelControls.css'
 
 type PainelControlsProps = {
-  children?: React.ReactNode
+  children?: ReactNode
 }
 
-export function PainelControls({ children }: PainelControlsProps) {
+function PainelControlsComponent({ children }: PainelControlsProps) {
   return (
     <div className="painel-controls-area">
-     {children}
+      {children}
     </div>
   )
 }
+
+export const PainelControls = memo(PainelControlsComponent)

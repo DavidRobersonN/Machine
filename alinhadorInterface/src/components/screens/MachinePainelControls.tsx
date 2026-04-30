@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 import { PainelControls } from '../PainelComponents/PainelControls/PainelControls'
 import { MotorRodaControl } from '../PainelComponents/Motors/MotorRodaControl'
 
@@ -10,7 +12,7 @@ type MachinePainelControlsProps = {
   currentScreen: AppScreen
 }
 
-export function MachinePainelControls({
+function MachinePainelControlsComponent({
   currentScreen,
 }: MachinePainelControlsProps) {
   switch (currentScreen) {
@@ -24,3 +26,5 @@ export function MachinePainelControls({
       return <PainelControls />
   }
 }
+
+export const MachinePainelControls = memo(MachinePainelControlsComponent)

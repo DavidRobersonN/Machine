@@ -26,8 +26,7 @@ class MachineStateService:
         Envia o valor do sensor lateral para o frontend em tempo real,
         sem salvar no banco de dados.
 
-        Para não sobrecarregar o WebSocket e o React, o envio é limitado
-        a uma atualização a cada 0.5 segundo.
+        O envio é limitado a aproximadamente 20 atualizações por segundo.
         """
 
         now = time.monotonic()
