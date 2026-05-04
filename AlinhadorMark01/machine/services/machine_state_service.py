@@ -1,3 +1,5 @@
+import time
+
 from machine.models import MachineState
 from machine.services.broadcast_service import BroadcastService
 from machine.services.serial_service import SerialService
@@ -16,6 +18,29 @@ class MachineStateService:
     def __init__(self, serial_service: SerialService):
         self.broadcast_service = BroadcastService()
         self.serial_service = serial_service
+        self.last_lateral_broadcast_time = 0.0
+        self.lateral_broadcast_interval = 0.05
+
+    def broadcast_lateral_sensor_state(self, value: float) -> None:
+        """
+        Envia o valor do sensor lateral para o frontend em tempo real,
+        sem salvar no banco de dados.
+
+        O envio é limitado a aproximadamente 20 atualizações por segundo.
+        """
+
+        now = time.monotonic()
+
+        if now - self.last_lateral_broadcast_time < self.lateral_broadcast_interval:
+            return
+
+        self.last_lateral_broadcast_time = now
+
+        self.broadcast_service.broadcast_machine_state(
+            payload={
+                'lateral_misalignment_current': value,
+            }
+        )
 
     def update_state(self, data: dict) -> MachineState:
         state, _ = MachineState.objects.get_or_create(id=1)

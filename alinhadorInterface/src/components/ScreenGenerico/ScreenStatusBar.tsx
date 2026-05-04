@@ -1,9 +1,11 @@
+import { memo } from 'react'
+
 type ScreenStatusBarProps = {
   arduinoConnection: string
   led: string
 }
 
-export function ScreenStatusBar({
+function ScreenStatusBarComponent({
   arduinoConnection,
   led,
 }: ScreenStatusBarProps) {
@@ -14,3 +16,5 @@ export function ScreenStatusBar({
     </div>
   )
 }
+
+export const ScreenStatusBar = memo(ScreenStatusBarComponent)

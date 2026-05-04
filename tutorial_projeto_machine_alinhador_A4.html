@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial do Projeto Machine / Alinhador</title>
+  <style>
+@page { size: A4; margin: 14mm 13mm; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: #f3f6fb; color: #1f2937;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  line-height: 1.55; font-size: 14px;
+}
+.page { max-width: 210mm; margin: 0 auto; background: white; padding: 20mm 17mm; box-shadow: 0 12px 40px rgba(15,23,42,.12); }
+.cover { border: 1px solid #e5e7eb; border-radius: 18px; padding: 28px; margin-bottom: 24px; background: linear-gradient(180deg,#ffffff 0%,#f8fbff 100%); }
+.cover h1 { margin: 0 0 10px; font-size: 30px; line-height: 1.15; color: #0f172a; letter-spacing: -0.03em; }
+.subtitle { color: #475569; font-size: 15px; margin: 0; }
+.badges { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+.badge { border:1px solid #dbeafe; background:#eff6ff; color:#1d4ed8; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:600; }
+.toc { margin: 20px 0 28px; padding: 16px 18px; border-radius: 14px; background:#f8fafc; border: 1px solid #e2e8f0; }
+.toc h2 { margin-top:0; border:0; padding:0; font-size:18px; }
+.toc ol { columns: 2; padding-left: 22px; margin:0; }
+.toc li { break-inside: avoid; margin: 3px 0; }
+a { color:#2563eb; text-decoration:none; }
+h2 { margin: 30px 0 10px; padding-top: 12px; border-top: 1px solid #e5e7eb; color:#111827; font-size: 22px; line-height: 1.25; page-break-after: avoid; }
+h3 { margin: 22px 0 8px; color:#1f2937; font-size: 17px; page-break-after: avoid; }
+.emoji { display:inline-block; width: 1.35em; }
+p { margin: 8px 0 11px; }
+code { font-family: "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace; background:#f6f8fa; border:1px solid #e5e7eb; border-radius:5px; padding:1px 5px; color:#0f172a; font-size:.92em; }
+.highlight, .plain-code { background: #ffffff !important; border: 1px solid #d1d5db; border-left: 4px solid #007acc; border-radius: 10px; margin: 12px 0 16px; overflow-x:auto; page-break-inside: avoid; }
+.highlight pre, .plain-code code { margin:0; padding: 13px 15px; display:block; font-size: 12.4px; line-height: 1.52; font-family: "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace; white-space: pre; background:#fff !important; }
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.highlight .hll { background-color: #ffffcc }
+.highlight { background: #ffffff; }
+.highlight .c { color: #008000 } /* Comment */
+.highlight .err { border: 1px solid #F00 } /* Error */
+.highlight .k { color: #00F } /* Keyword */
+.highlight .ch { color: #008000 } /* Comment.Hashbang */
+.highlight .cm { color: #008000 } /* Comment.Multiline */
+.highlight .cp { color: #00F } /* Comment.Preproc */
+.highlight .cpf { color: #008000 } /* Comment.PreprocFile */
+.highlight .c1 { color: #008000 } /* Comment.Single */
+.highlight .cs { color: #008000 } /* Comment.Special */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.highlight .gh { font-weight: bold } /* Generic.Heading */
+.highlight .gp { font-weight: bold } /* Generic.Prompt */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { font-weight: bold } /* Generic.Subheading */
+.highlight .kc { color: #00F } /* Keyword.Constant */
+.highlight .kd { color: #00F } /* Keyword.Declaration */
+.highlight .kn { color: #00F } /* Keyword.Namespace */
+.highlight .kp { color: #00F } /* Keyword.Pseudo */
+.highlight .kr { color: #00F } /* Keyword.Reserved */
+.highlight .kt { color: #2B91AF } /* Keyword.Type */
+.highlight .s { color: #A31515 } /* Literal.String */
+.highlight .nc { color: #2B91AF } /* Name.Class */
+.highlight .ow { color: #00F } /* Operator.Word */
+.highlight .sa { color: #A31515 } /* Literal.String.Affix */
+.highlight .sb { color: #A31515 } /* Literal.String.Backtick */
+.highlight .sc { color: #A31515 } /* Literal.String.Char */
+.highlight .dl { color: #A31515 } /* Literal.String.Delimiter */
+.highlight .sd { color: #A31515 } /* Literal.String.Doc */
+.highlight .s2 { color: #A31515 } /* Literal.String.Double */
+.highlight .se { color: #A31515 } /* Literal.String.Escape */
+.highlight .sh { color: #A31515 } /* Literal.String.Heredoc */
+.highlight .si { color: #A31515 } /* Literal.String.Interpol */
+.highlight .sx { color: #A31515 } /* Literal.String.Other */
+.highlight .sr { color: #A31515 } /* Literal.String.Regex */
+.highlight .s1 { color: #A31515 } /* Literal.String.Single */
+.highlight .ss { color: #A31515 } /* Literal.String.Symbol */
+.highlight .k, .highlight .kd, .highlight .kn { color: #0000ff !important; }
+.highlight .nx, .highlight .n { color: #001080; }
+.highlight .s, .highlight .s1, .highlight .s2 { color: #a31515 !important; }
+.highlight .c, .highlight .c1, .highlight .cm { color: #008000 !important; font-style: normal !important; }
+.highlight .mi, .highlight .mf { color: #098658 !important; }
+.highlight .nf, .highlight .fm { color: #795e26 !important; }
+.flow-card { margin: 12px 0 16px; padding: 14px; border: 1px solid #bfdbfe; background:#f8fbff; border-radius:14px; page-break-inside: avoid; }
+.flow-step { margin: 4px auto; padding: 8px 10px; max-width: 480px; text-align:center; background:white; border:1px solid #e5e7eb; border-radius:10px; font-weight:600; color:#334155; }
+.flow-arrow { text-align:center; color:#2563eb; font-weight:800; font-size:18px; line-height:1.1; }
+.clean-list { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; padding: 12px 16px 12px 28px; background:#fafafa; border:1px solid #e5e7eb; border-radius:12px; page-break-inside: avoid; }
+.clean-list li { margin: 2px 0; }
+.checklist { list-style:none; padding: 12px 16px; border:1px solid #dcfce7; background:#f7fef9; border-radius:12px; page-break-inside: avoid; }
+.checklist li { margin:6px 0; padding-left: 26px; position:relative; }
+.checklist li::before { content:'☐'; position:absolute; left:0; color:#16a34a; font-weight:700; }
+strong { color:#111827; }
+.footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #e5e7eb; color:#64748b; font-size:12px; }
+@media print {
+  body { background:white; font-size: 12.5px; }
+  .page { box-shadow:none; max-width:none; padding:0; }
+  .cover { background:white; }
+  .toc { page-break-after: always; }
+  a { color: inherit; }
+  h2 { break-after: avoid; }
+  .highlight, .flow-card, .clean-list, .checklist { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+  <main class="page">
+    <section class="cover">
+      <h1>🛠️ Tutorial do Projeto Machine / Alinhador</h1>
+      <p class="subtitle">Guia técnico formatado para impressão em A4, com fluxos visuais, checklist e códigos coloridos em estilo VS Code com fundo branco.</p>
+      <div class="badges">
+        <span class="badge">React</span><span class="badge">Django</span><span class="badge">WebSocket</span><span class="badge">Arduino</span><span class="badge">Serial</span><span class="badge">A4 Print</span>
+      </div>
+    </section>
+    <nav class="toc">
+      <h2>📚 Sumário</h2>
+      <ol><li><a href="#1-visão-geral-do-projeto">1. Visão geral do projeto</a></li><li><a href="#2-fluxo-principal-da-aplicação">2. Fluxo principal da aplicação</a></li><li><a href="#3-arduino">3. Arduino</a></li><li><a href="#4-backend-django">4. Backend Django</a></li><li><a href="#1-atualizações-persistentes">1. Atualizações persistentes</a></li><li><a href="#2-atualizações-rápidas-em-tempo-real">2. Atualizações rápidas em tempo real</a></li><li><a href="#5-frontend-react">5. Frontend React</a></li><li><a href="#6-websocket-no-frontend">6. WebSocket no frontend</a></li><li><a href="#7-machinecontext">7. MachineContext</a></li><li><a href="#8-machinereducer">8. machineReducer</a></li><li><a href="#9-tipos-typescript">9. Tipos TypeScript</a></li><li><a href="#10-usehomemachinepage">10. useHomeMachinePage</a></li><li><a href="#11-homepage">11. HomePage</a></li><li><a href="#12-machinescreenrenderer">12. MachineScreenRenderer</a></li><li><a href="#13-lateralalignmentscreen">13. LateralAlignmentScreen</a></li><li><a href="#14-oscillationchart">14. OscillationChart</a></li><li><a href="#15-como-criar-uma-nova-tela">15. Como criar uma nova tela</a></li><li><a href="#16-como-adicionar-um-novo-valor-vindo-do-arduino">16. Como adicionar um novo valor vindo do Arduino</a></li><li><a href="#17-como-criar-um-novo-comando-para-o-arduino">17. Como criar um novo comando para o Arduino</a></li><li><a href="#18-padrão-ideal-para-criar-novos-componentes">18. Padrão ideal para criar novos componentes</a></li><li><a href="#1-criar-o-componente-visual-puro">1. Criar o componente visual puro</a></li><li><a href="#2-testar-com-valor-fixo">2. Testar com valor fixo</a></li><li><a href="#3-passar-valor-por-props">3. Passar valor por props</a></li><li><a href="#4-só-depois-mexer-no-backend-ou-reducer">4. Só depois mexer no backend ou reducer</a></li><li><a href="#19-como-evitar-renderização-desnecessária">19. Como evitar renderização desnecessária</a></li><li><a href="#20-o-que-aprendemos-sobre-velocidade-hoje">20. O que aprendemos sobre velocidade hoje</a></li><li><a href="#21-frequência-recomendada">21. Frequência recomendada</a></li><li><a href="#22-checklist-para-criar-uma-nova-feature">22. Checklist para criar uma nova feature</a></li><li><a href="#23-padrão-recomendado-de-mensagens">23. Padrão recomendado de mensagens</a></li><li><a href="#24-regra-de-ouro-do-seu-projeto">24. Regra de ouro do seu projeto</a></li><li><a href="#25-resumo-final-do-fluxo-do-sensor-lateral">25. Resumo final do fluxo do sensor lateral</a></li><li><a href="#1-arduino-lê-o-sensor-no-pino-a0">1. Arduino lê o sensor no pino A0</a></li><li><a href="#2-arduino-converte-raw-para-milímetros">2. Arduino converte RAW para milímetros</a></li><li><a href="#3-arduino-envia">3. Arduino envia:</a></li><li><a href="#4-django-consumer-lê-a-linha-pela-serial">4. Django Consumer lê a linha pela serial</a></li><li><a href="#5-se-a-linha-começa-com-pos">5. Se a linha começa com POS:</a></li><li><a href="#6-machinestateservice-envia">6. MachineStateService envia:</a></li><li><a href="#7-broadcastservice-manda">7. BroadcastService manda:</a></li><li><a href="#8-machinesocket-ts-recebe-pelo-websocket">8. machineSocket.ts recebe pelo WebSocket</a></li><li><a href="#9-usemachinesocket-repassa-para-machinecontext">9. useMachineSocket repassa para MachineContext</a></li><li><a href="#10-machinecontext">10. MachineContext:</a></li><li><a href="#11-machinereducer">11. machineReducer:</a></li><li><a href="#12-usehomemachinepage-expõe-os-dados">12. useHomeMachinePage expõe os dados</a></li><li><a href="#13-homepage-passa-para-machinescreenrenderer">13. HomePage passa para MachineScreenRenderer</a></li><li><a href="#14-machinescreenrenderer-escolhe-lateralalignmentscreen">14. MachineScreenRenderer escolhe LateralAlignmentScreen</a></li><li><a href="#15-lateralalignmentscreen-calcula-máximo-mínimo-e-média">15. LateralAlignmentScreen calcula máximo, mínimo e média</a></li><li><a href="#16-oscillationchart-desenha-o-gráfico">16. OscillationChart desenha o gráfico</a></li></ol>
+    </nav>
+    <h2 id="1-visão-geral-do-projeto"><span class="emoji">🧭</span> 1. Visão geral do projeto</h2><p>Seu projeto é um painel de controle para uma máquina de alinhamento de roda.</p><p>A arquitetura geral é esta:</p><p>Arduino</p><div class="flow-card"><div class="flow-step">↓ Serial USB</div><div class="flow-step">Django Backend</div><div class="flow-step">↓ WebSocket</div><div class="flow-step">React Frontend</div><div class="flow-step">↓ State global / props</div><div class="flow-step">Componentes visuais da tela</div><div class="flow-step">A ideia principal é:</div><div class="flow-step">Arduino mede ou executa algo</div><div class="flow-arrow">↓</div><div class="flow-step">Django lê ou envia comandos pela serial</div><div class="flow-arrow">↓</div></div><p>Django manda atualizações para o frontend via WebSocket</p><div class="flow-card"><div class="flow-arrow">↓</div><div class="flow-step">React atualiza o estado global</div><div class="flow-arrow">↓</div><div class="flow-step">Componentes mostram o estado na tela</div><div class="flow-step">Hoje seu projeto já trabalha com:</div><div class="flow-step">LED</div><div class="flow-step">Porta serial</div><div class="flow-step">Status do Arduino</div><div class="flow-step">Motor da roda</div><div class="flow-step">Velocidade do motor</div><div class="flow-step">Sensor de desalinhamento lateral</div><div class="flow-step">Gráfico de oscilação</div><div class="flow-step">Logs</div><div class="flow-step">Menu de navegação</div></div><h2 id="2-fluxo-principal-da-aplicação"><span class="emoji">🔄</span> 2. Fluxo principal da aplicação</h2><ul class="clean-list"><li>Fluxo resumido</li><li>Arduino</li><li>↓</li><li>SerialService</li><li>↓</li><li>MachineConsumer</li><li>↓</li><li>MachineStateService</li><li>↓</li><li>BroadcastService</li><li>↓</li><li>WebSocket</li><li>↓</li><li>machineSocket.ts</li><li>↓</li><li>useMachineSocket.ts</li><li>↓</li><li>MachineContext.tsx</li><li>↓</li><li>machineReducer.ts</li><li>↓</li><li>useHomeMachinePage.ts</li><li>↓</li><li>HomePage.tsx</li><li>↓</li><li>MachineScreenRenderer.tsx</li><li>↓</li><li>Tela específica</li></ul><p>Esse é o caminho completo de uma informação.</p><p>Por exemplo, quando o Arduino envia:</p><p><code>POS:12.50</code></p><p>o caminho é:</p><p>Arduino envia <code>POS:12.50</code></p><div class="flow-card"><div class="flow-arrow">↓</div><div class="flow-step">Django lê pela serial</div><div class="flow-arrow">↓</div><div class="flow-step">Django identifica que começa com POS:</div><div class="flow-arrow">↓</div><div class="flow-step">Django converte para float</div><div class="flow-arrow">↓</div><div class="flow-step">Django manda machine_update pelo WebSocket</div><div class="flow-arrow">↓</div><div class="flow-step">React recebe a mensagem</div><div class="flow-arrow">↓</div><div class="flow-step">MachineContext atualiza o state</div><div class="flow-arrow">↓</div><div class="flow-step">LateralAlignmentScreen recebe o valor</div><div class="flow-arrow">↓</div><div class="flow-step">OscillationChart mostra no gráfico</div></div><h2 id="3-arduino"><span class="emoji">🔌</span> 3. Arduino</h2><p>O Arduino é responsável por:</p><ul class="clean-list"><li>Ler o sensor lateral</li><li>Controlar o motor</li><li>Controlar LED</li><li>Responder comandos vindos do backend</li><li>Enviar valores pela Serial</li></ul><p>No seu código Arduino, o sensor lateral envia mensagens assim:</p><div class="highlight"><pre><span></span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot;POS:&quot;</span><span class="p">);</span>
+<span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">positionMm</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+</pre></div>
+<p>Ou seja, ele manda algo como:</p><ul class="clean-list"><li>POS:14.8</li><li>POS:15.0</li><li>POS:-2.3</li></ul><p>O Django espera exatamente esse formato:</p><p><code>POS:valor</code></p><p>No código que revisamos, o Arduino estava com:</p><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">unsigned</span><span class="w"> </span><span class="kr">long</span><span class="w"> </span><span class="nx">SENSOR_INTERVAL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">20</span><span class="p">;</span>
+</pre></div>
+<p>Isso significa que ele tenta mandar leitura a cada 20ms, aproximadamente:</p><p>50 leituras por segundo</p><p>Esse ponto foi importante porque antes estava com 100ms ou 120ms, o que limitava o envio para aproximadamente 8 a 10 leituras por segundo.</p><h2 id="4-backend-django"><span class="emoji">🧠</span> 4. Backend Django</h2><p>O backend Django tem alguns papéis principais:</p><ul class="clean-list"><li>Abrir conexão serial com o Arduino</li><li>Enviar comandos para o Arduino</li><li>Ler respostas do Arduino</li><li>Interpretar mensagens da serial</li></ul><p>Enviar atualizações para o frontend via WebSocket Salvar estados importantes no banco quando necessário</p><h3 id="4-1-serialservice"><span class="emoji">🔗</span> 4.1 SerialService</h3><p>O arquivo <code>serial_service.py</code> é o responsável por conversar diretamente com o Arduino.</p><p>Ele cuida de:</p><ul class="clean-list"><li>Selecionar porta serial</li><li>Conectar</li><li>Desconectar</li><li>Enviar comandos</li><li>Ler linhas da serial</li><li>Ler JSON quando necessário</li></ul><p>A função mais importante para o sensor lateral é:</p><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">read_line</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+</pre></div>
+<p>Ela usa:</p><p>raw_data = self.connection.readline()</p><p>Isso significa que o Django fica lendo linha por linha que o Arduino envia.</p><p>O timeout está configurado como:</p><p>timeout: float = 0.05</p><p>Esse valor é aceitável para o fluxo atual. Ele permite que o backend leia com boa frequência quando o Arduino está enviando rápido.</p><h3 id="4-2-machineconsumer"><span class="emoji">🌐</span> 4.2 MachineConsumer</h3><p>O MachineConsumer é o WebSocket principal do backend.</p><p>Ele faz estas coisas:</p><ul class="clean-list"><li>Aceita conexão WebSocket</li><li>Adiciona o cliente ao grupo machine_updates</li><li>Cria uma thread para escutar a serial</li><li>Envia o estado inicial para o frontend</li><li>Recebe comandos do frontend</li><li>Envia respostas para o frontend</li></ul><p>A parte mais importante para o sensor lateral é o listener da serial:</p><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">start_serial_listener</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</pre></div>
+<p>Esse listener fica rodando em loop:</p><p>Verifica se a serial está conectada</p><div class="flow-card"><div class="flow-arrow">↓</div><div class="flow-step">Lê uma linha da serial</div><div class="flow-arrow">↓</div><div class="flow-step">Se a linha começa com POS:</div><div class="flow-arrow">↓</div><div class="flow-step">Converte o valor para float</div><div class="flow-arrow">↓</div><div class="flow-step">Chama broadcast_lateral_sensor_state(value)</div><div class="flow-step">O fluxo é este:</div></div><p>line = self.machine_service.serial_service.read_line()</p><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="nx">line</span><span class="p">.</span><span class="nx">startswith</span><span class="p">(</span><span class="s1">&#39;POS:&#39;</span><span class="p">)</span><span class="o">:</span>
+</pre></div>
+<p>value = float(line.replace(&#x27;POS:&#x27;, &#x27;&#x27;).strip())</p><div class="highlight"><pre><span></span>    <span class="bp">self</span><span class="o">.</span><span class="n">machine_state_service</span><span class="o">.</span><span class="n">broadcast_lateral_sensor_state</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</pre></div>
+<p>Esse é o ponto onde o Django transforma uma mensagem crua do Arduino em atualização para o frontend.</p><p>Durante os testes, você adicionou contadores para medir velocidade. Eles mostraram que, depois de ajustar o Arduino, o Django passou a receber cerca de 50 leituras por segundo.</p><p>Para a aplicação final, aqueles print de velocidade podem ser removidos, porque eram só para diagnóstico.</p><h3 id="4-3-machinestateservice"><span class="emoji">🗃️</span> 4.3 MachineStateService</h3><p>O MachineStateService cuida do estado da máquina.</p><p>Ele tem dois tipos de responsabilidade:</p><h2 id="1-atualizações-persistentes"><span class="emoji">📌</span> 1. Atualizações persistentes</h2><p>Exemplo: LED, velocidade do motor, estado salvo no banco</p><h2 id="2-atualizações-rápidas-em-tempo-real"><span class="emoji">📌</span> 2. Atualizações rápidas em tempo real</h2><p>Exemplo: sensor lateral</p><p>Para o sensor lateral, a função principal é:</p><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">broadcast_lateral_sensor_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</pre></div>
+<p>Ela envia o valor para o frontend sem salvar no banco:</p><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">broadcast_service</span><span class="o">.</span><span class="n">broadcast_machine_state</span><span class="p">(</span>
+    <span class="n">payload</span><span class="o">=</span><span class="p">{</span>
+</pre></div>
+<p>&#x27;lateral_misalignment_current&#x27;: value,</p><div class="highlight"><pre><span></span><span class="w">    </span><span class="p">}</span>
+</pre></div>
+<p>)</p><p>Isso é correto, porque leitura rápida de sensor não deve ficar salvando no banco a cada atualização.</p><p>O serviço também tem um controle de frequência:</p><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">lateral_broadcast_interval</span> <span class="o">=</span> <span class="mf">0.05</span>
+</pre></div>
+<p>Isso limita o envio para aproximadamente:</p><p>20 atualizações por segundo</p><p>Esse valor é bom para o frontend. Para uma tela visual, 20 a 30 atualizações por segundo já costuma parecer em tempo real.</p><h3 id="4-4-broadcastservice"><span class="emoji">📡</span> 4.4 BroadcastService</h3><p>O BroadcastService é uma camada simples para enviar mensagens para o grupo WebSocket.</p><p>Ele envia mensagens assim:</p><div class="highlight"><pre><span></span><span class="p">{</span>
+</pre></div>
+<p>&#x27;type&#x27;: &#x27;machine_update&#x27;, &#x27;payload&#x27;: payload,</p><div class="highlight"><pre><span></span><span class="p">}</span>
+</pre></div>
+<p>Então, quando o sensor lateral manda valor, o frontend recebe algo assim:</p><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;machine_update&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;lateral_misalignment_current&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">12.5</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<p>Esse formato é o padrão principal do seu sistema.</p><h2 id="5-frontend-react"><span class="emoji">⚛️</span> 5. Frontend React</h2><p>O frontend é organizado em algumas camadas:</p><ul class="clean-list"><li>services</li><li>hooks</li><li>context</li><li>reducer</li><li>pages</li><li>screen renderer</li><li>screens</li><li>components visuais</li></ul><h2 id="6-websocket-no-frontend"><span class="emoji">⚛️</span> 6. WebSocket no frontend</h2><h3 id="6-1-machinesocket-ts"><span class="emoji">📌</span> 6.1 machineSocket.ts</h3><p>Esse arquivo cria a conexão WebSocket com o Django.</p><p>Ele usa:</p><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">socket</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">WebSocket</span><span class="p">(</span><span class="s1">&#39;ws://127.0.0.1:8000/ws/machine/&#39;</span><span class="p">)</span>
+</pre></div>
+<p>Esse endereço aponta para o backend local.</p><p>O socket.onmessage faz:</p><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">data</span><span class="p">)</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">MachineMessage</span>
+</pre></div>
+<p>onMessage(data)</p><p>Ou seja:</p><p>Recebe mensagem crua do Django</p><div class="flow-card"><div class="flow-arrow">↓</div><div class="flow-step">Converte JSON para objeto</div><div class="flow-arrow">↓</div><div class="flow-step">Entrega para o callback onMessage</div></div><p>Esse arquivo não deve ter regra de negócio. Ele só cria, recebe e envia mensagens.</p><p>Também é importante manter:</p><div class="highlight"><pre><span></span><span class="nx">socket</span><span class="p">.</span><span class="nx">onclose</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</pre></div>
+<p>onClose()</p><div class="highlight"><pre><span></span><span class="p">}</span>
+</pre></div>
+<p>porque isso atualiza o estado de conexão quando o WebSocket fecha.</p><h3 id="6-2-usemachinesocket-ts"><span class="emoji">📌</span> 6.2 useMachineSocket.ts</h3><p>Esse hook usa o <code>machineSocket.ts</code>.</p><p>Ele faz:</p><ul class="clean-list"><li>Cria o socket</li><li>Guarda o socket em uma ref</li><li>Fecha o socket ao desmontar</li><li>Fornece a função send</li></ul><p>O papel dele é deixar o uso do WebSocket mais limpo dentro do contexto.</p><p>Ele recebe:</p><ul class="clean-list"><li>onConnected</li><li>onDisconnected</li><li>onMachineMessage</li></ul><p>E cria o socket assim:</p><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">socket</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">createMachineSocket</span><span class="p">(</span>
+</pre></div>
+<p>onConnected, onDisconnected, onMachineMessage, )</p><p>Esse arquivo está correto e deve continuar simples.</p><h2 id="7-machinecontext"><span class="emoji">🧩</span> 7. MachineContext</h2><p>O <code>MachineContext.tsx</code> é uma das partes mais importantes do frontend.</p><p>Ele guarda o estado global da máquina usando:</p><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">state</span><span class="p">,</span><span class="w"> </span><span class="nx">dispatch</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useReducer</span><span class="p">(</span><span class="nx">machineReducer</span><span class="p">,</span><span class="w"> </span><span class="nx">initialMachineState</span><span class="p">)</span>
+</pre></div>
+<p>Ele fornece para o resto da aplicação:</p><ul class="clean-list"><li>state</li><li>dispatch</li><li>send</li><li>sendCommand</li></ul><h3 id="7-1-o-que-o-machinecontext-faz"><span class="emoji">🧩</span> 7.1 O que o MachineContext faz</h3><p>Ele é responsável por:</p><ul class="clean-list"><li>Guardar estado global</li><li>Receber mensagens do WebSocket</li><li>Transformar mensagens em actions do reducer</li><li>Enviar comandos para o backend</li><li>Registrar logs</li><li>Controlar conexão/desconexão</li><li>Atualizar valor do sensor lateral</li><li>Atualizar histórico do gráfico</li></ul><h3 id="7-2-quando-chega-machine-update"><span class="emoji">📌</span> 7.2 Quando chega machine_update</h3><p>Quando chega uma mensagem:</p><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;machine_update&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;lateral_misalignment_current&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">10.5</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<p>O MachineContext deve:</p><ul class="clean-list"><li>Guardar o valor mais recente em uma ref</li><li>Marcar que já recebeu valor lateral</li><li>Fazer dispatch de MACHINE_UPDATED</li></ul><p>A ideia correta é:</p><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="kr">type</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">&#39;machine_update&#39;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">lateralValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">message</span><span class="p">.</span><span class="nx">payload</span><span class="p">.</span><span class="nx">lateral_misalignment_current</span>
+
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">lateralValue</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="kc">undefined</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</pre></div>
+<p>latestLateralValueRef.current = lateralValue hasReceivedLateralValueRef.current = true</p><div class="highlight"><pre><span></span><span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="nx">dispatch</span><span class="p">({</span>
+<span class="w">    </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;MACHINE_UPDATED&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="kt">message.payload</span><span class="p">,</span>
+<span class="w">  </span><span class="p">})</span>
+</pre></div>
+<p>return</p><div class="highlight"><pre><span></span><span class="p">}</span>
+</pre></div>
+<p>Isso faz duas coisas:</p><p>MACHINE_UPDATED → atualiza o valor atual mostrado na tela</p><p>latestLateralValueRef → guarda o último valor para alimentar o histórico do gráfico</p><h3 id="7-3-histórico-do-gráfico"><span class="emoji">📌</span> 7.3 Histórico do gráfico</h3><p>O histórico não deve ser atualizado a cada mensagem recebida, porque podem chegar muitas mensagens por segundo.</p><p>Por isso o seu projeto usa um setInterval:</p><div class="highlight"><pre><span></span><span class="nx">useEffect</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">intervalId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">window</span><span class="p">.</span><span class="nx">setInterval</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">hasReceivedLateralValueRef</span><span class="p">.</span><span class="nx">current</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</pre></div>
+<p>return</p><div class="highlight"><pre><span></span><span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">dispatch</span><span class="p">({</span>
+<span class="w">      </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;ADD_LATERAL_MISALIGNMENT_POINT&#39;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="kt">latestLateralValueRef.current</span><span class="p">,</span>
+<span class="w">    </span><span class="p">})</span>
+<span class="w">  </span><span class="p">},</span><span class="w"> </span><span class="mf">100</span><span class="p">)</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</pre></div>
+<p>window.clearInterval(intervalId)</p><div class="highlight"><pre><span></span><span class="w">  </span><span class="p">}</span>
+<span class="p">},</span><span class="w"> </span><span class="p">[])</span>
+</pre></div>
+<p>Esse trecho alimenta o gráfico a cada:</p><p>100ms = 10 pontos por segundo</p><p>Isso é bom porque:</p><p>O valor atual pode atualizar rápido O gráfico recebe pontos em frequência controlada A aplicação não fica pesada demais</p><h2 id="8-machinereducer"><span class="emoji">⚙️</span> 8. machineReducer</h2><p>O <code>machineReducer.ts</code> é a função que realmente altera o estado global.</p><p>Ele recebe:</p><ul class="clean-list"><li>state atual</li><li>action</li></ul><p>E retorna:</p><p>novo state</p><h3 id="8-1-estado-inicial"><span class="emoji">📌</span> 8.1 Estado inicial</h3><p>Seu estado inicial tem:</p><div class="highlight"><pre><span></span><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">initialMachineState</span><span class="o">:</span><span class="w"> </span><span class="kt">MachineState</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">connected</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">led</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Desligado&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">arduino_connected</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Desconectado&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">logs</span><span class="o">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nx">available_ports</span><span class="o">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nx">selected_port</span><span class="o">:</span><span class="w"> </span><span class="kt">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">speed_motor_roda</span><span class="o">:</span><span class="w"> </span><span class="kt">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">lateral_misalignment_current</span><span class="o">:</span><span class="w"> </span><span class="kt">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">lateral_misalignment_history</span><span class="o">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="p">}</span>
+</pre></div>
+<p>Isso significa:</p><ul class="clean-list"><li>Começa desconectado</li><li>LED desligado</li><li>Arduino desconectado</li><li>Sem logs</li><li>Sem porta selecionada</li><li>Velocidade 0</li><li>Desalinhamento atual 0</li><li>Histórico vazio</li></ul><h3 id="8-2-machine-updated"><span class="emoji">📌</span> 8.2 MACHINE_UPDATED</h3><p>Essa action atualiza partes do estado vindas do backend.</p><p>Ela trata:</p><ul class="clean-list"><li>LED</li><li>Arduino conectado</li><li>Porta selecionada</li><li>Velocidade do motor</li><li>Valor atual do desalinhamento</li></ul><p>Para o sensor lateral:</p><p>lateral_misalignment_current:</p><div class="highlight"><pre><span></span><span class="w">  </span><span class="nx">lateralValue</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="kc">undefined</span>
+</pre></div>
+<p>? lateralValue : state.lateral_misalignment_current,</p><p>Ou seja:</p><p>Se veio valor novo, atualiza Se não veio, mantém o valor antigo</p><p>Isso é importante porque machine_update pode vir só com uma parte do estado.</p><p>Exemplo:</p><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;machine_update&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;arduino_connected&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<p>Nesse caso, ele não deve apagar LED, velocidade ou sensor.</p><h3 id="8-3-add-lateral-misalignment-point"><span class="emoji">📌</span> 8.3 ADD_LATERAL_MISALIGNMENT_POINT</h3><p>Essa action adiciona pontos no histórico do gráfico:</p><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">newPoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">Date.now</span><span class="p">(),</span>
+<span class="w">  </span><span class="nx">value</span><span class="o">:</span><span class="w"> </span><span class="kt">action.payload</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+<p>Depois mantém apenas os últimos 100 pontos:</p><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">updatedHistory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+</pre></div>
+<p>...state.lateral_misalignment_history, newPoint,</p><div class="highlight"><pre><span></span><span class="p">].</span><span class="nx">slice</span><span class="p">(</span><span class="o">-</span><span class="mf">100</span><span class="p">)</span>
+</pre></div>
+<p>Isso evita que o array cresça infinitamente.</p><p>O gráfico então mostra só os pontos mais recentes.</p><h2 id="9-tipos-typescript"><span class="emoji">🧾</span> 9. Tipos TypeScript</h2><p>Seus tipos principais ficam em:</p><p>src/types/machine</p><h3 id="9-1-state-ts"><span class="emoji">📌</span> 9.1 state.ts</h3><p>Esse arquivo define o formato do estado global.</p><p>O sensor lateral usa:</p><div class="highlight"><pre><span></span><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">MisalignmentPoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</pre></div>
+<ul class="clean-list"><li>id: number</li><li>value: number</li></ul><div class="highlight"><pre><span></span><span class="p">}</span>
+</pre></div>
+<p>E no MachineState:</p><p>lateral_misalignment_current: number</p><div class="highlight"><pre><span></span><span class="nx">lateral_misalignment_history</span><span class="o">:</span><span class="w"> </span><span class="kt">MisalignmentPoint</span><span class="p">[]</span>
+</pre></div>
+<p>Isso significa:</p><p>lateral_misalignment_current → valor atual do sensor</p><p>lateral_misalignment_history → lista de pontos para o gráfico</p><h3 id="9-2-messages-ts"><span class="emoji">📌</span> 9.2 messages.ts</h3><p>Esse arquivo define o que o backend pode mandar para o frontend.</p><p>O principal é:</p><div class="highlight"><pre><span></span><span class="k">export</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="nx">MachineUpdatePayload</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">led?</span><span class="o">:</span><span class="w"> </span><span class="kt">LedBackendState</span>
+<span class="w">  </span><span class="nx">arduino_connected?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span>
+<span class="w">  </span><span class="nx">selected_port?</span><span class="o">:</span><span class="w"> </span><span class="kt">SelectedSerialPortState</span>
+<span class="w">  </span><span class="nx">speed_motor_roda?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span>
+<span class="w">  </span><span class="nx">lateral_misalignment_current?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span>
+<span class="p">}</span>
+</pre></div>
+<p>Todos os campos são opcionais porque o backend pode mandar só o que mudou.</p><p>Exemplo só do sensor:</p><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;lateral_misalignment_current&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">10.2</span>
+<span class="p">}</span>
+</pre></div>
+<p>Exemplo do LED:</p><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;led&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ON&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;arduino_connected&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
+</pre></div>
+<h3 id="9-3-actions-ts"><span class="emoji">📌</span> 9.3 actions.ts</h3><p>Esse arquivo define as actions internas do reducer.</p><p>Para o sensor lateral, as principais são:</p><div class="highlight"><pre><span></span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;SET_LATERAL_MISALIGNMENT_CURRENT&#39;</span><span class="p">;</span><span class="w"> </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="p">}</span>
+<span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;ADD_LATERAL_MISALIGNMENT_POINT&#39;</span><span class="p">;</span><span class="w"> </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+<p>Mas no fluxo normal atual, o valor atual é atualizado principalmente por:</p><p>MACHINE_UPDATED</p><p>E o histórico por:</p><p>ADD_LATERAL_MISALIGNMENT_POINT</p><h2 id="10-usehomemachinepage"><span class="emoji">🏠</span> 10. useHomeMachinePage</h2><p>Esse hook organiza os dados da página principal.</p><p>Ele junta:</p><ul class="clean-list"><li>state global</li><li>dados da tela</li><li>ações dos botões inferiores</li><li>funções de navegação</li><li>funções de porta serial</li></ul><p>Ele retorna coisas como:</p><ul class="clean-list"><li>currentScreen</li><li>logs</li><li>availablePorts</li><li>selectedPort</li><li>sidebarProps</li><li>statusBarProps</li><li>led</li><li>speedMotorRoda</li><li>lateralMisalignmentCurrent</li><li>lateralMisalignmentHistory</li><li>bottomActions</li></ul><p>Esse hook é importante porque deixa a HomePage mais limpa.</p><h3 id="10-1-bottomactions-com-usememo"><span class="emoji">📌</span> 10.1 bottomActions com useMemo</h3><p>Você colocou:</p><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">bottomActions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useMemo</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">getBottomActions</span><span class="p">({</span>
+</pre></div>
+<p>currentScreen, goToScreen, handleClearLogs, handleListSerialPorts, handleDisconnectPort,</p><div class="highlight"><pre><span></span><span class="w">  </span><span class="p">})</span>
+<span class="p">},</span><span class="w"> </span><span class="p">[</span>
+</pre></div>
+<p>currentScreen, goToScreen, handleClearLogs, handleListSerialPorts, handleDisconnectPort,</p><div class="highlight"><pre><span></span><span class="p">])</span>
+</pre></div>
+<p>Isso é bom porque evita recriar os botões inferiores toda vez que qualquer coisa muda.</p><p>Como você percebeu no React DevTools, isso ajuda a reduzir renderizações desnecessárias.</p><h2 id="11-homepage"><span class="emoji">🖥️</span> 11. HomePage</h2><p>A HomePage monta o painel principal.</p><p>Ela usa:</p><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="p">{</span>
+</pre></div>
+<p>currentScreen, logs, availablePorts, selectedPort, arduinoConnected, speedMotorRoda, lateralMisalignmentCurrent, lateralMisalignmentHistory, sidebarProps, statusBarProps, bottomActions, led, goToScreen, handleListSerialPorts, handleSelectPort,</p><div class="highlight"><pre><span></span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useHomeMachinePage</span><span class="p">()</span>
+</pre></div>
+<p>E monta:</p><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">PainelMachineTemplate</span>
+<span class="w">  </span><span class="na">screenMain</span><span class="o">=</span><span class="p">{...}</span>
+<span class="w">  </span><span class="na">bottomControls</span><span class="o">=</span><span class="p">{...}</span>
+<span class="p">/&gt;</span>
+</pre></div>
+<p>A estrutura visual é:</p><p>PainelMachineTemplate ├── ScreenMain │     ├── MachineScreenRenderer │     ├── ScreenSidebar │     ├── ScreenStatusBar │     └── MachinePainelControls │ └── BottomControls</p><h2 id="12-machinescreenrenderer"><span class="emoji">🎛️</span> 12. MachineScreenRenderer</h2><p>Esse componente escolhe qual tela mostrar.</p><p>Ele recebe:</p><p>currentScreen</p><p>E faz:</p><p>switch (currentScreen)</p><p>Exemplo:</p><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="s1">&#39;alignment&#39;</span><span class="o">:</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="p">&lt;</span><span class="nt">LateralAlignmentScreen</span>
+<span class="w">      </span><span class="na">value</span><span class="o">=</span><span class="p">{</span><span class="nx">lateralMisalignmentCurrent</span><span class="p">}</span>
+<span class="w">      </span><span class="na">history</span><span class="o">=</span><span class="p">{</span><span class="nx">lateralMisalignmentHistory</span><span class="p">}</span>
+<span class="w">    </span><span class="p">/&gt;</span>
+</pre></div>
+<p>)</p><p>Ou seja:</p><p>Se a tela atual for alignment</p><div class="flow-card"><div class="flow-arrow">↓</div><div class="flow-step">Mostra LateralAlignmentScreen</div><div class="flow-arrow">↓</div><div class="flow-step">Passa valor atual e histórico</div></div><p>Esse componente é o lugar certo para adicionar novas telas.</p><h2 id="13-lateralalignmentscreen"><span class="emoji">📏</span> 13. LateralAlignmentScreen</h2><p>Essa é a tela do alinhamento lateral.</p><p>Ela recebe:</p><ul class="clean-list"><li>value</li><li>history</li></ul><p>E calcula:</p><ul class="clean-list"><li>Valor máximo</li><li>Valor mínimo</li><li>Média</li></ul><p>Com:</p><p>useMemo</p><p>Isso é bom porque o cálculo só refaz quando o history muda.</p><p>Ela renderiza:</p><ul class="clean-list"><li>Título</li><li>Gráfico de oscilação</li><li>Card Atual</li><li>Card Máximo</li><li>Card Mínimo</li><li>Card Média</li></ul><p>E passa para o gráfico:</p><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">OscillationChart</span>
+</pre></div>
+<p>title=&quot;Gráfico de oscilação&quot;</p><div class="highlight"><pre><span></span><span class="w">  </span><span class="nx">value</span><span class="o">=</span><span class="p">{</span><span class="nx">value</span><span class="p">}</span>
+<span class="w">  </span><span class="nx">points</span><span class="o">=</span><span class="p">{</span><span class="nx">history</span><span class="p">}</span>
+<span class="w">  </span><span class="nx">minValue</span><span class="o">=</span><span class="p">{</span><span class="o">-</span><span class="mf">15</span><span class="p">}</span>
+<span class="w">  </span><span class="nx">maxValue</span><span class="o">=</span><span class="p">{</span><span class="mf">15</span><span class="p">}</span>
+</pre></div>
+<p>unit=&quot; mm&quot;</p><div class="highlight"><pre><span></span><span class="err">/&gt;</span>
+</pre></div>
+<h2 id="14-oscillationchart"><span class="emoji">📈</span> 14. OscillationChart</h2><p>Esse componente desenha o gráfico.</p><p>Ele recebe:</p><ul class="clean-list"><li>title</li><li>value</li><li>points</li><li>minValue</li><li>maxValue</li><li>unit</li></ul><p>Ele mostra:</p><ul class="clean-list"><li>Título</li><li>Valor atual</li><li>SVG do gráfico</li><li>Linha central</li><li>Texto de escala</li><li>Polyline com histórico</li></ul><p>A linha do gráfico vem de:</p><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">polyline</span>
+<span class="w">  </span><span class="na">points</span><span class="o">=</span><span class="p">{</span><span class="nx">linePoints</span><span class="p">}</span>
+</pre></div>
+<p>className=&quot;oscillation-chart-line&quot;</p><div class="highlight"><pre><span></span><span class="err">/&gt;</span>
+</pre></div>
+<p>O linePoints é gerado a partir do histórico:</p><p>points.map(...)</p><p>Você já colocou useMemo para evitar recalcular desnecessariamente.</p><h2 id="15-como-criar-uma-nova-tela"><span class="emoji">➕</span> 15. Como criar uma nova tela</h2><p>Suponha que você queira criar uma nova tela chamada:</p><p>VerticalAlignmentScreen</p><p>O passo a passo seria:</p><p>Passo 1 — criar o componente</p><p>Criar arquivo:</p><p><code>src/components/screens/VerticalAlignmentScreen/VerticalAlignmentScreen.tsx</code></p><p>Exemplo:</p><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="s1">&#39;./VerticalAlignmentScreen.css&#39;</span>
+
+<span class="kr">type</span><span class="w"> </span><span class="nx">VerticalAlignmentScreenProps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</pre></div>
+<p>value: number</p><div class="highlight"><pre><span></span><span class="p">}</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">VerticalAlignmentScreen</span><span class="p">({</span>
+</pre></div>
+<p>value,</p><div class="highlight"><pre><span></span><span class="p">}</span><span class="o">:</span><span class="w"> </span><span class="nx">VerticalAlignmentScreenProps</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="p">&lt;</span><span class="nt">div</span><span class="w"> </span><span class="na">className</span><span class="o">=</span><span class="s">&quot;screen-page vertical-alignment-screen&quot;</span><span class="p">&gt;</span>
+<span class="w">      </span><span class="p">&lt;</span><span class="nt">h2</span><span class="w"> </span><span class="na">className</span><span class="o">=</span><span class="s">&quot;screen-page-title&quot;</span><span class="p">&gt;</span><span class="nx">Alinhamento</span><span class="w"> </span><span class="nx">vertical</span><span class="p">&lt;/</span><span class="nt">h2</span><span class="p">&gt;</span>
+
+<span class="w">      </span><span class="p">&lt;</span><span class="nt">div</span><span class="w"> </span><span class="na">className</span><span class="o">=</span><span class="s">&quot;vertical-alignment-card&quot;</span><span class="p">&gt;</span>
+<span class="w">        </span><span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span><span class="nx">Valor</span><span class="w"> </span><span class="nx">atual</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="w">        </span><span class="p">&lt;</span><span class="nt">strong</span><span class="p">&gt;{</span><span class="nx">value</span><span class="p">.</span><span class="nx">toFixed</span><span class="p">(</span><span class="mf">2</span><span class="p">)}</span><span class="w"> </span><span class="nx">mm</span><span class="p">&lt;/</span><span class="nt">strong</span><span class="p">&gt;</span>
+<span class="w">      </span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</pre></div>
+<p>)</p><div class="highlight"><pre><span></span><span class="p">}</span>
+</pre></div>
+<p>Passo 2 — adicionar tipo de tela</p><p>No arquivo de navegação, provavelmente:</p><p><code>src/types/navigation.ts</code></p><p>Você teria algo assim:</p><div class="highlight"><pre><span></span><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">AppScreen</span><span class="w"> </span><span class="o">=</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;start&#39;</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;menu&#39;</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;led&#39;</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;motors&#39;</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;logs&#39;</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;serial&#39;</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;alignment&#39;</span>
+</pre></div>
+<p>Adicione:</p><div class="highlight"><pre><span></span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;verticalAlignment&#39;</span>
+</pre></div>
+<p>Ficaria:</p><div class="highlight"><pre><span></span><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">AppScreen</span><span class="w"> </span><span class="o">=</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;start&#39;</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;menu&#39;</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;led&#39;</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;motors&#39;</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;logs&#39;</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;serial&#39;</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;alignment&#39;</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;verticalAlignment&#39;</span>
+</pre></div>
+<p>Passo 3 — adicionar no menu</p><p>No MachineScreenRenderer, dentro do MenuScreen, você teria que passar uma nova função para abrir a tela.</p><p>Hoje você tem algo como:</p><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">MenuScreen</span>
+<span class="w">  </span><span class="na">onSelectLed</span><span class="o">=</span><span class="p">{()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">onGoToScreen</span><span class="p">(</span><span class="s1">&#39;led&#39;</span><span class="p">)}</span>
+<span class="w">  </span><span class="na">onSelectLogs</span><span class="o">=</span><span class="p">{()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">onGoToScreen</span><span class="p">(</span><span class="s1">&#39;logs&#39;</span><span class="p">)}</span>
+<span class="w">  </span><span class="na">onSelectSerial</span><span class="o">=</span><span class="p">{</span><span class="nx">onListSerialPorts</span><span class="p">}</span>
+<span class="w">  </span><span class="na">onSelectMotors</span><span class="o">=</span><span class="p">{()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">onGoToScreen</span><span class="p">(</span><span class="s1">&#39;motors&#39;</span><span class="p">)}</span>
+<span class="w">  </span><span class="na">onSelectAlignment</span><span class="o">=</span><span class="p">{()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">onGoToScreen</span><span class="p">(</span><span class="s1">&#39;alignment&#39;</span><span class="p">)}</span>
+<span class="p">/&gt;</span>
+</pre></div>
+<p>Você adicionaria:</p><div class="highlight"><pre><span></span><span class="nx">onSelectVerticalAlignment</span><span class="o">=</span><span class="p">{()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">onGoToScreen</span><span class="p">(</span><span class="s1">&#39;verticalAlignment&#39;</span><span class="p">)}</span>
+</pre></div>
+<p>Mas isso exige também alterar o MenuScreen para receber essa prop e criar o botão.</p><p>Passo 4 — importar a nova tela</p><p>No MachineScreenRenderer:</p><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">VerticalAlignmentScreen</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;./VerticalAlignmentScreen/VerticalAlignmentScreen&#39;</span>
+</pre></div>
+<p>Passo 5 — adicionar case no switch</p><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="s1">&#39;verticalAlignment&#39;</span><span class="o">:</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="p">&lt;</span><span class="nt">VerticalAlignmentScreen</span>
+<span class="w">      </span><span class="na">value</span><span class="o">=</span><span class="p">{</span><span class="nx">verticalMisalignmentCurrent</span><span class="p">}</span>
+<span class="w">    </span><span class="p">/&gt;</span>
+</pre></div>
+<p>)</p><p>Claro que antes você precisaria criar esse valor no state.</p><h2 id="16-como-adicionar-um-novo-valor-vindo-do-arduino"><span class="emoji">🔌</span> 16. Como adicionar um novo valor vindo do Arduino</h2><p>Suponha que você queira adicionar sensor vertical.</p><p>O Arduino poderia mandar:</p><p><code>VERT:3.50</code></p><p>O Django teria que ler isso no MachineConsumer:</p><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="nx">line</span><span class="p">.</span><span class="nx">startswith</span><span class="p">(</span><span class="s1">&#39;VERT:&#39;</span><span class="p">)</span><span class="o">:</span>
+</pre></div>
+<p>value = float(line.replace(&#x27;VERT:&#x27;, &#x27;&#x27;).strip())</p><div class="highlight"><pre><span></span>    <span class="bp">self</span><span class="o">.</span><span class="n">machine_state_service</span><span class="o">.</span><span class="n">broadcast_vertical_sensor_state</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</pre></div>
+<p>Depois criar no MachineStateService:</p><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">broadcast_vertical_sensor_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">broadcast_service</span><span class="o">.</span><span class="n">broadcast_machine_state</span><span class="p">(</span>
+        <span class="n">payload</span><span class="o">=</span><span class="p">{</span>
+</pre></div>
+<p>&#x27;vertical_misalignment_current&#x27;: value,</p><div class="highlight"><pre><span></span><span class="w">        </span><span class="p">}</span>
+</pre></div>
+<p>)</p><p>No frontend, adicionar em MachineUpdatePayload:</p><div class="highlight"><pre><span></span><span class="nx">vertical_misalignment_current?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span>
+</pre></div>
+<p>Adicionar no MachineState:</p><p>vertical_misalignment_current: number</p><div class="highlight"><pre><span></span><span class="nx">vertical_misalignment_history</span><span class="o">:</span><span class="w"> </span><span class="kt">MisalignmentPoint</span><span class="p">[]</span>
+</pre></div>
+<p>Adicionar no initialMachineState:</p><div class="highlight"><pre><span></span><span class="nx">vertical_misalignment_current</span><span class="o">:</span><span class="w"> </span><span class="kt">0</span><span class="p">,</span>
+<span class="nx">vertical_misalignment_history</span><span class="o">:</span><span class="w"> </span><span class="p">[],</span>
+</pre></div>
+<p>Adicionar no reducer:</p><p>vertical_misalignment_current:</p><div class="highlight"><pre><span></span><span class="w">  </span><span class="nx">action</span><span class="p">.</span><span class="nx">payload</span><span class="p">.</span><span class="nx">vertical_misalignment_current</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="kc">undefined</span>
+</pre></div>
+<p>? action.payload.vertical_misalignment_current : state.vertical_misalignment_current,</p><p>E se quiser histórico:</p><div class="highlight"><pre><span></span><span class="k">case</span><span class="w"> </span><span class="s1">&#39;ADD_VERTICAL_MISALIGNMENT_POINT&#39;</span><span class="o">:</span>
+</pre></div>
+<p>Depois passar pela HomePage, MachineScreenRenderer e tela nova.</p><h2 id="17-como-criar-um-novo-comando-para-o-arduino"><span class="emoji">🔌</span> 17. Como criar um novo comando para o Arduino</h2><p>Exemplo: calibrar sensor lateral.</p><p>Você já tem comando no TypeScript:</p><div class="highlight"><pre><span></span><span class="k">export</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="nx">LateralSensorCalibrateZeroCommand</span><span class="w"> </span><span class="p">{</span>
+</pre></div>
+<p>action: &#x27;lateral_sensor_calibrate_zero&#x27;</p><div class="highlight"><pre><span></span><span class="p">}</span>
+</pre></div>
+<p>O fluxo para comando é:</p><p>Botão no React</p><div class="flow-card"><div class="flow-arrow">↓</div></div><div class="highlight"><pre><span></span><span class="nx">sendCommand</span><span class="p">({</span><span class="w"> </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;...&#39;</span><span class="w"> </span><span class="p">})</span>
+</pre></div>
+<div class="flow-card"><div class="flow-arrow">↓</div><div class="flow-step">MachineContext</div><div class="flow-arrow">↓</div><div class="flow-step">useMachineSocket</div><div class="flow-arrow">↓</div><div class="flow-step">machineSocket.ts</div><div class="flow-arrow">↓</div><div class="flow-step">Django receive()</div><div class="flow-arrow">↓</div><div class="flow-step">MachineService.handle_command()</div><div class="flow-arrow">↓</div><div class="flow-step">SerialService.send_command()</div><div class="flow-arrow">↓</div><div class="flow-step">Arduino handleCommand()</div></div><p>Para um comando novo funcionar, ele precisa existir nos dois lados.</p><h3 id="17-1-no-frontend"><span class="emoji">⚛️</span> 17.1 No frontend</h3><p>Criar uma função:</p><div class="highlight"><pre><span></span><span class="kd">function</span><span class="w"> </span><span class="nx">handleCalibrateSensor</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">sendCommand</span><span class="p">({</span>
+<span class="w">    </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;lateral_sensor_calibrate_zero&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="p">})</span>
+<span class="p">}</span>
+</pre></div>
+<h3 id="17-2-no-backend"><span class="emoji">🧠</span> 17.2 No backend</h3><p>No MachineService.handle_command, precisa mapear:</p><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;lateral_sensor_calibrate_zero&#39;</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">serial_service</span><span class="o">.</span><span class="n">send_command</span><span class="p">(</span><span class="s1">&#39;LATERAL_SENSOR_CALIBRATE_ZERO&#39;</span><span class="p">)</span>
+</pre></div>
+<h3 id="17-3-no-arduino"><span class="emoji">🔌</span> 17.3 No Arduino</h3><p>No handleCommand:</p><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">command</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;LATERAL_SENSOR_CALIBRATE_ZERO&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">calibrateLateralSensorZero</span><span class="p">();</span>
+</pre></div>
+<p>return;</p><div class="highlight"><pre><span></span><span class="p">}</span>
+</pre></div>
+<p>E criar a função:</p><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">calibrateLateralSensorZero</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</pre></div>
+<p>// lógica de calibração</p><div class="highlight"><pre><span></span><span class="w">  </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">&quot;{</span><span class="se">\&quot;</span><span class="s">success</span><span class="se">\&quot;</span><span class="s">:true,</span><span class="se">\&quot;</span><span class="s">type</span><span class="se">\&quot;</span><span class="s">:</span><span class="se">\&quot;</span><span class="s">info</span><span class="se">\&quot;</span><span class="s">,</span><span class="se">\&quot;</span><span class="s">message</span><span class="se">\&quot;</span><span class="s">:</span><span class="se">\&quot;</span><span class="s">Sensor lateral calibrado</span><span class="se">\&quot;</span><span class="s">}&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<h2 id="18-padrão-ideal-para-criar-novos-componentes"><span class="emoji">🧱</span> 18. Padrão ideal para criar novos componentes</h2><p>Para não quebrar a aplicação, siga sempre esta ordem:</p><h2 id="1-criar-o-componente-visual-puro"><span class="emoji">📌</span> 1. Criar o componente visual puro</h2><p>Primeiro crie um componente que só recebe props.</p><p>Exemplo:</p><div class="highlight"><pre><span></span><span class="kr">type</span><span class="w"> </span><span class="nx">SensorValueCardProps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</pre></div>
+<ul class="clean-list"><li>label: string</li><li>value: number</li></ul><div class="highlight"><pre><span></span><span class="w">  </span><span class="nx">unit?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">SensorValueCard</span><span class="p">({</span>
+</pre></div>
+<p>label, value,</p><div class="highlight"><pre><span></span><span class="w">  </span><span class="nx">unit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39; mm&#39;</span><span class="p">,</span>
+<span class="p">}</span><span class="o">:</span><span class="w"> </span><span class="nx">SensorValueCardProps</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="p">&lt;</span><span class="nt">div</span><span class="w"> </span><span class="na">className</span><span class="o">=</span><span class="s">&quot;sensor-value-card&quot;</span><span class="p">&gt;</span>
+<span class="w">      </span><span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;{</span><span class="nx">label</span><span class="p">}&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="w">      </span><span class="p">&lt;</span><span class="nt">strong</span><span class="p">&gt;{</span><span class="nx">value</span><span class="p">.</span><span class="nx">toFixed</span><span class="p">(</span><span class="mf">2</span><span class="p">)}{</span><span class="nx">unit</span><span class="p">}&lt;/</span><span class="nt">strong</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</pre></div>
+<p>)</p><div class="highlight"><pre><span></span><span class="p">}</span>
+</pre></div>
+<p>Esse componente não deve acessar contexto, WebSocket ou reducer.</p><h2 id="2-testar-com-valor-fixo"><span class="emoji">📌</span> 2. Testar com valor fixo</h2><p>Antes de ligar no state real, teste assim:</p><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">SensorValueCard</span><span class="w"> </span><span class="na">label</span><span class="o">=</span><span class="s">&quot;Teste&quot;</span><span class="w"> </span><span class="na">value</span><span class="o">=</span><span class="p">{</span><span class="mf">12.34</span><span class="p">}</span><span class="w"> </span><span class="p">/&gt;</span>
+</pre></div>
+<p>Se aparecer certo, o visual está ok.</p><h2 id="3-passar-valor-por-props"><span class="emoji">📌</span> 3. Passar valor por props</h2><p>Depois passe o valor real:</p><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">SensorValueCard</span>
+</pre></div>
+<p>label=&quot;Desalinhamento atual&quot;</p><div class="highlight"><pre><span></span><span class="w">  </span><span class="nx">value</span><span class="o">=</span><span class="p">{</span><span class="nx">lateralMisalignmentCurrent</span><span class="p">}</span>
+<span class="err">/&gt;</span>
+</pre></div>
+<h2 id="4-só-depois-mexer-no-backend-ou-reducer"><span class="emoji">🧠</span> 4. Só depois mexer no backend ou reducer</h2><p>Não misture tudo de uma vez.</p><p>A ordem segura é:</p><p>Componente visual</p><div class="flow-card"><div class="flow-arrow">↓</div><div class="flow-step">Props</div><div class="flow-arrow">↓</div><div class="flow-step">State</div><div class="flow-arrow">↓</div><div class="flow-step">Reducer</div><div class="flow-arrow">↓</div><div class="flow-step">Context</div><div class="flow-arrow">↓</div><div class="flow-step">WebSocket</div><div class="flow-arrow">↓</div><div class="flow-step">Backend</div><div class="flow-arrow">↓</div><div class="flow-step">Arduino</div></div><h2 id="19-como-evitar-renderização-desnecessária"><span class="emoji">🚀</span> 19. Como evitar renderização desnecessária</h2><p>Você usou o React DevTools para ver quando componentes renderizam.</p><p>Você percebeu que muitos componentes piscavam quando o sensor atualizava.</p><p>Isso acontece porque:</p><p>sensor atualiza state global</p><div class="flow-card"><div class="flow-arrow">↓</div><div class="flow-step">context muda</div><div class="flow-arrow">↓</div><div class="flow-step">HomePage renderiza</div><div class="flow-arrow">↓</div><div class="flow-step">componentes filhos podem renderizar</div></div><p>Para reduzir isso, você começou a usar:</p><ul class="clean-list"><li>memo</li><li>useMemo</li><li>useCallback</li></ul><h3 id="19-1-quando-usar-memo"><span class="emoji">📌</span> 19.1 Quando usar memo</h3><p>Use memo em componentes que recebem props simples e não precisam renderizar toda hora.</p><p>Bons candidatos:</p><ul class="clean-list"><li>ScreenSidebar</li><li>ScreenStatusBar</li><li>BottomControls</li><li>MachinePainelControls</li><li>PainelControls</li></ul><p>Exemplo:</p><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">memo</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;react&#39;</span>
+
+<span class="kd">function</span><span class="w"> </span><span class="nx">ScreenStatusBarComponent</span><span class="p">({</span>
+</pre></div>
+<p>arduinoConnection, led,</p><div class="highlight"><pre><span></span><span class="p">}</span><span class="o">:</span><span class="w"> </span><span class="nx">ScreenStatusBarProps</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="p">&lt;</span><span class="nt">div</span><span class="w"> </span><span class="na">className</span><span class="o">=</span><span class="s">&quot;screen-statusbar&quot;</span><span class="p">&gt;</span>
+<span class="w">      </span><span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span><span class="nx">Arduino</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="nx">arduinoConnection</span><span class="p">}&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="w">      </span><span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span><span class="nx">LED</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="nx">led</span><span class="p">}&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</pre></div>
+<p>)</p><div class="highlight"><pre><span></span><span class="p">}</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">ScreenStatusBar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">memo</span><span class="p">(</span><span class="nx">ScreenStatusBarComponent</span><span class="p">)</span>
+</pre></div>
+<h3 id="19-2-quando-usar-usememo"><span class="emoji">📌</span> 19.2 Quando usar useMemo</h3><p>Use useMemo quando você calcula algo derivado de dados.</p><p>Exemplo:</p><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">maxValue</span><span class="p">,</span><span class="w"> </span><span class="nx">minValue</span><span class="p">,</span><span class="w"> </span><span class="nx">averageValue</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useMemo</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</pre></div>
+<p>...</p><div class="highlight"><pre><span></span><span class="p">},</span><span class="w"> </span><span class="p">[</span><span class="nx">history</span><span class="p">])</span>
+</pre></div>
+<p>Isso evita recalcular máximo, mínimo e média em renderizações que não mudam o histórico.</p><h3 id="19-3-quando-usar-usecallback"><span class="emoji">📌</span> 19.3 Quando usar useCallback</h3><p>Use useCallback em funções passadas para componentes filhos.</p><p>Exemplo:</p><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">goToScreen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useCallback</span><span class="p">((</span><span class="nx">screen</span><span class="o">:</span><span class="w"> </span><span class="kt">AppScreen</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</pre></div>
+<p>setCurrentScreen(screen)</p><div class="highlight"><pre><span></span><span class="p">},</span><span class="w"> </span><span class="p">[])</span>
+</pre></div>
+<p>Isso ajuda o memo dos componentes filhos a funcionar melhor.</p><h2 id="20-o-que-aprendemos-sobre-velocidade-hoje"><span class="emoji">⏱️</span> 20. O que aprendemos sobre velocidade hoje</h2><p>Durante os testes, descobrimos:</p><ul class="clean-list"><li>Antes</li><li>Arduino enviava a cada 100ms ou 120ms</li><li>↓</li><li>Django recebia 8 a 11 leituras/s</li><li>↓</li><li>Frontend parecia atrasado</li><li>Depois</li></ul><p>Mudando o Arduino para:</p><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">unsigned</span><span class="w"> </span><span class="kr">long</span><span class="w"> </span><span class="nx">SENSOR_INTERVAL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">20</span><span class="p">;</span>
+</pre></div>
+<p>O Django passou a receber:</p><p>aproximadamente 50 leituras/s</p><p>Depois vimos que o frontend também recebia rápido.</p><p>Então o gargalo inicial era o intervalo do Arduino.</p><h2 id="21-frequência-recomendada"><span class="emoji">📊</span> 21. Frequência recomendada</h2><p>Para seu projeto, uma boa configuração é:</p><ul class="clean-list"><li>Arduino lendo/enviando: 20ms</li><li>Django limitando broadcast: 0.05s</li><li>Histórico do gráfico no frontend: 100ms</li></ul><p>Isso significa:</p><p>Arduino → Django: até 50/s Django → Frontend: até 20/s Histórico do gráfico: 10 pontos/s Valor atual: atualiza quando chega machine_update</p><p>Essa combinação é equilibrada.</p><p>Ela evita:</p><ul class="clean-list"><li>travamento</li><li>renderização excessiva</li><li>gráfico pesado</li><li>WebSocket sobrecarregado</li></ul><h2 id="22-checklist-para-criar-uma-nova-feature"><span class="emoji">✅</span> 22. Checklist para criar uma nova feature</h2><p>Sempre que for criar uma nova função, siga este checklist:</p><p>Frontend</p><ul class="checklist"><li>Criar tipo no state.ts, se for estado global</li><li>Criar campo no MachineState</li><li>Adicionar valor no initialMachineState</li><li>Adicionar campo no MachineUpdatePayload, se vier do backend</li><li>Adicionar action no actions.ts, se necessário</li><li>Atualizar machineReducer</li><li>Expor valor no useHomeMachinePage</li><li>Passar prop na HomePage</li><li>Passar prop no MachineScreenRenderer</li><li>Criar tela ou componente visual</li></ul><p>Backend</p><ul class="checklist"><li>Arduino envia mensagem no formato combinado</li><li>SerialService consegue ler a linha</li><li>MachineConsumer interpreta a linha</li><li>MachineStateService cria função de broadcast/update</li><li>BroadcastService envia machine_update</li><li>MachineService trata comandos, se for comando</li></ul><p>Arduino</p><ul class="checklist"><li>Criar leitura ou ação</li><li>Criar função específica</li><li>Criar comando no handleCommand, se necessário</li><li>Enviar resposta em formato previsível</li><li>Evitar delay() desnecessário</li><li>Usar millis() para tarefas repetitivas</li></ul><h2 id="23-padrão-recomendado-de-mensagens"><span class="emoji">✉️</span> 23. Padrão recomendado de mensagens</h2><p>Arduino para Django</p><p>Para sensor rápido:</p><p><code>POS:12.50</code></p><p>Para JSON de resposta de comando:</p><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;success&quot;</span><span class="p">:</span><span class="kc">true</span><span class="p">,</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;led_status&quot;</span><span class="p">,</span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="s2">&quot;ON&quot;</span><span class="p">,</span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="s2">&quot;LED ligado&quot;</span><span class="p">}</span>
+</pre></div>
+<p>Django para React</p><p>Sempre que atualizar estado:</p><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;machine_update&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;campo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;valor&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<p>Para logs:</p><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;log&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;received&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mensagem...&quot;</span>
+<span class="p">}</span>
+</pre></div>
+<p>Para erro:</p><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;error&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Erro...&quot;</span>
+<span class="p">}</span>
+</pre></div>
+<h2 id="24-regra-de-ouro-do-seu-projeto"><span class="emoji">🏆</span> 24. Regra de ouro do seu projeto</h2><p>A regra mais importante é:</p><p>Componente visual não deve saber de WebSocket, Django ou Arduino.</p><p>Componente visual deve receber props.</p><p>Exemplo bom:</p><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">LateralAlignmentScreen</span>
+<span class="w">  </span><span class="na">value</span><span class="o">=</span><span class="p">{</span><span class="nx">lateralMisalignmentCurrent</span><span class="p">}</span>
+<span class="w">  </span><span class="na">history</span><span class="o">=</span><span class="p">{</span><span class="nx">lateralMisalignmentHistory</span><span class="p">}</span>
+<span class="p">/&gt;</span>
+</pre></div>
+<p>Exemplo ruim:</p><p>LateralAlignmentScreen acessando WebSocket diretamente</p><p>O fluxo correto é:</p><p>WebSocket</p><div class="flow-card"><div class="flow-arrow">↓</div><div class="flow-step">Context</div><div class="flow-arrow">↓</div><div class="flow-step">Reducer</div><div class="flow-arrow">↓</div><div class="flow-step">Hook da página</div><div class="flow-arrow">↓</div><div class="flow-step">Props</div><div class="flow-arrow">↓</div><div class="flow-step">Componente visual</div></div><h2 id="25-resumo-final-do-fluxo-do-sensor-lateral"><span class="emoji">🔄</span> 25. Resumo final do fluxo do sensor lateral</h2><h2 id="1-arduino-lê-o-sensor-no-pino-a0"><span class="emoji">🔌</span> 1. Arduino lê o sensor no pino A0</h2><h2 id="2-arduino-converte-raw-para-milímetros"><span class="emoji">🔌</span> 2. Arduino converte RAW para milímetros</h2><h2 id="3-arduino-envia"><span class="emoji">🔌</span> 3. Arduino envia:</h2><p><code>POS:valor</code></p><h2 id="4-django-consumer-lê-a-linha-pela-serial"><span class="emoji">📌</span> 4. Django Consumer lê a linha pela serial</h2><h2 id="5-se-a-linha-começa-com-pos"><span class="emoji">📌</span> 5. Se a linha começa com POS:</h2><p>converte para float</p><h2 id="6-machinestateservice-envia"><span class="emoji">🗃️</span> 6. MachineStateService envia:</h2><p>lateral_misalignment_current</p><h2 id="7-broadcastservice-manda"><span class="emoji">📡</span> 7. BroadcastService manda:</h2><p>type: machine_update</p><h2 id="8-machinesocket-ts-recebe-pelo-websocket"><span class="emoji">🌐</span> 8. machineSocket.ts recebe pelo WebSocket</h2><h2 id="9-usemachinesocket-repassa-para-machinecontext"><span class="emoji">🧩</span> 9. useMachineSocket repassa para MachineContext</h2><h2 id="10-machinecontext"><span class="emoji">🧩</span> 10. MachineContext:</h2><ul class="clean-list"><li>- guarda último valor em ref</li><li>- dispara MACHINE_UPDATED</li><li>- alimenta histórico a cada 100ms</li></ul><h2 id="11-machinereducer"><span class="emoji">⚙️</span> 11. machineReducer:</h2><p>- atualiza lateral_misalignment_current - adiciona pontos em lateral_misalignment_history</p><h2 id="12-usehomemachinepage-expõe-os-dados"><span class="emoji">🏠</span> 12. useHomeMachinePage expõe os dados</h2><h2 id="13-homepage-passa-para-machinescreenrenderer"><span class="emoji">🖥️</span> 13. HomePage passa para MachineScreenRenderer</h2><h2 id="14-machinescreenrenderer-escolhe-lateralalignmentscreen"><span class="emoji">🎛️</span> 14. MachineScreenRenderer escolhe LateralAlignmentScreen</h2><h2 id="15-lateralalignmentscreen-calcula-máximo-mínimo-e-média"><span class="emoji">📏</span> 15. LateralAlignmentScreen calcula máximo, mínimo e média</h2><h2 id="16-oscillationchart-desenha-o-gráfico"><span class="emoji">📈</span> 16. OscillationChart desenha o gráfico</h2>
+    <div class="footer">Documento gerado a partir do conteúdo enviado e preparado para impressão em papel A4.</div>
+  </main>
+</body>
+</html>

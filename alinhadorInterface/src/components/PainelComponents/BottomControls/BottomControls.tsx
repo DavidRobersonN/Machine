@@ -1,10 +1,12 @@
+import { memo } from 'react'
+
 import type { BottomAction } from '../../../types/bottomControls'
 
 type BottomControlsProps = {
   actions: BottomAction[]
 }
 
-export function BottomControls({ actions }: BottomControlsProps) {
+function BottomControlsComponent({ actions }: BottomControlsProps) {
   return (
     <>
       {actions.map((action, index) => (
@@ -19,3 +21,5 @@ export function BottomControls({ actions }: BottomControlsProps) {
     </>
   )
 }
+
+export const BottomControls = memo(BottomControlsComponent)

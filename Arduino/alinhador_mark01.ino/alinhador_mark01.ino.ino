@@ -40,13 +40,21 @@ bool motorRodaClockwise = true;
 // SENSOR LATERAL
 // =======================
 
-const unsigned long SENSOR_INTERVAL = 100;
+// 20 ms = aproximadamente 50 leituras/envios por segundo.
+const unsigned long SENSOR_INTERVAL = 20;
+
 unsigned long lastSensorReadTime = 0;
 
-// Conversão e amplificação
-const float SENSOR_RANGE_MM = 70.0;
-const float SENSOR_BASELINE_MM = 0.20;
-const float SENSOR_GAIN = 5.0;
+// O sensor vai de:
+// RAW 0    = -15 mm
+// RAW 1023 = +15 mm
+const float SENSOR_RANGE_MM = 30.0;
+const float SENSOR_HALF_RANGE_MM = SENSOR_RANGE_MM / 2.0;
+
+float lastSentSensorMm = 999.0;
+
+// Controla se o Arduino deve ou não enviar POS pela Serial.
+bool lateralSensorReadingEnabled = false;
 
 // =======================
 // ESTADOS
@@ -54,6 +62,10 @@ const float SENSOR_GAIN = 5.0;
 
 bool ledState = false;
 String inputBuffer = "";
+
+// =======================
+// SETUP
+// =======================
 
 void setup() {
   Serial.begin(9600);
@@ -70,18 +82,34 @@ void setup() {
 
   delay(300);
 
-  Serial.println("{\"success\":true,\"type\":\"startup\",\"message\":\"Arduino iniciado com sensor lateral\"}");
+  Serial.println("{\"success\":true,\"type\":\"startup\",\"message\":\"arduino_iniciado_com_sensor_lateral\"}");
+  Serial.flush();
 }
+
+// =======================
+// LOOP
+// =======================
 
 void loop() {
   readSerialCommands();
   updateMotorRoda();
-  updateLateralSensor();
+
+  if (lateralSensorReadingEnabled) {
+    updateLateralSensor();
+  }
 }
 
 // =======================
 // SENSOR LATERAL
 // =======================
+
+float readLateralSensorMm() {
+  int raw = analogRead(LATERAL_SENSOR_PIN);
+
+  float positionMm = ((raw / 1023.0) * SENSOR_RANGE_MM) - SENSOR_HALF_RANGE_MM;
+
+  return positionMm;
+}
 
 void updateLateralSensor() {
   unsigned long now = millis();
@@ -92,25 +120,31 @@ void updateLateralSensor() {
 
   lastSensorReadTime = now;
 
-  int raw = analogRead(LATERAL_SENSOR_PIN);
-  float voltage = raw * (5.0 / 1023.0);
+  float positionMm = readLateralSensorMm();
 
-  float positionMm = (voltage / 5.0) * SENSOR_RANGE_MM;
-  positionMm = (positionMm - SENSOR_BASELINE_MM) * SENSOR_GAIN;
+  lastSentSensorMm = positionMm;
 
   Serial.print("POS:");
   Serial.println(positionMm, 2);
 }
 
 void sendLateralSensorNow() {
-  int raw = analogRead(LATERAL_SENSOR_PIN);
-  float voltage = raw * (5.0 / 1023.0);
-
-  float positionMm = (voltage / 5.0) * SENSOR_RANGE_MM;
-  positionMm = (positionMm - SENSOR_BASELINE_MM) * SENSOR_GAIN;
+  float positionMm = readLateralSensorMm();
 
   Serial.print("POS:");
   Serial.println(positionMm, 2);
+}
+
+// Envia o status da leitura lateral para o Django.
+// Mensagem curta, sem acentos, para reduzir risco de corrupção/mistura.
+void sendLateralSensorStatus(bool enabled) {
+  if (enabled) {
+    Serial.println("{\"type\":\"lateral_sensor_status\",\"reading_enabled\":true,\"message\":\"leitura_lateral_iniciada\"}");
+  } else {
+    Serial.println("{\"type\":\"lateral_sensor_status\",\"reading_enabled\":false,\"message\":\"leitura_lateral_parada\"}");
+  }
+
+  Serial.flush();
 }
 
 // =======================
@@ -141,6 +175,30 @@ void readSerialCommands() {
 
 void handleCommand(String command) {
   command.trim();
+
+  if (command == "LATERAL_SENSOR_START_READING") {
+    // Primeiro envia a resposta de status.
+    sendLateralSensorStatus(true);
+
+    // Pequena pausa para evitar que o JSON se misture com POS.
+    delay(100);
+
+    // Só depois libera o envio contínuo do sensor.
+    lateralSensorReadingEnabled = true;
+    lastSensorReadTime = millis();
+
+    return;
+  }
+
+  if (command == "LATERAL_SENSOR_STOP_READING") {
+    // Primeiro para imediatamente o envio contínuo.
+    lateralSensorReadingEnabled = false;
+
+    // Depois informa o status.
+    sendLateralSensorStatus(false);
+
+    return;
+  }
 
   if (command == "LED_ON") {
     turnLedOn();
@@ -225,7 +283,7 @@ void startMotorRoda() {
   Serial.print(motorRodaSpeed);
   Serial.print(",\"speed_percent\":");
   Serial.print(calculateMotorRodaSpeedPercent());
-  Serial.println(",\"message\":\"Motor da roda iniciado\"}");
+  Serial.println(",\"message\":\"motor_da_roda_iniciado\"}");
 }
 
 void stopMotorRoda() {
@@ -236,7 +294,7 @@ void stopMotorRoda() {
   Serial.print(motorRodaSpeed);
   Serial.print(",\"speed_percent\":");
   Serial.print(calculateMotorRodaSpeedPercent());
-  Serial.println(",\"message\":\"Motor da roda parado\"}");
+  Serial.println(",\"message\":\"motor_da_roda_parado\"}");
 }
 
 void setMotorRodaClockwise() {
@@ -247,7 +305,7 @@ void setMotorRodaClockwise() {
   Serial.print(motorRodaSpeed);
   Serial.print(",\"speed_percent\":");
   Serial.print(calculateMotorRodaSpeedPercent());
-  Serial.println(",\"message\":\"Motor da roda definido para sentido horario\"}");
+  Serial.println(",\"message\":\"motor_da_roda_sentido_horario\"}");
 }
 
 void setMotorRodaCounterClockwise() {
@@ -258,7 +316,7 @@ void setMotorRodaCounterClockwise() {
   Serial.print(motorRodaSpeed);
   Serial.print(",\"speed_percent\":");
   Serial.print(calculateMotorRodaSpeedPercent());
-  Serial.println(",\"message\":\"Motor da roda definido para sentido anti-horario\"}");
+  Serial.println(",\"message\":\"motor_da_roda_sentido_anti_horario\"}");
 }
 
 void increaseMotorRodaSpeed() {
@@ -269,7 +327,7 @@ void increaseMotorRodaSpeed() {
   }
 
   applyMotorRodaSpeed();
-  sendMotorRodaSpeedStatusMessage("Velocidade do motor da roda aumentada");
+  sendMotorRodaSpeedStatusMessage("velocidade_do_motor_da_roda_aumentada");
 }
 
 void decreaseMotorRodaSpeed() {
@@ -280,7 +338,7 @@ void decreaseMotorRodaSpeed() {
   }
 
   applyMotorRodaSpeed();
-  sendMotorRodaSpeedStatusMessage("Velocidade do motor da roda diminuida");
+  sendMotorRodaSpeedStatusMessage("velocidade_do_motor_da_roda_diminuida");
 }
 
 void applyMotorRodaSpeed() {
@@ -296,7 +354,7 @@ void applyMotorRodaSpeed() {
 }
 
 void sendMotorRodaSpeedStatus() {
-  sendMotorRodaSpeedStatusMessage("Status da velocidade do motor da roda");
+  sendMotorRodaSpeedStatusMessage("status_da_velocidade_do_motor_da_roda");
 }
 
 void sendMotorRodaSpeedStatusMessage(String message) {
@@ -319,8 +377,13 @@ int calculateMotorRodaSpeedPercent() {
 
   int percent = (currentPosition * 100.0) / range;
 
-  if (percent < 0) percent = 0;
-  if (percent > 100) percent = 100;
+  if (percent < 0) {
+    percent = 0;
+  }
+
+  if (percent > 100) {
+    percent = 100;
+  }
 
   return percent;
 }
@@ -333,21 +396,21 @@ void turnLedOn() {
   digitalWrite(LED_PIN, HIGH);
   ledState = true;
 
-  Serial.println("{\"success\":true,\"type\":\"led_status\",\"state\":\"ON\",\"message\":\"LED ligado\"}");
+  Serial.println("{\"success\":true,\"type\":\"led_status\",\"state\":\"ON\",\"message\":\"led_ligado\"}");
 }
 
 void turnLedOff() {
   digitalWrite(LED_PIN, LOW);
   ledState = false;
 
-  Serial.println("{\"success\":true,\"type\":\"led_status\",\"state\":\"OFF\",\"message\":\"LED desligado\"}");
+  Serial.println("{\"success\":true,\"type\":\"led_status\",\"state\":\"OFF\",\"message\":\"led_desligado\"}");
 }
 
 void sendLedStatus() {
   if (ledState) {
-    Serial.println("{\"success\":true,\"type\":\"led_status\",\"state\":\"ON\",\"message\":\"LED atualmente ligado\"}");
+    Serial.println("{\"success\":true,\"type\":\"led_status\",\"state\":\"ON\",\"message\":\"led_atualmente_ligado\"}");
   } else {
-    Serial.println("{\"success\":true,\"type\":\"led_status\",\"state\":\"OFF\",\"message\":\"LED atualmente desligado\"}");
+    Serial.println("{\"success\":true,\"type\":\"led_status\",\"state\":\"OFF\",\"message\":\"led_atualmente_desligado\"}");
   }
 }
 
@@ -356,7 +419,7 @@ void sendLedStatus() {
 // =======================
 
 void sendPong() {
-  Serial.println("{\"success\":true,\"type\":\"pong\",\"message\":\"Arduino conectado\"}");
+  Serial.println("{\"success\":true,\"type\":\"pong\",\"message\":\"arduino_conectado\"}");
 }
 
 // =======================
@@ -364,7 +427,7 @@ void sendPong() {
 // =======================
 
 void sendUnknownCommandError(String command) {
-  Serial.print("{\"success\":false,\"type\":\"error\",\"message\":\"Comando desconhecido: ");
+  Serial.print("{\"success\":false,\"type\":\"error\",\"message\":\"comando_desconhecido:");
   Serial.print(command);
   Serial.println("\"}");
 }

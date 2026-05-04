@@ -1,8 +1,12 @@
 import json
+import threading
+import time
+
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
+
 from machine.services.machine_service import MachineService
-import threading
+
 
 class MachineConsumer(WebsocketConsumer):
     GROUP_NAME = 'machine_updates'
@@ -13,6 +17,7 @@ class MachineConsumer(WebsocketConsumer):
         while getattr(self, 'serial_listener_running', False):
             try:
                 if not self.machine_service.serial_service.is_connected():
+                    time.sleep(0.001)
                     continue
 
                 line = self.machine_service.serial_service.read_line()
@@ -20,14 +25,12 @@ class MachineConsumer(WebsocketConsumer):
                 if not line:
                     continue
 
-                print('[Serial Listener] Recebido:', line)
+                line = line.strip()
 
                 if line.startswith('POS:'):
                     value = float(line.replace('POS:', '').strip())
 
-                    self.machine_state_service.update_state({
-                        'lateral_misalignment_current': value,
-                    })
+                    self.machine_state_service.broadcast_lateral_sensor_state(value)
 
             except Exception as error:
                 print('[Serial Listener] Erro:', error)
@@ -64,8 +67,6 @@ class MachineConsumer(WebsocketConsumer):
         try:
             data = json.loads(text_data)
 
-            # LOG 1:
-            # registra que o backend recebeu uma mensagem do frontend
             self.send(text_data=json.dumps({
                 'type': 'log',
                 'direction': 'received',
@@ -74,15 +75,12 @@ class MachineConsumer(WebsocketConsumer):
 
             response = self.machine_service.handle_command(data)
 
-            # LOG 2:
-            # registra que o backend vai enviar uma resposta ao frontend
             self.send(text_data=json.dumps({
                 'type': 'log',
                 'direction': 'sent',
                 'message': f'Resposta enviada pelo backend: {response}',
             }))
 
-            # resposta principal da aplicação
             self.send(text_data=json.dumps(response))
 
         except json.JSONDecodeError:
@@ -98,6 +96,8 @@ class MachineConsumer(WebsocketConsumer):
             }))
 
     def disconnect(self, close_code):
+        self.serial_listener_running = False
+
         async_to_sync(self.channel_layer.group_discard)(
             self.GROUP_NAME,
             self.channel_name,

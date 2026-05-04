@@ -18,10 +18,10 @@ import type {
   MachineState,
 } from '../types/machine/machine'
 
-// O contexto da máquina é responsável por armazenar o estado global da máquina, e fornecer funções 
-// para enviar comandos para o backend e receber mensagens do backend. Ele também é responsável por 
-// manter um histórico dos valores de desalinhamento lateral, que são atualizados a cada 100ms com o 
-// valor mais recente recebido do backend.
+// O contexto da máquina é responsável por armazenar o estado global da máquina,
+// fornecer funções para enviar comandos para o backend e receber mensagens do backend.
+// O valor atual do sensor lateral é atualizado quando chega mensagem do backend.
+// O histórico do gráfico é alimentado a cada 100ms com o último valor recebido.
 
 type MachineContextValue = {
   state: MachineState
@@ -39,11 +39,9 @@ type MachineProviderProps = {
 export function MachineProvider({ children }: MachineProviderProps) {
   const [state, dispatch] = useReducer(machineReducer, initialMachineState)
 
-
   const latestLateralValueRef = useRef(0)
   const hasReceivedLateralValueRef = useRef(false)
 
-  // Sempre que receber um valor de desalinhamento lateral, atualizamos a referência mais recente e marcamos que já recebemos um valor
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       if (!hasReceivedLateralValueRef.current) {
@@ -60,7 +58,6 @@ export function MachineProvider({ children }: MachineProviderProps) {
       window.clearInterval(intervalId)
     }
   }, [])
-
 
   const handleConnected = useCallback(() => {
     dispatch({ type: 'SOCKET_CONNECTED' })
@@ -87,7 +84,6 @@ export function MachineProvider({ children }: MachineProviderProps) {
   }, [])
 
   const handleMachineMessage = useCallback((message: MachineMessage) => {
-
     if (message.type === 'serial_port_disconnected') {
       dispatch({
         type: 'SET_SELECTED_PORT',
@@ -114,11 +110,18 @@ export function MachineProvider({ children }: MachineProviderProps) {
     }
 
     if (message.type === 'machine_update') {
+      const lateralValue = message.payload.lateral_misalignment_current
+
+      if (lateralValue !== undefined) {
+        latestLateralValueRef.current = lateralValue
+        hasReceivedLateralValueRef.current = true
+      }
+
       dispatch({
         type: 'MACHINE_UPDATED',
         payload: message.payload,
       })
-      console.log('machine_update recebido:', message.payload)
+
       return
     }
 
@@ -259,6 +262,7 @@ export function MachineProvider({ children }: MachineProviderProps) {
     onMachineMessage: handleMachineMessage,
   })
 
+  // Esta função é usada para enviar comandos para o backend. Ela também adiciona uma entrada de log para cada comando enviado.
   const sendCommand = useCallback(
     (payload: MachineCommand) => {
       const success = send(payload)
@@ -293,7 +297,7 @@ export function MachineProvider({ children }: MachineProviderProps) {
       send,
       sendCommand,
     }),
-    [state, dispatch, send, sendCommand],
+    [state, send, sendCommand],
   )
 
   return (

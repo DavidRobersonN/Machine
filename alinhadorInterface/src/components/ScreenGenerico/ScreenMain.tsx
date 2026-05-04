@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { ReactNode } from 'react'
 
 import './Styles.css'
@@ -9,7 +10,7 @@ type ScreenMainProps = {
   painelControls?: ReactNode
 }
 
-export function ScreenMain({
+function ScreenMainComponent({
   sidebar,
   statusBar,
   children,
@@ -47,3 +48,5 @@ export function ScreenMain({
     </div>
   )
 }
+
+export const ScreenMain = memo(ScreenMainComponent)

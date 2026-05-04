@@ -34,4 +34,5 @@ export interface MachineState {
 
   lateral_misalignment_current: number
   lateral_misalignment_history: MisalignmentPoint[]
+  is_lateral_reading_enabled: boolean
 }
