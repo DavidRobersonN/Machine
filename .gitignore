@@ -281,3 +281,18 @@ AlinhadorMark01Interface/build/
 AlinhadorInterface/node_modules/
 AlinhadorInterface/dist/
 AlinhadorInterface/build/
+
+# Test coverage
+coverage/
+htmlcov/
+.coverage
+coverage.xml
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Frontend
+node_modules/
+dist/
