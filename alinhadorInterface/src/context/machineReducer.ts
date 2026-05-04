@@ -14,6 +14,7 @@ export const initialMachineState: MachineState = {
   speed_motor_roda: 0,
   lateral_misalignment_current: 0,
   lateral_misalignment_history: [],
+  is_lateral_reading_enabled: false,
 }
 
 export function machineReducer(
@@ -125,6 +126,11 @@ export function machineReducer(
         // O histórico agora é atualizado pela action ADD_LATERAL_MISALIGNMENT_POINT.
         // Isso evita adicionar ponto duplicado toda vez que chega machine_update.
         lateral_misalignment_history: state.lateral_misalignment_history,
+
+        is_lateral_reading_enabled:
+          action.payload.is_lateral_reading_enabled !== undefined
+          ? action.payload.is_lateral_reading_enabled
+          : state.is_lateral_reading_enabled,
       }
     }
 

@@ -20,3 +20,4 @@ export type MachineAction =
   | { type: 'SET_SPEED_MOTOR_RODA'; payload: number }
   | { type: 'SET_LATERAL_MISALIGNMENT_CURRENT'; payload: number }
   | { type: 'ADD_LATERAL_MISALIGNMENT_POINT'; payload: number }
+  | { type: 'SET_IS_LATERAL_READING_ENABLED'; payload: boolean }

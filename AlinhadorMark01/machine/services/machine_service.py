@@ -34,6 +34,12 @@ class MachineService:
         # MOTOR DA RODA
         # =========================
 
+        if action == 'lateral_sensor_start_reading':
+            return self.serial_service.send_command('LATERAL_SENSOR_START_READING')
+
+        if action == 'lateral_sensor_stop_reading':
+            return self.serial_service.send_command('LATERAL_SENSOR_STOP_READING')
+
         if action == 'motor_roda_start':
             return self.motor_roda_start()
 

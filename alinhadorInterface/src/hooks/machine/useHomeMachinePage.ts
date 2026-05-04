@@ -61,6 +61,7 @@ export function useHomeMachinePage() {
     })
   }, [sendCommand, dispatch])
 
+
   const bottomActions = useMemo(() => {
     return getBottomActions({
       currentScreen,
@@ -90,7 +91,6 @@ export function useHomeMachinePage() {
     lateralMisalignmentCurrent: state.lateral_misalignment_current,
     lateralMisalignmentHistory: state.lateral_misalignment_history,
     bottomActions,
-
     goToScreen,
     handleListSerialPorts,
     handleSelectPort,
@@ -113,6 +113,7 @@ function getBottomActions({
   handleClearLogs,
   handleListSerialPorts,
   handleDisconnectPort,
+  
 }: GetBottomActionsParams) {
   switch (currentScreen) {
     case 'start':

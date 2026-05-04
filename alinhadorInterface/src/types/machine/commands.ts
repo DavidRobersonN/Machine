@@ -1,4 +1,4 @@
-//Responsável pelo que o frontend envia para o backend.
+// Responsável pelo que o frontend envia para o backend.
 
 export type MotorRodaCommand =
   | { action: 'motor_roda_start' }
@@ -37,6 +37,22 @@ export interface ReadMachineStateCommand {
   action: 'read_machine_state'
 }
 
+export interface LateralSensorStatusCommand {
+  action: 'lateral_sensor_status'
+}
+
+export interface LateralSensorCalibrateZeroCommand {
+  action: 'lateral_sensor_calibrate_zero'
+}
+
+export interface LateralSensorStartReadingCommand {
+  action: 'lateral_sensor_start_reading'
+}
+
+export interface LateralSensorStopReadingCommand {
+  action: 'lateral_sensor_stop_reading'
+}
+
 export type MachineCommand =
   | MotorRodaCommand
   | ListSerialPortsCommand
@@ -46,3 +62,7 @@ export type MachineCommand =
   | LedOnCommand
   | LedOffCommand
   | ReadMachineStateCommand
+  | LateralSensorStatusCommand
+  | LateralSensorCalibrateZeroCommand
+  | LateralSensorStartReadingCommand
+  | LateralSensorStopReadingCommand

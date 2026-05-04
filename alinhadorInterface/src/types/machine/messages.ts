@@ -13,6 +13,7 @@ export interface MachineUpdatePayload {
   selected_port?: SelectedSerialPortState
   speed_motor_roda?: number
   lateral_misalignment_current?: number
+  is_lateral_reading_enabled?: boolean
 }
 
 export interface MachineUpdateMessage {

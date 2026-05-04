@@ -262,6 +262,7 @@ export function MachineProvider({ children }: MachineProviderProps) {
     onMachineMessage: handleMachineMessage,
   })
 
+  // Esta função é usada para enviar comandos para o backend. Ela também adiciona uma entrada de log para cada comando enviado.
   const sendCommand = useCallback(
     (payload: MachineCommand) => {
       const success = send(payload)
