@@ -1,10 +1,9 @@
 import type { MachineAction, MachineState } from '../types/machine/machine'
 
-/// O reducer é uma função pura que recebe o estado atual e uma ação, e 
-// retorna um novo estado atualizado com base na ação recebida. Ele é usado para gerenciar o estado global da aplicação de forma previsível e eficiente.
+// O reducer é uma função pura que recebe o estado atual e uma ação,
+// e retorna um novo estado atualizado com base na ação recebida.
 
-// O estado inicial da máquina, que é usado para inicializar o estado global da aplicação. Ele define os valores padrão para todas as propriedades do estado, 
-// garantindo que a aplicação tenha um estado consistente desde o início.
+// Estado inicial da máquina
 export const initialMachineState: MachineState = {
   connected: false,
   led: 'Desligado',
@@ -15,38 +14,37 @@ export const initialMachineState: MachineState = {
   speed_motor_roda: 0,
   lateral_misalignment_current: 0,
   lateral_misalignment_history: [],
+  is_lateral_reading_enabled: false,
 }
 
-
-// esses case, vem do backend. O backend envia mensagens do tipo MachineMessage, e o reducer atualiza o estado global da aplicação
 export function machineReducer(
   state: MachineState,
   action: MachineAction,
 ): MachineState {
   switch (action.type) {
-      case 'SET_LATERAL_MISALIGNMENT_CURRENT':
-        return {
-          ...state,
-          lateral_misalignment_current: action.payload,
-        }
-
-      case 'ADD_LATERAL_MISALIGNMENT_POINT': {
-        const newPoint = {
-          id: Date.now(),
-          value: action.payload,
-        }
-
-        const updatedHistory = [
-          ...state.lateral_misalignment_history,
-          newPoint,
-        ].slice(-100)
-
-        return {
-          ...state,
-          lateral_misalignment_history: updatedHistory,
-        }
+    case 'SET_LATERAL_MISALIGNMENT_CURRENT':
+      return {
+        ...state,
+        lateral_misalignment_current: action.payload,
       }
-      
+
+    case 'ADD_LATERAL_MISALIGNMENT_POINT': {
+      const newPoint = {
+        id: Date.now(),
+        value: action.payload,
+      }
+
+      const updatedHistory = [
+        ...state.lateral_misalignment_history,
+        newPoint,
+      ].slice(-100)
+
+      return {
+        ...state,
+        lateral_misalignment_history: updatedHistory,
+      }
+    }
+
     case 'SET_SELECTED_PORT':
       return {
         ...state,
@@ -83,59 +81,58 @@ export function machineReducer(
         ...state,
         logs: [],
       }
-      
-        case 'SET_SPEED_MOTOR_RODA':
+
+    case 'SET_SPEED_MOTOR_RODA':
       return {
         ...state,
         speed_motor_roda: action.payload,
       }
 
-   case 'MACHINE_UPDATED': {
-    const lateralValue = action.payload.lateral_misalignment_current
+    case 'MACHINE_UPDATED': {
+      const lateralValue = action.payload.lateral_misalignment_current
 
-    return {
-      ...state,
-      led:
-        action.payload.led === 'ON'
-          ? 'Ligado'
-          : action.payload.led === 'OFF'
-            ? 'Desligado'
-            : state.led,
+      return {
+        ...state,
 
-      arduino_connected:
-        action.payload.arduino_connected === true
-          ? 'Conectado'
-          : action.payload.arduino_connected === false
-            ? 'Desconectado'
-            : state.arduino_connected,
+        led:
+          action.payload.led === 'ON'
+            ? 'Ligado'
+            : action.payload.led === 'OFF'
+              ? 'Desligado'
+              : state.led,
 
-      selected_port:
-        action.payload.selected_port !== undefined
-          ? action.payload.selected_port
-          : state.selected_port,
+        arduino_connected:
+          action.payload.arduino_connected === true
+            ? 'Conectado'
+            : action.payload.arduino_connected === false
+              ? 'Desconectado'
+              : state.arduino_connected,
 
-      speed_motor_roda:
-        action.payload.speed_motor_roda !== undefined
-          ? action.payload.speed_motor_roda
-          : state.speed_motor_roda,
+        selected_port:
+          action.payload.selected_port !== undefined
+            ? action.payload.selected_port
+            : state.selected_port,
 
-      lateral_misalignment_current:
-        lateralValue !== undefined
-          ? lateralValue
-          : state.lateral_misalignment_current,
+        speed_motor_roda:
+          action.payload.speed_motor_roda !== undefined
+            ? action.payload.speed_motor_roda
+            : state.speed_motor_roda,
 
-      lateral_misalignment_history:
-        lateralValue !== undefined
-          ? [
-              ...state.lateral_misalignment_history,
-              {
-                id: Date.now(),
-                value: lateralValue,
-              },
-            ].slice(-100)
-          : state.lateral_misalignment_history,
+        lateral_misalignment_current:
+          lateralValue !== undefined
+            ? lateralValue
+            : state.lateral_misalignment_current,
+
+        // O histórico agora é atualizado pela action ADD_LATERAL_MISALIGNMENT_POINT.
+        // Isso evita adicionar ponto duplicado toda vez que chega machine_update.
+        lateral_misalignment_history: state.lateral_misalignment_history,
+
+        is_lateral_reading_enabled:
+          action.payload.is_lateral_reading_enabled !== undefined
+          ? action.payload.is_lateral_reading_enabled
+          : state.is_lateral_reading_enabled,
+      }
     }
-  }
 
     default:
       return state

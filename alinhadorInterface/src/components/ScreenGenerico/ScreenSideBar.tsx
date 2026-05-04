@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 type ScreenSidebarProps = {
   led?: string
   databaseConnection?: string
@@ -8,7 +10,7 @@ type ScreenSidebarProps = {
   progressValue?: number
 }
 
-export function ScreenSidebar({
+function ScreenSidebarComponent({
   led,
   databaseConnection,
   arduinoConnection,
@@ -71,3 +73,5 @@ export function ScreenSidebar({
     </div>
   )
 }
+
+export const ScreenSidebar = memo(ScreenSidebarComponent)

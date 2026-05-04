@@ -16,8 +16,8 @@
   max-width: 100%;
   min-width: 0;
 
-  background: #07111f;
-  border: 1px solid rgba(0, 255, 170, 0.25);
+  background: #ffffff31;
+  border: 1px solid rgba(27, 48, 41, 0.25);
   border-radius: 18px;
   padding: 16px;
 
@@ -54,7 +54,7 @@
 
   font-size: 18px;
   line-height: 1.1;
-  color: #e8fff7;
+  color: #303835;
 
   white-space: nowrap;
   overflow: hidden;
@@ -76,7 +76,7 @@
 
   font-size: 28px;
   line-height: 1.1;
-  color: #00ffaa;
+  color: #384e47;
   font-family: monospace;
 
   white-space: nowrap;
@@ -93,14 +93,14 @@
 
 /* Retângulo interno do gráfico */
 .oscillation-chart-border {
-  fill: rgba(0, 0, 0, 0.15);
+  fill: rgba(0, 0, 0, 0.253);
   stroke: rgba(255, 255, 255, 0.08);
   stroke-width: 1;
 }
 
 /* Linha central do gráfico */
 .oscillation-chart-center-line {
-  stroke: rgba(255, 255, 255, 0.25);
+  stroke: rgb(255, 255, 255);
   stroke-width: 1;
   stroke-dasharray: 6 6;
 }
@@ -108,16 +108,16 @@
 /* Linha da oscilação */
 .oscillation-chart-line {
   fill: none;
-  stroke: #00ffaa;
-  stroke-width: 3;
+  stroke: #26332a;
+  stroke-width: 1;
   stroke-linejoin: round;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 6px rgba(0, 255, 170, 0.7));
+  filter: drop-shadow(0 0 6px rgba(65, 94, 80, 0.7));
 }
 
 /* Textos dos eixos */
 .oscillation-chart-axis-text {
-  fill: rgba(232, 255, 247, 0.75);
+  fill: rgba(27, 37, 34, 0.75);
   font-size: 10px;
 }
 

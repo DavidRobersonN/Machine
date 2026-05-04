@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import type { MisalignmentPoint } from '../../../types/machine/machine'
 import { OscillationChart } from '../../OscillationChart/OscillationChart'
 import './LateralAlignmentScreen.css'
@@ -11,21 +12,37 @@ export function LateralAlignmentScreen({
   value,
   history,
 }: LateralAlignmentScreenProps) {
-  const maxValue =
-    history.length > 0
-      ? Math.max(...history.map((point) => point.value))
-      : 0
+  const { maxValue, minValue, averageValue } = useMemo(() => {
+    if (history.length === 0) {
+      return {
+        maxValue: 0,
+        minValue: 0,
+        averageValue: 0,
+      }
+    }
 
-  const minValue =
-    history.length > 0
-      ? Math.min(...history.map((point) => point.value))
-      : 0
+    let max = history[0].value
+    let min = history[0].value
+    let total = 0
 
-  const averageValue =
-    history.length > 0
-      ? history.reduce((total, point) => total + point.value, 0) /
-        history.length
-      : 0
+    for (const point of history) {
+      if (point.value > max) {
+        max = point.value
+      }
+
+      if (point.value < min) {
+        min = point.value
+      }
+
+      total += point.value
+    }
+
+    return {
+      maxValue: max,
+      minValue: min,
+      averageValue: total / history.length,
+    }
+  }, [history])
 
   return (
     <div className="screen-page lateral-alignment-screen">
@@ -35,8 +52,8 @@ export function LateralAlignmentScreen({
         title="Gráfico de oscilação"
         value={value}
         points={history}
-        minValue={-2}
-        maxValue={2}
+        minValue={-15}
+        maxValue={15}
         unit=" mm"
       />
 

@@ -33,7 +33,6 @@ type MachineScreenRendererProps = {
 
   lateralMisalignmentCurrent: number
   lateralMisalignmentHistory: MisalignmentPoint[]
-
   onSelectPort: (port: string) => void
   onGoToScreen: (screen: AppScreen) => void
   onListSerialPorts: () => void

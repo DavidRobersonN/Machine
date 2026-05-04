@@ -20,7 +20,7 @@ class SerialService:
         self,
         port: str | None = None,
         baudrate: int = 9600,
-        timeout: float = 1.0,
+        timeout: float = 0.05,
     ):
         self.port = port
         self.baudrate = baudrate
@@ -155,7 +155,12 @@ class SerialService:
 
     def send_command(self, command: str) -> dict:
         """
-        Envia um comando para o Arduino e tenta ler uma resposta.
+        Envia um comando para o Arduino.
+
+        Importante:
+        - Este método NÃO lê resposta da serial.
+        - A leitura contínua deve ficar apenas no listener do MachineConsumer.
+        - Isso evita duas partes do backend lendo a serial ao mesmo tempo.
         """
 
         if not self.ensure_connection():
@@ -172,20 +177,14 @@ class SerialService:
 
             print(f'[SerialService] Enviando comando: {command}')
 
-            self.connection.reset_input_buffer()
-
             self.connection.write(command_to_send.encode('utf-8'))
             self.connection.flush()
-
-            response = self.read_line()
-
-            print(f'[SerialService] Resposta recebida: {response}')
 
             return {
                 'success': True,
                 'message': 'Comando enviado com sucesso',
                 'command': command,
-                'response': response,
+                'response': None,
                 'arduino_connected': self.is_connected(),
             }
 

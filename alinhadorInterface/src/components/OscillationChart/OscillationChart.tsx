@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 import type { MisalignmentPoint } from '../../types/machine/machine'
 import './OscillationChart.css'
 
@@ -10,12 +12,33 @@ type OscillationChartProps = {
   unit?: string
 }
 
+function polarNormalizeY({
+  pointValue,
+  minValue,
+  maxValue,
+  height,
+  padding,
+  usableHeight,
+}: {
+  pointValue: number
+  minValue: number
+  maxValue: number
+  height: number
+  padding: number
+  usableHeight: number
+}) {
+  const clampedValue = Math.max(minValue, Math.min(maxValue, pointValue))
+  const percentage = (clampedValue - minValue) / (maxValue - minValue)
+
+  return height - padding - percentage * usableHeight
+}
+
 export function OscillationChart({
   title,
   value,
   points,
-  minValue = -2,
-  maxValue = 2,
+  minValue = -15,
+  maxValue = 15,
   unit = ' mm',
 }: OscillationChartProps) {
   const width = 520
@@ -25,30 +48,51 @@ export function OscillationChart({
   const usableWidth = width - padding * 2
   const usableHeight = height - padding * 2
 
-  function normalizeY(pointValue: number) {
-    const percentage = (pointValue - minValue) / (maxValue - minValue)
+  const centerY = useMemo(() => {
+    return polarNormalizeY({
+      pointValue: 0,
+      minValue,
+      maxValue,
+      height,
+      padding,
+      usableHeight,
+    })
+  }, [minValue, maxValue, height, padding, usableHeight])
 
-    return height - padding - percentage * usableHeight
-  }
+  const linePoints = useMemo(() => {
+    function normalizeX(index: number) {
+      if (points.length <= 1) {
+        return padding
+      }
 
-  function normalizeX(index: number) {
-    if (points.length <= 1) {
-      return padding
+      return padding + (index / (points.length - 1)) * usableWidth
     }
 
-    return padding + (index / (points.length - 1)) * usableWidth
-  }
+    return points
+      .map((point, index) => {
+        const x = normalizeX(index)
 
-  const linePoints = points
-    .map((point, index) => {
-      const x = normalizeX(index)
-      const y = normalizeY(point.value)
+        const y = polarNormalizeY({
+          pointValue: point.value,
+          minValue,
+          maxValue,
+          height,
+          padding,
+          usableHeight,
+        })
 
-      return `${x},${y}`
-    })
-    .join(' ')
-
-  const centerY = normalizeY(0)
+        return `${x},${y}`
+      })
+      .join(' ')
+  }, [
+    points,
+    minValue,
+    maxValue,
+    height,
+    padding,
+    usableHeight,
+    usableWidth,
+  ])
 
   return (
     <div className="oscillation-chart">
@@ -94,7 +138,7 @@ export function OscillationChart({
           y={padding - 6}
           className="oscillation-chart-axis-text"
         >
-          {maxValue}
+          +{maxValue}
           {unit}
         </text>
 
