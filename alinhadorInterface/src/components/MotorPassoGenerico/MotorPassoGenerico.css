@@ -1,63 +1,101 @@
 /* =========================
-   MOTOR PASSO GENÉRICO
+   TELA DE MOTORES
 ========================= */
 
-/*
-  Container dos controles do motor.
-
-  Esse componente normalmente aparece na lateral direita
-  dentro da área .screen-main-painel-controls.
-*/
-.motor-passo-generico {
+.motors-screen {
   width: 100%;
-  max-width: 220px;
+  height: 100%;
+  min-width: 0;
 
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 
   box-sizing: border-box;
-}
-
-/* Título do controle */
-.motor-passo-title {
-  margin: 0 0 12px;
-
-  font-size: 18px;
-  font-weight: 700;
-  color: #111827;
-
-  text-align: left;
-}
-
-/* Linha dos botões principais: iniciar/parar */
-.motor-passo-actions-row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-/* Grupo vertical de botões */
-.motor-passo-actions-column {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  overflow: hidden;
 }
 
 /*
-  Botões dentro do MotorPassoGenerico.
+  Área principal da tela de motores.
 
-  Mantém o estilo global .btn, mas garante
-  uma largura boa dentro da lateral.
+  Junta a roda visual e o medidor de velocidade.
 */
-.motor-passo-generico .btn {
+.motors-dashboard-area {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  flex: 1;
+
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr);
+  align-items: center;
+  justify-items: center;
+  gap: 18px;
+
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Área da roda */
+.motors-wheel-area {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 /*
-  Na linha iniciar/parar, os botões dividem o espaço.
+  Área onde fica o medidor de velocidade.
+
+  Centraliza o SpeedGauge sem deixar ele estourar
+  a área da tela principal.
 */
-.motor-passo-actions-row .btn {
-  flex: 1;
+.motors-speed-area {
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 760px) {
+  .motors-dashboard-area {
+    grid-template-columns: 1fr;
+    align-content: start;
+    gap: 14px;
+
+    overflow: auto;
+    padding: 8px 0 12px;
+  }
+}
+
+@media (max-width: 560px) {
+  .motors-screen {
+    gap: 12px;
+  }
+
+  .motors-dashboard-area {
+    padding-top: 12px;
+  }
+
+  .motors-speed-area {
+    align-items: flex-start;
+  }
 }

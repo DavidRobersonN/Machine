@@ -11,6 +11,13 @@ describe('machineReducer', () => {
       available_ports: [],
       selected_port: null,
       speed_motor_roda: 0,
+
+      wheel_position_degrees: 0,
+      wheel_total_turns: 0,
+      wheel_direction: 'stopped',
+      wheel_is_running: false,
+      motor_turns_per_wheel_turn: 1,
+
       lateral_misalignment_current: 0,
       lateral_misalignment_history: [],
       is_lateral_reading_enabled: false,
@@ -247,6 +254,61 @@ describe('machineReducer', () => {
     expect(newState.speed_motor_roda).toBe(80)
   })
 
+  it('deve atualizar a posição da roda via MACHINE_UPDATED', () => {
+    const newState = machineReducer(initialMachineState, {
+      type: 'MACHINE_UPDATED',
+      payload: {
+        wheel_position_degrees: 135,
+      },
+    })
+
+    expect(newState.wheel_position_degrees).toBe(135)
+  })
+
+  it('deve atualizar o total de voltas da roda via MACHINE_UPDATED', () => {
+    const newState = machineReducer(initialMachineState, {
+      type: 'MACHINE_UPDATED',
+      payload: {
+        wheel_total_turns: 2.5,
+      },
+    })
+
+    expect(newState.wheel_total_turns).toBe(2.5)
+  })
+
+  it('deve atualizar o sentido da roda via MACHINE_UPDATED', () => {
+    const newState = machineReducer(initialMachineState, {
+      type: 'MACHINE_UPDATED',
+      payload: {
+        wheel_direction: 'clockwise',
+      },
+    })
+
+    expect(newState.wheel_direction).toBe('clockwise')
+  })
+
+  it('deve atualizar se a roda está girando via MACHINE_UPDATED', () => {
+    const newState = machineReducer(initialMachineState, {
+      type: 'MACHINE_UPDATED',
+      payload: {
+        wheel_is_running: true,
+      },
+    })
+
+    expect(newState.wheel_is_running).toBe(true)
+  })
+
+  it('deve atualizar a relação de voltas do motor por volta da roda via MACHINE_UPDATED', () => {
+    const newState = machineReducer(initialMachineState, {
+      type: 'MACHINE_UPDATED',
+      payload: {
+        motor_turns_per_wheel_turn: 4,
+      },
+    })
+
+    expect(newState.motor_turns_per_wheel_turn).toBe(4)
+  })
+
   it('deve ativar a leitura lateral', () => {
     const newState = machineReducer(initialMachineState, {
       type: 'MACHINE_UPDATED',
@@ -280,6 +342,13 @@ describe('machineReducer', () => {
       led: 'Ligado' as const,
       selected_port: 'COM9',
       speed_motor_roda: 50,
+
+      wheel_position_degrees: 90,
+      wheel_total_turns: 3,
+      wheel_direction: 'clockwise' as const,
+      wheel_is_running: true,
+      motor_turns_per_wheel_turn: 4,
+
       lateral_misalignment_current: 8.2,
       is_lateral_reading_enabled: true,
     }
@@ -294,6 +363,13 @@ describe('machineReducer', () => {
     expect(newState.led).toBe('Ligado')
     expect(newState.selected_port).toBe('COM9')
     expect(newState.speed_motor_roda).toBe(50)
+
+    expect(newState.wheel_position_degrees).toBe(90)
+    expect(newState.wheel_total_turns).toBe(3)
+    expect(newState.wheel_direction).toBe('clockwise')
+    expect(newState.wheel_is_running).toBe(true)
+    expect(newState.motor_turns_per_wheel_turn).toBe(4)
+
     expect(newState.lateral_misalignment_current).toBe(8.2)
     expect(newState.is_lateral_reading_enabled).toBe(true)
     expect(newState.arduino_connected).toBe('Conectado')

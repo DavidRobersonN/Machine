@@ -12,6 +12,8 @@ type MotorPassoGenericoProps = {
   onIncreaseSpeed: () => void
   onDecreaseSpeed: () => void
 
+  onResetPosition?: () => void
+
   clockwiseLabel: string
   counterClockwiseLabel: string
 }
@@ -24,6 +26,7 @@ export function MotorPassoGenerico({
   onCounterClockwise,
   onIncreaseSpeed,
   onDecreaseSpeed,
+  onResetPosition,
   clockwiseLabel,
   counterClockwiseLabel,
 }: MotorPassoGenericoProps) {
@@ -57,6 +60,12 @@ export function MotorPassoGenerico({
         <button className="btn btn-orange" onClick={onCounterClockwise}>
           {counterClockwiseLabel}
         </button>
+
+        {onResetPosition && (
+          <button className="btn btn-red" onClick={onResetPosition}>
+            Zerar posição
+          </button>
+        )}
       </div>
     </div>
   )

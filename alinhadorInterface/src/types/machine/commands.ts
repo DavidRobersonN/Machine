@@ -7,6 +7,7 @@ export type MotorRodaCommand =
   | { action: 'motor_roda_set_counter_clockwise' }
   | { action: 'motor_roda_increase_speed' }
   | { action: 'motor_roda_decrease_speed' }
+  | { action: 'wheel_reset_position' }
 
 export interface ListSerialPortsCommand {
   action: 'list_serial_ports'

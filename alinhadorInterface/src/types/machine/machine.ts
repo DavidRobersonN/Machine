@@ -3,6 +3,7 @@ export type {
   LedUiState,
   ArduinoConnectionState,
   SelectedSerialPortState,
+  WheelDirection,
   MachineLog,
   SerialPortInfo,
   MisalignmentPoint,

@@ -15,9 +15,9 @@ class MachineService:
     - devolve mensagens para o frontend
     """
 
-    SPEED_STEP = 10
+    SPEED_STEP = 5
     MIN_SPEED = 0
-    MAX_SPEED = 1000
+    MAX_SPEED = 100
 
     def __init__(self):
         self.serial_service = SerialService(
@@ -31,7 +31,7 @@ class MachineService:
         action = data.get('action')
 
         # =========================
-        # MOTOR DA RODA
+        # SENSOR LATERAL
         # =========================
 
         if action == 'lateral_sensor_start_reading':
@@ -39,6 +39,10 @@ class MachineService:
 
         if action == 'lateral_sensor_stop_reading':
             return self.serial_service.send_command('LATERAL_SENSOR_STOP_READING')
+
+        # =========================
+        # MOTOR DA RODA
+        # =========================
 
         if action == 'motor_roda_start':
             return self.motor_roda_start()
@@ -57,6 +61,9 @@ class MachineService:
 
         if action == 'motor_roda_decrease_speed':
             return self.motor_roda_decrease_speed()
+        
+        if action == 'wheel_reset_position':
+            return self.wheel_reset_position()
 
         # =========================
         # PORTA SERIAL
@@ -126,7 +133,7 @@ class MachineService:
                 else None
             ),
         }
-    
+
     def select_serial_port(self, data: dict) -> dict:
         port = data.get('port')
 
@@ -162,6 +169,8 @@ class MachineService:
         self.machine_state_service.update_state({
             'led': 'OFF',
             'selected_port': None,
+            'wheel_is_running': False,
+            'wheel_direction': 'stopped',
         })
 
         return {
@@ -229,9 +238,19 @@ class MachineService:
     # =========================
 
     def motor_roda_start(self) -> dict:
+        current_state = self.machine_state_service.get_current_state()
+
+        current_direction = current_state.get('wheel_direction', 'stopped')
+
+        if current_direction == 'stopped':
+            current_direction = 'clockwise'
+
         serial_result = self.serial_service.send_command('MOTOR_RODA_START')
 
-        self.machine_state_service.update_state({})
+        self.machine_state_service.update_state({
+            'wheel_is_running': True,
+            'wheel_direction': current_direction,
+        })
 
         return {
             'type': 'log',
@@ -245,7 +264,10 @@ class MachineService:
     def motor_roda_stop(self) -> dict:
         serial_result = self.serial_service.send_command('MOTOR_RODA_STOP')
 
-        self.machine_state_service.update_state({})
+        self.machine_state_service.update_state({
+            'wheel_is_running': False,
+            'wheel_direction': 'stopped',
+        })
 
         return {
             'type': 'log',
@@ -261,7 +283,9 @@ class MachineService:
             'MOTOR_RODA_SET_CLOCKWISE'
         )
 
-        self.machine_state_service.update_state({})
+        self.machine_state_service.update_state({
+            'wheel_direction': 'clockwise',
+        })
 
         return {
             'type': 'log',
@@ -277,7 +301,9 @@ class MachineService:
             'MOTOR_RODA_SET_COUNTER_CLOCKWISE'
         )
 
-        self.machine_state_service.update_state({})
+        self.machine_state_service.update_state({
+            'wheel_direction': 'counter_clockwise',
+        })
 
         return {
             'type': 'log',
@@ -292,15 +318,45 @@ class MachineService:
         current_state = self.machine_state_service.get_current_state()
 
         current_speed = current_state.get('speed_motor_roda', 0)
+        current_direction = current_state.get('wheel_direction', 'stopped')
+        current_is_running = current_state.get('wheel_is_running', False)
+
+        if current_speed >= self.MAX_SPEED:
+            self.machine_state_service.update_state({
+                'speed_motor_roda': self.MAX_SPEED,
+            })
+
+            print(
+                'Aumentar velocidade do motor da roda:',
+                {
+                    'current_speed': current_speed,
+                    'new_speed': self.MAX_SPEED,
+                    'blocked': True,
+                    'reason': 'Velocidade máxima atingida',
+                },
+            )
+
+            return {
+                'type': 'log',
+                'direction': 'received',
+                'message': f'Velocidade do motor da roda já está no máximo: {self.MAX_SPEED}',
+            }
+
         new_speed = min(current_speed + self.SPEED_STEP, self.MAX_SPEED)
 
         serial_result = self.serial_service.send_command(
             'MOTOR_RODA_INCREASE_SPEED'
         )
 
-        self.machine_state_service.update_state({
+        state_update = {
             'speed_motor_roda': new_speed,
-        })
+        }
+
+        if new_speed > 0 and not current_is_running and current_direction != 'stopped':
+            self.serial_service.send_command('MOTOR_RODA_START')
+            state_update['wheel_is_running'] = True
+
+        self.machine_state_service.update_state(state_update)
 
         print(
             'Aumentar velocidade do motor da roda:',
@@ -324,15 +380,44 @@ class MachineService:
         current_state = self.machine_state_service.get_current_state()
 
         current_speed = current_state.get('speed_motor_roda', 0)
+
+        if current_speed <= self.MIN_SPEED:
+            self.machine_state_service.update_state({
+                'speed_motor_roda': self.MIN_SPEED,
+                'wheel_is_running': False,
+            })
+
+            print(
+                'Diminuir velocidade do motor da roda:',
+                {
+                    'current_speed': current_speed,
+                    'new_speed': self.MIN_SPEED,
+                    'blocked': True,
+                    'reason': 'Velocidade mínima atingida',
+                },
+            )
+
+            return {
+                'type': 'log',
+                'direction': 'received',
+                'message': f'Velocidade do motor da roda já está no mínimo: {self.MIN_SPEED}',
+            }
+
         new_speed = max(current_speed - self.SPEED_STEP, self.MIN_SPEED)
 
         serial_result = self.serial_service.send_command(
             'MOTOR_RODA_DECREASE_SPEED'
         )
 
-        self.machine_state_service.update_state({
+        state_update = {
             'speed_motor_roda': new_speed,
-        })
+        }
+
+        if new_speed == 0:
+            self.serial_service.send_command('MOTOR_RODA_STOP')
+            state_update['wheel_is_running'] = False
+
+        self.machine_state_service.update_state(state_update)
 
         print(
             'Diminuir velocidade do motor da roda:',
@@ -351,10 +436,21 @@ class MachineService:
                 f'Velocidade do motor da roda diminuída para {new_speed}',
             ),
         }
-
     # =========================
     # AUXILIAR
     # =========================
 
     def get_serial_message(self, serial_result: dict, fallback: str) -> str:
         return serial_result.get('message') or fallback
+    
+    def wheel_reset_position(self) -> dict:
+        self.machine_state_service.update_state({
+            'wheel_position_degrees': 0,
+            'wheel_total_turns': 0,
+        })
+
+        return {
+            'type': 'log',
+            'direction': 'received',
+            'message': 'Posição da roda zerada',
+        }

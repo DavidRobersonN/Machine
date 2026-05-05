@@ -12,6 +12,13 @@ export const initialMachineState: MachineState = {
   available_ports: [],
   selected_port: null,
   speed_motor_roda: 0,
+
+  wheel_position_degrees: 0,
+  wheel_total_turns: 0,
+  wheel_direction: 'stopped',
+  wheel_is_running: false,
+  motor_turns_per_wheel_turn: 1,
+
   lateral_misalignment_current: 0,
   lateral_misalignment_history: [],
   is_lateral_reading_enabled: false,
@@ -117,6 +124,31 @@ export function machineReducer(
           action.payload.speed_motor_roda !== undefined
             ? action.payload.speed_motor_roda
             : state.speed_motor_roda,
+        
+                    wheel_position_degrees:
+          action.payload.wheel_position_degrees !== undefined
+            ? action.payload.wheel_position_degrees
+            : state.wheel_position_degrees,
+
+        wheel_total_turns:
+          action.payload.wheel_total_turns !== undefined
+            ? action.payload.wheel_total_turns
+            : state.wheel_total_turns,
+
+        wheel_direction:
+          action.payload.wheel_direction !== undefined
+            ? action.payload.wheel_direction
+            : state.wheel_direction,
+
+        wheel_is_running:
+          action.payload.wheel_is_running !== undefined
+            ? action.payload.wheel_is_running
+            : state.wheel_is_running,
+
+        motor_turns_per_wheel_turn:
+          action.payload.motor_turns_per_wheel_turn !== undefined
+            ? action.payload.motor_turns_per_wheel_turn
+            : state.motor_turns_per_wheel_turn,
 
         lateral_misalignment_current:
           lateralValue !== undefined

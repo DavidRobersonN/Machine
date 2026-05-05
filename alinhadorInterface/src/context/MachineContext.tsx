@@ -42,6 +42,7 @@ export function MachineProvider({ children }: MachineProviderProps) {
   const latestLateralValueRef = useRef(0)
   const hasReceivedLateralValueRef = useRef(false)
 
+
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       if (!hasReceivedLateralValueRef.current) {

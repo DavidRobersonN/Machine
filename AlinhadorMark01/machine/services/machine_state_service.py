@@ -11,9 +11,15 @@ class MachineStateService:
     e depois avisar o frontend em tempo real.
     """
 
-    SPEED_STEP = 10
+    SPEED_STEP = 5
     MIN_SPEED = 0
-    MAX_SPEED = 1000
+    MAX_SPEED = 100
+
+    # Define a velocidade máxima visual da simulação da roda.
+    # 0.25 significa:
+    # - em 100%, a roda dá 0.25 volta por segundo
+    # - ou seja, 1 volta completa a cada 4 segundos
+    MAX_WHEEL_TURNS_PER_SECOND = 0.5
 
     def __init__(self, serial_service: SerialService):
         self.broadcast_service = BroadcastService()
@@ -42,6 +48,76 @@ class MachineStateService:
             }
         )
 
+    def update_wheel_position_realtime(self, interval_seconds: float) -> None:
+        """
+        Atualiza a posição da roda em tempo real.
+
+        Esta é uma simulação temporária no backend.
+
+        Regra usada:
+        - speed_motor_roda vai de 0 a 100.
+        - 100 significa 0.25 volta por segundo.
+        - 50 significa 0.125 volta por segundo.
+        - 25 significa 0.0625 volta por segundo.
+
+        Depois, quando o Arduino enviar a posição real da roda,
+        essa simulação poderá ser removida.
+        """
+
+        state, _ = MachineState.objects.get_or_create(id=1)
+
+        if not state.wheel_is_running:
+            return
+
+        if state.wheel_direction == 'stopped':
+            return
+
+        if state.speed_motor_roda <= 0:
+            return
+
+        speed_percent = max(0, min(state.speed_motor_roda, self.MAX_SPEED))
+
+        turns_per_second = (
+            speed_percent / self.MAX_SPEED
+        ) * self.MAX_WHEEL_TURNS_PER_SECOND
+
+        delta_turns = turns_per_second * interval_seconds
+
+        if state.wheel_direction == 'counter_clockwise':
+            delta_turns *= -1
+
+        state.wheel_total_turns += delta_turns
+
+        state.wheel_position_degrees = (
+            state.wheel_position_degrees + (delta_turns * 360)
+        ) % 360
+
+        state.arduino_connected = self.serial_service.is_connected()
+
+        state.save()
+
+        print(
+            '[Wheel Position]',
+            {
+                'speed': state.speed_motor_roda,
+                'direction': state.wheel_direction,
+                'is_running': state.wheel_is_running,
+                'position': state.wheel_position_degrees,
+                'turns': state.wheel_total_turns,
+            },
+        )
+
+        self.broadcast_service.broadcast_machine_state(
+            payload={
+                'speed_motor_roda': state.speed_motor_roda,
+                'wheel_position_degrees': state.wheel_position_degrees,
+                'wheel_total_turns': state.wheel_total_turns,
+                'wheel_direction': state.wheel_direction,
+                'wheel_is_running': state.wheel_is_running,
+                'motor_turns_per_wheel_turn': state.motor_turns_per_wheel_turn,
+            }
+        )
+
     def update_state(self, data: dict) -> MachineState:
         state, _ = MachineState.objects.get_or_create(id=1)
 
@@ -53,6 +129,25 @@ class MachineStateService:
 
         if 'speed_motor_roda' in data:
             state.speed_motor_roda = data['speed_motor_roda']
+
+        # =========================
+        # RODA
+        # =========================
+
+        if 'wheel_position_degrees' in data:
+            state.wheel_position_degrees = data['wheel_position_degrees']
+
+        if 'wheel_total_turns' in data:
+            state.wheel_total_turns = data['wheel_total_turns']
+
+        if 'wheel_direction' in data:
+            state.wheel_direction = data['wheel_direction']
+
+        if 'wheel_is_running' in data:
+            state.wheel_is_running = data['wheel_is_running']
+
+        if 'motor_turns_per_wheel_turn' in data:
+            state.motor_turns_per_wheel_turn = data['motor_turns_per_wheel_turn']
 
         state.arduino_connected = self.serial_service.is_connected()
 
@@ -71,6 +166,8 @@ class MachineStateService:
 
         if not state.arduino_connected:
             state.led = 'OFF'
+            state.wheel_is_running = False
+            state.wheel_direction = 'stopped'
 
         state.save()
 
@@ -82,6 +179,13 @@ class MachineStateService:
             'arduino_connected': state.arduino_connected,
             'selected_port': self.serial_service.port,
             'speed_motor_roda': state.speed_motor_roda,
+
+            'wheel_position_degrees': state.wheel_position_degrees,
+            'wheel_total_turns': state.wheel_total_turns,
+            'wheel_direction': state.wheel_direction,
+            'wheel_is_running': state.wheel_is_running,
+            'motor_turns_per_wheel_turn': state.motor_turns_per_wheel_turn,
+
             'lateral_misalignment_current': state.lateral_misalignment_current,
         }
 

@@ -15,6 +15,7 @@ import type {
   ArduinoConnectionState,
   LedUiState,
   MisalignmentPoint,
+  WheelDirection,
 } from '../../types/machine'
 
 // Este componente é responsável por renderizar a tela principal do painel,
@@ -29,6 +30,13 @@ type MachineScreenRendererProps = {
   selectedPort: SelectedSerialPortState
   arduinoConnected: ArduinoConnectionState
   speedMotorRoda: number
+
+  wheelPositionDegrees: number
+  wheelTotalTurns: number
+  wheelDirection: WheelDirection
+  wheelIsRunning: boolean
+  motorTurnsPerWheelTurn: number
+
   led: LedUiState
 
   lateralMisalignmentCurrent: number
@@ -45,6 +53,13 @@ export function MachineScreenRenderer({
   selectedPort,
   arduinoConnected,
   speedMotorRoda,
+
+  wheelPositionDegrees,
+  wheelTotalTurns,
+  wheelDirection,
+  wheelIsRunning,
+  motorTurnsPerWheelTurn,
+
   led,
   lateralMisalignmentCurrent,
   lateralMisalignmentHistory,
@@ -78,6 +93,11 @@ export function MachineScreenRenderer({
       return (
         <MotorsScreen
           speedPercent={speedMotorRoda}
+          wheelPositionDegrees={wheelPositionDegrees}
+          wheelTotalTurns={wheelTotalTurns}
+          wheelDirection={wheelDirection}
+          wheelIsRunning={wheelIsRunning}
+          motorTurnsPerWheelTurn={motorTurnsPerWheelTurn}
         />
       )
 

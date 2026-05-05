@@ -5,6 +5,7 @@ import type {
   MachineLog,
   SelectedSerialPortState,
   SerialPortInfo,
+  WheelDirection,
 } from './state'
 
 export interface MachineUpdatePayload {
@@ -12,6 +13,13 @@ export interface MachineUpdatePayload {
   arduino_connected?: boolean
   selected_port?: SelectedSerialPortState
   speed_motor_roda?: number
+
+  wheel_position_degrees?: number
+  wheel_total_turns?: number
+  wheel_direction?: WheelDirection
+  wheel_is_running?: boolean
+  motor_turns_per_wheel_turn?: number
+
   lateral_misalignment_current?: number
   is_lateral_reading_enabled?: boolean
 }

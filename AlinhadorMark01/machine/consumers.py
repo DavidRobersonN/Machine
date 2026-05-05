@@ -11,6 +11,8 @@ from machine.services.machine_service import MachineService
 class MachineConsumer(WebsocketConsumer):
     GROUP_NAME = 'machine_updates'
 
+    WHEEL_UPDATE_INTERVAL_SECONDS = 0.1
+
     def start_serial_listener(self):
         print('[Serial Listener] Iniciado')
 
@@ -35,6 +37,21 @@ class MachineConsumer(WebsocketConsumer):
             except Exception as error:
                 print('[Serial Listener] Erro:', error)
 
+    def start_wheel_position_listener(self):
+        print('[Wheel Position Listener] Iniciado')
+
+        while getattr(self, 'wheel_position_listener_running', False):
+            try:
+                self.machine_state_service.update_wheel_position_realtime(
+                    interval_seconds=self.WHEEL_UPDATE_INTERVAL_SECONDS,
+                )
+
+                time.sleep(self.WHEEL_UPDATE_INTERVAL_SECONDS)
+
+            except Exception as error:
+                print('[Wheel Position Listener] Erro:', error)
+                time.sleep(self.WHEEL_UPDATE_INTERVAL_SECONDS)
+
     def connect(self):
         self.machine_service = MachineService()
         self.machine_state_service = self.machine_service.machine_state_service
@@ -50,6 +67,13 @@ class MachineConsumer(WebsocketConsumer):
 
         threading.Thread(
             target=self.start_serial_listener,
+            daemon=True,
+        ).start()
+
+        self.wheel_position_listener_running = True
+
+        threading.Thread(
+            target=self.start_wheel_position_listener,
             daemon=True,
         ).start()
 
@@ -106,6 +130,7 @@ class MachineConsumer(WebsocketConsumer):
         try:
             if hasattr(self, 'machine_service'):
                 self.machine_service.serial_service.disconnect()
+                self.wheel_position_listener_running = False
         except Exception:
             pass
 

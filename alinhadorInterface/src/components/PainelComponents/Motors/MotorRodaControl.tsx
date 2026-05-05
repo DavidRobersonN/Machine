@@ -40,6 +40,12 @@ export function MotorRodaControl() {
     })
   }
 
+  function handleResetPosition() {
+    sendCommand({
+      action: 'wheel_reset_position',
+    })
+  }
+
   return (
     <MotorPassoGenerico
       title="Motor da roda"
@@ -49,6 +55,7 @@ export function MotorRodaControl() {
       onCounterClockwise={handleCounterClockwise}
       onIncreaseSpeed={handleIncreaseSpeed}
       onDecreaseSpeed={handleDecreaseSpeed}
+      onResetPosition={handleResetPosition}
       clockwiseLabel="Girar horário"
       counterClockwiseLabel="Girar anti-horário"
     />

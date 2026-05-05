@@ -25,6 +25,11 @@ export function HomePage() {
     statusBarProps,
     bottomActions,
     led,
+    wheelPositionDegrees,
+    wheelTotalTurns,
+    wheelDirection,
+    wheelIsRunning,
+    motorTurnsPerWheelTurn,
 
     goToScreen,
     handleListSerialPorts,
@@ -49,6 +54,11 @@ export function HomePage() {
             selectedPort={selectedPort}
             arduinoConnected={arduinoConnected}
             speedMotorRoda={speedMotorRoda}
+            wheelPositionDegrees={wheelPositionDegrees}
+            wheelTotalTurns={wheelTotalTurns}
+            wheelDirection={wheelDirection}
+            wheelIsRunning={wheelIsRunning}
+            motorTurnsPerWheelTurn={motorTurnsPerWheelTurn}
             lateralMisalignmentCurrent={lateralMisalignmentCurrent}
             lateralMisalignmentHistory={lateralMisalignmentHistory}
             onSelectPort={handleSelectPort}
