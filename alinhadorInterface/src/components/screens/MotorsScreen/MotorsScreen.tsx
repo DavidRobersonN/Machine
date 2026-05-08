@@ -1,46 +1,19 @@
-import { SpeedGauge } from '../../../components/SpeedGauge/SpeedGauge'
-import { WheelRotationViewer } from '../../../components/WheelRotationViewer/WheelRotationViewer'
-
-import type { WheelDirection } from '../../../types/machine'
+import { WheelPositionControl } from '../../../components/controls/WheelPositionControl/WheelPositionControl'
 
 import './MotorsScreen.css'
 
-type MotorsScreenProps = {
-  speedPercent: number
-  wheelPositionDegrees: number
-  wheelTotalTurns: number
-  wheelDirection: WheelDirection
-  wheelIsRunning: boolean
-  motorTurnsPerWheelTurn: number
-}
-
-export function MotorsScreen({
-  speedPercent,
-  wheelPositionDegrees,
-  wheelTotalTurns,
-  wheelDirection,
-  wheelIsRunning,
-  motorTurnsPerWheelTurn,
-}: MotorsScreenProps) {
+export function MotorsScreen() {
   return (
     <div className="screen-page motors-screen">
-      <h2 className="screen-page-title">Motores</h2>
+      <header className="motors-screen__header">
+        <div>
+          <h2 className="screen-page-title">Motores</h2>
+          <p>Controle de posição e movimentação da roda.</p>
+        </div>
+      </header>
 
       <div className="motors-dashboard-area">
-        <div className="motors-wheel-area">
-          <WheelRotationViewer
-            positionDegrees={wheelPositionDegrees}
-            totalTurns={wheelTotalTurns}
-            speedPercent={speedPercent}
-            direction={wheelDirection}
-            isRunning={wheelIsRunning}
-            motorTurnsPerWheelTurn={motorTurnsPerWheelTurn}
-          />
-        </div>
-
-        <div className="motors-speed-area">
-          <SpeedGauge value={speedPercent} />
-        </div>
+        <WheelPositionControl />
       </div>
     </div>
   )

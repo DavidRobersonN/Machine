@@ -14,6 +14,7 @@ def make_consumer():
     - disconnect
     - machine_update
     - start_serial_listener
+    - handle_serial_json_message
     """
 
     consumer = object.__new__(MachineConsumer)
@@ -235,6 +236,183 @@ def test_machine_update_sends_machine_update_message_to_frontend():
     ]
 
 
+def test_handle_serial_json_message_motor_roda_position_status_broadcasts_machine_update():
+    consumer = make_consumer()
+
+    fake_broadcast_service = Mock()
+
+    fake_machine_state_service = Mock()
+    fake_machine_state_service.broadcast_service = fake_broadcast_service
+
+    consumer.machine_state_service = fake_machine_state_service
+
+    was_handled = consumer.handle_serial_json_message({
+        'success': True,
+        'type': 'motor_roda_position_status',
+        'status': 'position_reached',
+        'current_angle': 90.0,
+        'target_angle': 90.0,
+        'current_spoke': 10,
+        'target_spoke': 10,
+        'total_spokes': 36,
+        'is_positioning': False,
+    })
+
+    assert was_handled is True
+
+    fake_broadcast_service.broadcast_machine_state.assert_called_once_with(
+        payload={
+            'wheel_current_angle': 90.0,
+            'wheel_target_angle': 90.0,
+            'wheel_current_spoke': 10,
+            'wheel_target_spoke': 10,
+            'wheel_total_spokes': 36,
+            'wheel_is_positioning': False,
+        }
+    )
+
+    messages = get_sent_json_messages(consumer)
+
+    assert messages == [
+        {
+            'type': 'serial_message',
+            'direction': 'received',
+            'message': (
+                'Status da posição da roda: '
+                'ângulo atual 90.0°, '
+                'raio atual 10, '
+                'status position_reached'
+            ),
+        }
+    ]
+
+
+def test_handle_serial_json_message_motor_roda_position_status_ignores_none_values():
+    consumer = make_consumer()
+
+    fake_broadcast_service = Mock()
+
+    fake_machine_state_service = Mock()
+    fake_machine_state_service.broadcast_service = fake_broadcast_service
+
+    consumer.machine_state_service = fake_machine_state_service
+
+    was_handled = consumer.handle_serial_json_message({
+        'success': True,
+        'type': 'motor_roda_position_status',
+        'status': 'moving_to_angle',
+        'current_angle': 110.0,
+        'target_angle': None,
+        'current_spoke': 12,
+        'target_spoke': None,
+        'total_spokes': 36,
+        'is_positioning': True,
+    })
+
+    assert was_handled is True
+
+    fake_broadcast_service.broadcast_machine_state.assert_called_once_with(
+        payload={
+            'wheel_current_angle': 110.0,
+            'wheel_current_spoke': 12,
+            'wheel_total_spokes': 36,
+            'wheel_is_positioning': True,
+        }
+    )
+
+
+def test_handle_serial_json_message_lateral_sensor_status_broadcasts_reading_enabled():
+    consumer = make_consumer()
+
+    fake_broadcast_service = Mock()
+
+    fake_machine_state_service = Mock()
+    fake_machine_state_service.broadcast_service = fake_broadcast_service
+
+    consumer.machine_state_service = fake_machine_state_service
+
+    was_handled = consumer.handle_serial_json_message({
+        'success': True,
+        'type': 'lateral_sensor_status',
+        'reading_enabled': True,
+        'message': 'leitura_lateral_iniciada',
+    })
+
+    assert was_handled is True
+
+    fake_broadcast_service.broadcast_machine_state.assert_called_once_with(
+        payload={
+            'is_lateral_reading_enabled': True,
+        }
+    )
+
+    messages = get_sent_json_messages(consumer)
+
+    assert messages == [
+        {
+            'type': 'serial_message',
+            'direction': 'received',
+            'message': 'leitura_lateral_iniciada',
+        }
+    ]
+
+
+def test_handle_serial_json_message_lateral_sensor_status_uses_fallback_message():
+    consumer = make_consumer()
+
+    fake_broadcast_service = Mock()
+
+    fake_machine_state_service = Mock()
+    fake_machine_state_service.broadcast_service = fake_broadcast_service
+
+    consumer.machine_state_service = fake_machine_state_service
+
+    was_handled = consumer.handle_serial_json_message({
+        'success': True,
+        'type': 'lateral_sensor_status',
+        'reading_enabled': False,
+    })
+
+    assert was_handled is True
+
+    fake_broadcast_service.broadcast_machine_state.assert_called_once_with(
+        payload={
+            'is_lateral_reading_enabled': False,
+        }
+    )
+
+    messages = get_sent_json_messages(consumer)
+
+    assert messages == [
+        {
+            'type': 'serial_message',
+            'direction': 'received',
+            'message': 'Status da leitura lateral atualizado',
+        }
+    ]
+
+
+def test_handle_serial_json_message_unknown_type_returns_false():
+    consumer = make_consumer()
+
+    fake_broadcast_service = Mock()
+
+    fake_machine_state_service = Mock()
+    fake_machine_state_service.broadcast_service = fake_broadcast_service
+
+    consumer.machine_state_service = fake_machine_state_service
+
+    was_handled = consumer.handle_serial_json_message({
+        'type': 'mensagem_desconhecida',
+        'message': 'qualquer coisa',
+    })
+
+    assert was_handled is False
+
+    fake_broadcast_service.broadcast_machine_state.assert_not_called()
+    consumer.send.assert_not_called()
+
+
 def test_start_serial_listener_broadcasts_lateral_sensor_value_when_receives_pos_line():
     consumer = make_consumer()
 
@@ -264,6 +442,101 @@ def test_start_serial_listener_broadcasts_lateral_sensor_value_when_receives_pos
     fake_machine_state_service.broadcast_lateral_sensor_state.assert_called_once_with(
         12.50
     )
+
+
+def test_start_serial_listener_handles_motor_roda_position_status_json_line():
+    consumer = make_consumer()
+
+    serial_line = json.dumps({
+        'success': True,
+        'type': 'motor_roda_position_status',
+        'status': 'position_reached',
+        'current_angle': 90.0,
+        'target_angle': 90.0,
+        'current_spoke': 10,
+        'target_spoke': 10,
+        'total_spokes': 36,
+        'is_positioning': False,
+    })
+
+    fake_serial_service = Mock()
+    fake_serial_service.is_connected.return_value = True
+
+    def read_line_once():
+        consumer.serial_listener_running = False
+        return serial_line
+
+    fake_serial_service.read_line.side_effect = read_line_once
+
+    fake_machine_service = Mock()
+    fake_machine_service.serial_service = fake_serial_service
+
+    fake_broadcast_service = Mock()
+
+    fake_machine_state_service = Mock()
+    fake_machine_state_service.broadcast_service = fake_broadcast_service
+
+    consumer.machine_service = fake_machine_service
+    consumer.machine_state_service = fake_machine_state_service
+    consumer.serial_listener_running = True
+
+    consumer.start_serial_listener()
+
+    fake_broadcast_service.broadcast_machine_state.assert_called_once_with(
+        payload={
+            'wheel_current_angle': 90.0,
+            'wheel_target_angle': 90.0,
+            'wheel_current_spoke': 10,
+            'wheel_target_spoke': 10,
+            'wheel_total_spokes': 36,
+            'wheel_is_positioning': False,
+        }
+    )
+
+
+def test_start_serial_listener_sends_unknown_json_as_serial_message():
+    consumer = make_consumer()
+
+    serial_line = json.dumps({
+        'success': True,
+        'type': 'startup',
+        'message': 'arduino_iniciado',
+    })
+
+    fake_serial_service = Mock()
+    fake_serial_service.is_connected.return_value = True
+
+    def read_line_once():
+        consumer.serial_listener_running = False
+        return serial_line
+
+    fake_serial_service.read_line.side_effect = read_line_once
+
+    fake_machine_service = Mock()
+    fake_machine_service.serial_service = fake_serial_service
+
+    fake_broadcast_service = Mock()
+
+    fake_machine_state_service = Mock()
+    fake_machine_state_service.broadcast_service = fake_broadcast_service
+
+    consumer.machine_service = fake_machine_service
+    consumer.machine_state_service = fake_machine_state_service
+    consumer.serial_listener_running = True
+
+    consumer.start_serial_listener()
+
+    fake_broadcast_service.broadcast_machine_state.assert_not_called()
+
+    messages = get_sent_json_messages(consumer)
+
+    assert messages == [
+        {
+            'type': 'serial_message',
+            'direction': 'received',
+            'message': serial_line,
+        }
+    ]
 
 
 def test_start_serial_listener_ignores_empty_line():

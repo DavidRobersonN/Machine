@@ -19,6 +19,13 @@ export const initialMachineState: MachineState = {
   wheel_is_running: false,
   motor_turns_per_wheel_turn: 1,
 
+  wheel_current_angle: 0,
+  wheel_target_angle: null,
+  wheel_current_spoke: 1,
+  wheel_target_spoke: null,
+  wheel_total_spokes: 36,
+  wheel_is_positioning: false,
+
   lateral_misalignment_current: 0,
   lateral_misalignment_history: [],
   is_lateral_reading_enabled: false,
@@ -124,8 +131,8 @@ export function machineReducer(
           action.payload.speed_motor_roda !== undefined
             ? action.payload.speed_motor_roda
             : state.speed_motor_roda,
-        
-                    wheel_position_degrees:
+
+        wheel_position_degrees:
           action.payload.wheel_position_degrees !== undefined
             ? action.payload.wheel_position_degrees
             : state.wheel_position_degrees,
@@ -150,6 +157,36 @@ export function machineReducer(
             ? action.payload.motor_turns_per_wheel_turn
             : state.motor_turns_per_wheel_turn,
 
+        wheel_current_angle:
+          action.payload.wheel_current_angle !== undefined
+            ? action.payload.wheel_current_angle
+            : state.wheel_current_angle,
+
+        wheel_target_angle:
+          action.payload.wheel_target_angle !== undefined
+            ? action.payload.wheel_target_angle
+            : state.wheel_target_angle,
+
+        wheel_current_spoke:
+          action.payload.wheel_current_spoke !== undefined
+            ? action.payload.wheel_current_spoke
+            : state.wheel_current_spoke,
+
+        wheel_target_spoke:
+          action.payload.wheel_target_spoke !== undefined
+            ? action.payload.wheel_target_spoke
+            : state.wheel_target_spoke,
+
+        wheel_total_spokes:
+          action.payload.wheel_total_spokes !== undefined
+            ? action.payload.wheel_total_spokes
+            : state.wheel_total_spokes,
+
+        wheel_is_positioning:
+          action.payload.wheel_is_positioning !== undefined
+            ? action.payload.wheel_is_positioning
+            : state.wheel_is_positioning,
+
         lateral_misalignment_current:
           lateralValue !== undefined
             ? lateralValue
@@ -161,8 +198,8 @@ export function machineReducer(
 
         is_lateral_reading_enabled:
           action.payload.is_lateral_reading_enabled !== undefined
-          ? action.payload.is_lateral_reading_enabled
-          : state.is_lateral_reading_enabled,
+            ? action.payload.is_lateral_reading_enabled
+            : state.is_lateral_reading_enabled,
       }
     }
 

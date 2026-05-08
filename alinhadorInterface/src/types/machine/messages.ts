@@ -14,11 +14,32 @@ export interface MachineUpdatePayload {
   selected_port?: SelectedSerialPortState
   speed_motor_roda?: number
 
+  // =======================
+  // RODA - GIRO CONTÍNUO / ESTADO GERAL
+  // =======================
+
   wheel_position_degrees?: number
   wheel_total_turns?: number
   wheel_direction?: WheelDirection
   wheel_is_running?: boolean
   motor_turns_per_wheel_turn?: number
+
+  // =======================
+  // RODA - POSICIONAMENTO POR ÂNGULO / RAIO
+  // =======================
+
+  wheel_current_angle?: number
+  wheel_target_angle?: number | null
+
+  wheel_current_spoke?: number
+  wheel_target_spoke?: number | null
+
+  wheel_total_spokes?: number
+  wheel_is_positioning?: boolean
+
+  // =======================
+  // SENSOR LATERAL
+  // =======================
 
   lateral_misalignment_current?: number
   is_lateral_reading_enabled?: boolean

@@ -18,6 +18,13 @@ describe('machineReducer', () => {
       wheel_is_running: false,
       motor_turns_per_wheel_turn: 1,
 
+      wheel_current_angle: 0,
+      wheel_target_angle: null,
+      wheel_current_spoke: 1,
+      wheel_target_spoke: null,
+      wheel_total_spokes: 36,
+      wheel_is_positioning: false,
+
       lateral_misalignment_current: 0,
       lateral_misalignment_history: [],
       is_lateral_reading_enabled: false,
@@ -309,6 +316,104 @@ describe('machineReducer', () => {
     expect(newState.motor_turns_per_wheel_turn).toBe(4)
   })
 
+  it('deve atualizar o ângulo atual da roda via MACHINE_UPDATED', () => {
+    const newState = machineReducer(initialMachineState, {
+      type: 'MACHINE_UPDATED',
+      payload: {
+        wheel_current_angle: 110,
+      },
+    })
+
+    expect(newState.wheel_current_angle).toBe(110)
+  })
+
+  it('deve atualizar o ângulo alvo da roda via MACHINE_UPDATED', () => {
+    const newState = machineReducer(initialMachineState, {
+      type: 'MACHINE_UPDATED',
+      payload: {
+        wheel_target_angle: 180,
+      },
+    })
+
+    expect(newState.wheel_target_angle).toBe(180)
+  })
+
+  it('deve permitir limpar o ângulo alvo da roda via MACHINE_UPDATED', () => {
+    const state = {
+      ...initialMachineState,
+      wheel_target_angle: 180,
+    }
+
+    const newState = machineReducer(state, {
+      type: 'MACHINE_UPDATED',
+      payload: {
+        wheel_target_angle: null,
+      },
+    })
+
+    expect(newState.wheel_target_angle).toBeNull()
+  })
+
+  it('deve atualizar o raio atual da roda via MACHINE_UPDATED', () => {
+    const newState = machineReducer(initialMachineState, {
+      type: 'MACHINE_UPDATED',
+      payload: {
+        wheel_current_spoke: 12,
+      },
+    })
+
+    expect(newState.wheel_current_spoke).toBe(12)
+  })
+
+  it('deve atualizar o raio alvo da roda via MACHINE_UPDATED', () => {
+    const newState = machineReducer(initialMachineState, {
+      type: 'MACHINE_UPDATED',
+      payload: {
+        wheel_target_spoke: 19,
+      },
+    })
+
+    expect(newState.wheel_target_spoke).toBe(19)
+  })
+
+  it('deve permitir limpar o raio alvo da roda via MACHINE_UPDATED', () => {
+    const state = {
+      ...initialMachineState,
+      wheel_target_spoke: 19,
+    }
+
+    const newState = machineReducer(state, {
+      type: 'MACHINE_UPDATED',
+      payload: {
+        wheel_target_spoke: null,
+      },
+    })
+
+    expect(newState.wheel_target_spoke).toBeNull()
+  })
+
+  it('deve atualizar o total de raios da roda via MACHINE_UPDATED', () => {
+    const newState = machineReducer(initialMachineState, {
+      type: 'MACHINE_UPDATED',
+      payload: {
+        wheel_total_spokes: 36,
+      },
+    })
+
+    expect(newState.wheel_total_spokes).toBe(36)
+  })
+
+  it('deve atualizar se a roda está posicionando via MACHINE_UPDATED', () => {
+    const newState = machineReducer(initialMachineState, {
+      type: 'MACHINE_UPDATED',
+      payload: {
+        wheel_is_positioning: true,
+      },
+    })
+
+    expect(newState.wheel_is_positioning).toBe(true)
+  })
+
   it('deve ativar a leitura lateral', () => {
     const newState = machineReducer(initialMachineState, {
       type: 'MACHINE_UPDATED',
@@ -349,6 +454,13 @@ describe('machineReducer', () => {
       wheel_is_running: true,
       motor_turns_per_wheel_turn: 4,
 
+      wheel_current_angle: 110,
+      wheel_target_angle: 180,
+      wheel_current_spoke: 12,
+      wheel_target_spoke: 19,
+      wheel_total_spokes: 36,
+      wheel_is_positioning: true,
+
       lateral_misalignment_current: 8.2,
       is_lateral_reading_enabled: true,
     }
@@ -369,6 +481,13 @@ describe('machineReducer', () => {
     expect(newState.wheel_direction).toBe('clockwise')
     expect(newState.wheel_is_running).toBe(true)
     expect(newState.motor_turns_per_wheel_turn).toBe(4)
+
+    expect(newState.wheel_current_angle).toBe(110)
+    expect(newState.wheel_target_angle).toBe(180)
+    expect(newState.wheel_current_spoke).toBe(12)
+    expect(newState.wheel_target_spoke).toBe(19)
+    expect(newState.wheel_total_spokes).toBe(36)
+    expect(newState.wheel_is_positioning).toBe(true)
 
     expect(newState.lateral_misalignment_current).toBe(8.2)
     expect(newState.is_lateral_reading_enabled).toBe(true)

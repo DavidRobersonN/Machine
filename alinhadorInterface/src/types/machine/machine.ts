@@ -30,6 +30,12 @@ export type { MachineAction } from './actions'
 
 export type {
   MotorRodaCommand,
+  MotorRodaSetZeroCommand,
+  MotorRodaGoToAngleCommand,
+  MotorRodaGoToSpokeCommand,
+  MotorRodaNextSpokeCommand,
+  MotorRodaPreviousSpokeCommand,
+  MotorRodaPositionStatusCommand,
   ListSerialPortsCommand,
   SelectPortCommand,
   DisconnectSerialPortCommand,

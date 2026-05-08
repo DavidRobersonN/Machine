@@ -13,6 +13,69 @@ class MachineConsumer(WebsocketConsumer):
 
     WHEEL_UPDATE_INTERVAL_SECONDS = 0.1
 
+    def handle_serial_json_message(self, data: dict) -> bool:
+        """
+        Trata mensagens JSON recebidas diretamente do Arduino pela serial.
+
+        Retorna True quando a mensagem foi reconhecida e tratada.
+        Retorna False quando a mensagem não pertence a nenhum fluxo especial.
+        """
+
+        message_type = data.get('type')
+
+        if message_type == 'motor_roda_position_status':
+            payload = {
+                'wheel_current_angle': data.get('current_angle'),
+                'wheel_target_angle': data.get('target_angle'),
+                'wheel_current_spoke': data.get('current_spoke'),
+                'wheel_target_spoke': data.get('target_spoke'),
+                'wheel_total_spokes': data.get('total_spokes'),
+                'wheel_is_positioning': data.get('is_positioning'),
+            }
+
+            clean_payload = {
+                key: value
+                for key, value in payload.items()
+                if value is not None
+            }
+
+            self.machine_state_service.broadcast_service.broadcast_machine_state(
+                payload=clean_payload,
+            )
+
+            self.send(text_data=json.dumps({
+                'type': 'serial_message',
+                'direction': 'received',
+                'message': (
+                    f"Status da posição da roda: "
+                    f"ângulo atual {data.get('current_angle')}°, "
+                    f"raio atual {data.get('current_spoke')}, "
+                    f"status {data.get('status')}"
+                ),
+            }))
+
+            return True
+
+        if message_type == 'lateral_sensor_status':
+            self.machine_state_service.broadcast_service.broadcast_machine_state(
+                payload={
+                    'is_lateral_reading_enabled': data.get('reading_enabled'),
+                },
+            )
+
+            self.send(text_data=json.dumps({
+                'type': 'serial_message',
+                'direction': 'received',
+                'message': data.get(
+                    'message',
+                    'Status da leitura lateral atualizado',
+                ),
+            }))
+
+            return True
+
+        return False
+
     def start_serial_listener(self):
         """
         Listener contínuo da porta serial.
@@ -21,6 +84,8 @@ class MachineConsumer(WebsocketConsumer):
 
         Regras:
         - Se a linha começar com POS:, atualiza o sensor lateral em tempo real.
+        - Se a linha for JSON de posição da roda, atualiza o estado da roda.
+        - Se a linha for JSON de status do sensor lateral, atualiza o status da leitura lateral.
         - Qualquer outra linha recebida é enviada para o frontend como serial_message.
         """
 
@@ -47,6 +112,20 @@ class MachineConsumer(WebsocketConsumer):
                     self.machine_state_service.broadcast_lateral_sensor_state(value)
 
                     continue
+
+                if line.startswith('{') and line.endswith('}'):
+                    try:
+                        serial_data = json.loads(line)
+
+                        was_handled = self.handle_serial_json_message(
+                            serial_data,
+                        )
+
+                        if was_handled:
+                            continue
+
+                    except json.JSONDecodeError:
+                        pass
 
                 self.send(text_data=json.dumps({
                     'type': 'serial_message',
