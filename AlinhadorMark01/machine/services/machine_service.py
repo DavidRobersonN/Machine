@@ -61,9 +61,27 @@ class MachineService:
 
         if action == 'motor_roda_decrease_speed':
             return self.motor_roda_decrease_speed()
-        
+
         if action == 'wheel_reset_position':
             return self.wheel_reset_position()
+        
+        if action == 'motor_roda_set_zero':
+            return self.motor_roda_set_zero()
+
+        if action == 'motor_roda_go_to_angle':
+            return self.motor_roda_go_to_angle(data)
+
+        if action == 'motor_roda_go_to_spoke':
+            return self.motor_roda_go_to_spoke(data)
+
+        if action == 'motor_roda_next_spoke':
+            return self.motor_roda_next_spoke()
+
+        if action == 'motor_roda_previous_spoke':
+            return self.motor_roda_previous_spoke()
+
+        if action == 'motor_roda_position_status':
+            return self.motor_roda_position_status()
 
         # =========================
         # PORTA SERIAL
@@ -77,6 +95,9 @@ class MachineService:
 
         if action == 'disconnect_serial_port':
             return self.disconnect_serial_port()
+
+        if action == 'serial_send_command':
+            return self.serial_send_command(data)
 
         # =========================
         # TESTE DE CONEXÃO
@@ -181,6 +202,43 @@ class MachineService:
                 if current_port
                 else 'Arduino desconectado'
             ),
+        }
+
+    def serial_send_command(self, data: dict) -> dict:
+        """
+        Envia um comando manual para o Arduino pela porta serial.
+
+        Esse método é usado pelo Monitor Serial do React.
+
+        Exemplo recebido do frontend:
+        {
+            "action": "serial_send_command",
+            "command": "LED_ON"
+        }
+        """
+
+        command = data.get('command')
+
+        if not command:
+            return {
+                'type': 'error',
+                'message': 'Nenhum comando serial foi informado',
+            }
+
+        command = str(command).strip()
+
+        if not command:
+            return {
+                'type': 'error',
+                'message': 'O comando serial não pode estar vazio',
+            }
+
+        serial_result = self.serial_service.send_command(command)
+
+        return {
+            'type': 'serial_message',
+            'direction': 'received',
+            'message': self.format_serial_monitor_message(command, serial_result),
         }
 
     # =========================
@@ -436,13 +494,7 @@ class MachineService:
                 f'Velocidade do motor da roda diminuída para {new_speed}',
             ),
         }
-    # =========================
-    # AUXILIAR
-    # =========================
 
-    def get_serial_message(self, serial_result: dict, fallback: str) -> str:
-        return serial_result.get('message') or fallback
-    
     def wheel_reset_position(self) -> dict:
         self.machine_state_service.update_state({
             'wheel_position_degrees': 0,
@@ -454,3 +506,160 @@ class MachineService:
             'direction': 'received',
             'message': 'Posição da roda zerada',
         }
+    
+    # =========================
+    # MOTOR DA RODA - POSIÇÃO
+    # =========================
+
+    def motor_roda_set_zero(self) -> dict:
+        serial_result = self.serial_service.send_command('MOTOR_RODA_SET_ZERO')
+
+        self.machine_state_service.update_state({
+            'wheel_position_degrees': 0,
+            'wheel_total_turns': 0,
+        })
+
+        return {
+            'type': 'log',
+            'direction': 'received',
+            'message': self.get_serial_message(
+                serial_result,
+                'Comando enviado: definir posição atual como zero',
+            ),
+        }
+
+    def motor_roda_go_to_angle(self, data: dict) -> dict:
+        angle = data.get('angle')
+
+        if angle is None:
+            return {
+                'type': 'error',
+                'message': 'Nenhum ângulo foi informado',
+            }
+
+        try:
+            angle = float(angle)
+        except (TypeError, ValueError):
+            return {
+                'type': 'error',
+                'message': 'Ângulo inválido',
+            }
+
+        serial_result = self.serial_service.send_command(
+            f'MOTOR_RODA_GO_TO_ANGLE:{angle:g}'
+        )
+
+        return {
+            'type': 'log',
+            'direction': 'received',
+            'message': self.get_serial_message(
+                serial_result,
+                f'Comando enviado: mover roda para {angle:g} graus',
+            ),
+        }
+
+    def motor_roda_go_to_spoke(self, data: dict) -> dict:
+        spoke = data.get('spoke')
+
+        if spoke is None:
+            return {
+                'type': 'error',
+                'message': 'Nenhum raio foi informado',
+            }
+
+        try:
+            spoke = int(spoke)
+        except (TypeError, ValueError):
+            return {
+                'type': 'error',
+                'message': 'Raio inválido',
+            }
+
+        if spoke < 1:
+            return {
+                'type': 'error',
+                'message': 'O raio deve ser maior ou igual a 1',
+            }
+
+        serial_result = self.serial_service.send_command(
+            f'MOTOR_RODA_GO_TO_SPOKE:{spoke}'
+        )
+
+        return {
+            'type': 'log',
+            'direction': 'received',
+            'message': self.get_serial_message(
+                serial_result,
+                f'Comando enviado: mover roda para o raio {spoke}',
+            ),
+        }
+
+    def motor_roda_next_spoke(self) -> dict:
+        serial_result = self.serial_service.send_command(
+            'MOTOR_RODA_NEXT_SPOKE'
+        )
+
+        return {
+            'type': 'log',
+            'direction': 'received',
+            'message': self.get_serial_message(
+                serial_result,
+                'Comando enviado: mover para o próximo raio',
+            ),
+        }
+
+    def motor_roda_previous_spoke(self) -> dict:
+        serial_result = self.serial_service.send_command(
+            'MOTOR_RODA_PREVIOUS_SPOKE'
+        )
+
+        return {
+            'type': 'log',
+            'direction': 'received',
+            'message': self.get_serial_message(
+                serial_result,
+                'Comando enviado: mover para o raio anterior',
+            ),
+        }
+
+    def motor_roda_position_status(self) -> dict:
+        serial_result = self.serial_service.send_command(
+            'MOTOR_RODA_POSITION_STATUS'
+        )
+
+        return {
+            'type': 'log',
+            'direction': 'received',
+            'message': self.get_serial_message(
+                serial_result,
+                'Comando enviado: solicitar status da posição da roda',
+            ),
+        }
+
+    # =========================
+    # AUXILIAR
+    # =========================
+
+    def get_serial_message(self, serial_result: dict, fallback: str) -> str:
+        return serial_result.get('message') or fallback
+
+    def format_serial_monitor_message(self, command: str, serial_result: dict) -> str:
+        success = serial_result.get('success', False)
+        message = serial_result.get('message', '')
+        response = serial_result.get('response')
+
+        status = 'sucesso' if success else 'erro'
+
+        if response:
+            return (
+                f'Comando serial: {command}\n'
+                f'Status: {status}\n'
+                f'Mensagem: {message}\n'
+                f'Resposta Arduino: {response}'
+            )
+
+        return (
+            f'Comando serial: {command}\n'
+            f'Status: {status}\n'
+            f'Mensagem: {message}'
+        )

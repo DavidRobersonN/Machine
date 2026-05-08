@@ -42,7 +42,6 @@ export function MachineProvider({ children }: MachineProviderProps) {
   const latestLateralValueRef = useRef(0)
   const hasReceivedLateralValueRef = useRef(false)
 
-
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       if (!hasReceivedLateralValueRef.current) {
@@ -127,6 +126,17 @@ export function MachineProvider({ children }: MachineProviderProps) {
     }
 
     if (message.type === 'log') {
+      dispatch({
+        type: 'ADD_LOG',
+        payload: {
+          direction: message.direction,
+          message: message.message,
+        },
+      })
+      return
+    }
+
+    if (message.type === 'serial_message') {
       dispatch({
         type: 'ADD_LOG',
         payload: {

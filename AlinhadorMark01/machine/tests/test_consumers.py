@@ -41,7 +41,7 @@ def get_sent_json_messages(consumer):
     return messages
 
 
-def test_connect_accepts_websocket_adds_group_starts_listener_and_sends_initial_state():
+def test_connect_accepts_websocket_adds_group_starts_listeners_and_sends_initial_state():
     consumer = make_consumer()
 
     fake_state = {
@@ -79,8 +79,11 @@ def test_connect_accepts_websocket_adds_group_starts_listener_and_sends_initial_
     assert consumer.machine_service == fake_machine_service
     assert consumer.machine_state_service == fake_machine_state_service
 
-    mock_thread.assert_called_once()
-    fake_thread_instance.start.assert_called_once()
+    # O consumer atual inicia 2 threads:
+    # 1. start_serial_listener
+    # 2. start_wheel_position_listener
+    assert mock_thread.call_count == 2
+    assert fake_thread_instance.start.call_count == 2
 
     messages = get_sent_json_messages(consumer)
 
@@ -115,11 +118,11 @@ def test_receive_with_valid_json_sends_logs_and_backend_response():
 
     assert messages[0]['type'] == 'log'
     assert messages[0]['direction'] == 'received'
-    assert "Mensagem recebida do frontend" in messages[0]['message']
+    assert 'Mensagem recebida do frontend' in messages[0]['message']
 
     assert messages[1]['type'] == 'log'
     assert messages[1]['direction'] == 'sent'
-    assert "Resposta enviada pelo backend" in messages[1]['message']
+    assert 'Resposta enviada pelo backend' in messages[1]['message']
 
     assert messages[2] == backend_response
 
@@ -161,7 +164,7 @@ def test_receive_when_handle_command_raises_exception_sends_error_message():
     }
 
 
-def test_disconnect_stops_listener_removes_group_and_disconnects_serial_service():
+def test_disconnect_stops_listeners_removes_group_and_disconnects_serial_service():
     consumer = make_consumer()
 
     fake_serial_service = Mock()
@@ -171,11 +174,15 @@ def test_disconnect_stops_listener_removes_group_and_disconnects_serial_service(
 
     consumer.machine_service = fake_machine_service
     consumer.serial_listener_running = True
+    consumer.wheel_position_listener_running = True
 
     with patch('machine.consumers.async_to_sync', side_effect=lambda func: func):
         consumer.disconnect(close_code=1000)
 
     assert consumer.serial_listener_running is False
+
+    if hasattr(consumer, 'wheel_position_listener_running'):
+        assert consumer.wheel_position_listener_running is False
 
     consumer.channel_layer.group_discard.assert_called_once_with(
         'machine_updates',
@@ -189,11 +196,15 @@ def test_disconnect_without_machine_service_does_not_raise_error():
     consumer = make_consumer()
 
     consumer.serial_listener_running = True
+    consumer.wheel_position_listener_running = True
 
     with patch('machine.consumers.async_to_sync', side_effect=lambda func: func):
         consumer.disconnect(close_code=1000)
 
     assert consumer.serial_listener_running is False
+
+    if hasattr(consumer, 'wheel_position_listener_running'):
+        assert consumer.wheel_position_listener_running is False
 
     consumer.channel_layer.group_discard.assert_called_once_with(
         'machine_updates',

@@ -34,15 +34,42 @@ def make_service(
     return service, serial_service
 
 
+def make_expected_payload(
+    *,
+    led='OFF',
+    arduino_connected=True,
+    selected_port='COM9',
+    speed_motor_roda=0,
+    wheel_position_degrees=0.0,
+    wheel_total_turns=0.0,
+    wheel_direction='stopped',
+    wheel_is_running=False,
+    motor_turns_per_wheel_turn=1.0,
+    lateral_misalignment_current=0.0,
+):
+    return {
+        'led': led,
+        'arduino_connected': arduino_connected,
+        'selected_port': selected_port,
+        'speed_motor_roda': speed_motor_roda,
+        'wheel_position_degrees': wheel_position_degrees,
+        'wheel_total_turns': wheel_total_turns,
+        'wheel_direction': wheel_direction,
+        'wheel_is_running': wheel_is_running,
+        'motor_turns_per_wheel_turn': motor_turns_per_wheel_turn,
+        'lateral_misalignment_current': lateral_misalignment_current,
+    }
+
+
 def test_initial_state_of_service():
     service, serial_service = make_service()
 
     assert service.serial_service == serial_service
     assert service.last_lateral_broadcast_time == 0.0
     assert service.lateral_broadcast_interval == 0.05
-    assert service.SPEED_STEP == 10
+    assert service.SPEED_STEP == 5
     assert service.MIN_SPEED == 0
-    assert service.MAX_SPEED == 1000
+    assert service.MAX_SPEED == 100
 
 
 def test_serialize_state():
@@ -58,13 +85,13 @@ def test_serialize_state():
 
     serialized = service.serialize_state(state)
 
-    assert serialized == {
-        'led': 'ON',
-        'arduino_connected': True,
-        'selected_port': 'COM9',
-        'speed_motor_roda': 80,
-        'lateral_misalignment_current': 12.5,
-    }
+    assert serialized == make_expected_payload(
+        led='ON',
+        arduino_connected=True,
+        selected_port='COM9',
+        speed_motor_roda=80,
+        lateral_misalignment_current=12.5,
+    )
 
 
 def test_update_state_updates_led_speed_lateral_value_and_broadcasts():
@@ -87,13 +114,13 @@ def test_update_state_updates_led_speed_lateral_value_and_broadcasts():
     serial_service.is_connected.assert_called()
 
     service.broadcast_service.broadcast_machine_state.assert_called_once_with(
-        payload={
-            'led': 'ON',
-            'arduino_connected': True,
-            'selected_port': 'COM9',
-            'speed_motor_roda': 90,
-            'lateral_misalignment_current': 7.25,
-        }
+        payload=make_expected_payload(
+            led='ON',
+            arduino_connected=True,
+            selected_port='COM9',
+            speed_motor_roda=90,
+            lateral_misalignment_current=7.25,
+        )
     )
 
 
@@ -119,13 +146,13 @@ def test_update_state_with_empty_data_only_updates_arduino_connection_and_broadc
     assert updated_state.arduino_connected is False
 
     service.broadcast_service.broadcast_machine_state.assert_called_once_with(
-        payload={
-            'led': 'ON',
-            'arduino_connected': False,
-            'selected_port': 'COM9',
-            'speed_motor_roda': 50,
-            'lateral_misalignment_current': 3.5,
-        }
+        payload=make_expected_payload(
+            led='ON',
+            arduino_connected=False,
+            selected_port='COM9',
+            speed_motor_roda=50,
+            lateral_misalignment_current=3.5,
+        )
     )
 
 
@@ -142,13 +169,13 @@ def test_get_current_state_when_arduino_is_connected_keeps_led_state():
 
     current_state = service.get_current_state()
 
-    assert current_state == {
-        'led': 'ON',
-        'arduino_connected': True,
-        'selected_port': 'COM9',
-        'speed_motor_roda': 40,
-        'lateral_misalignment_current': 2.5,
-    }
+    assert current_state == make_expected_payload(
+        led='ON',
+        arduino_connected=True,
+        selected_port='COM9',
+        speed_motor_roda=40,
+        lateral_misalignment_current=2.5,
+    )
 
 
 def test_get_current_state_when_arduino_is_disconnected_turns_led_off():
@@ -169,13 +196,13 @@ def test_get_current_state_when_arduino_is_disconnected_turns_led_off():
     assert state.led == 'OFF'
     assert state.arduino_connected is False
 
-    assert current_state == {
-        'led': 'OFF',
-        'arduino_connected': False,
-        'selected_port': 'COM9',
-        'speed_motor_roda': 40,
-        'lateral_misalignment_current': 2.5,
-    }
+    assert current_state == make_expected_payload(
+        led='OFF',
+        arduino_connected=False,
+        selected_port='COM9',
+        speed_motor_roda=40,
+        lateral_misalignment_current=2.5,
+    )
 
 
 def test_broadcast_lateral_sensor_state_sends_payload_when_interval_has_passed():
@@ -306,7 +333,7 @@ def test_motor_roda_increase_speed_updates_database_sends_serial_and_broadcasts(
 
     state.refresh_from_db()
 
-    assert state.speed_motor_roda == 60
+    assert state.speed_motor_roda == 55
     assert state.arduino_connected is True
 
     serial_service.send_command.assert_called_once_with(
@@ -314,19 +341,19 @@ def test_motor_roda_increase_speed_updates_database_sends_serial_and_broadcasts(
     )
 
     service.broadcast_service.broadcast_machine_state.assert_called_once_with(
-        payload={
-            'led': 'OFF',
-            'arduino_connected': True,
-            'selected_port': 'COM9',
-            'speed_motor_roda': 60,
-            'lateral_misalignment_current': 0,
-        }
+        payload=make_expected_payload(
+            led='OFF',
+            arduino_connected=True,
+            selected_port='COM9',
+            speed_motor_roda=55,
+            lateral_misalignment_current=0.0,
+        )
     )
 
     assert response == {
         'type': 'log',
         'direction': 'received',
-        'message': 'Velocidade do motor da roda aumentada para 60',
+        'message': 'Velocidade do motor da roda aumentada para 55',
         'serial': make_serial_success('MOTOR_RODA_INCREASE_SPEED'),
     }
 
@@ -336,14 +363,14 @@ def test_motor_roda_increase_speed_respects_max_speed():
 
     state = MachineState.objects.create(
         id=1,
-        speed_motor_roda=1000,
+        speed_motor_roda=100,
     )
 
     service.motor_roda_increase_speed()
 
     state.refresh_from_db()
 
-    assert state.speed_motor_roda == 1000
+    assert state.speed_motor_roda == 100
 
 
 def test_motor_roda_decrease_speed_updates_database_sends_serial_and_broadcasts():
@@ -361,7 +388,7 @@ def test_motor_roda_decrease_speed_updates_database_sends_serial_and_broadcasts(
 
     state.refresh_from_db()
 
-    assert state.speed_motor_roda == 40
+    assert state.speed_motor_roda == 45
     assert state.arduino_connected is True
 
     serial_service.send_command.assert_called_once_with(
@@ -369,19 +396,19 @@ def test_motor_roda_decrease_speed_updates_database_sends_serial_and_broadcasts(
     )
 
     service.broadcast_service.broadcast_machine_state.assert_called_once_with(
-        payload={
-            'led': 'OFF',
-            'arduino_connected': True,
-            'selected_port': 'COM9',
-            'speed_motor_roda': 40,
-            'lateral_misalignment_current': 0,
-        }
+        payload=make_expected_payload(
+            led='OFF',
+            arduino_connected=True,
+            selected_port='COM9',
+            speed_motor_roda=45,
+            lateral_misalignment_current=0.0,
+        )
     )
 
     assert response == {
         'type': 'log',
         'direction': 'received',
-        'message': 'Velocidade do motor da roda diminuída para 40',
+        'message': 'Velocidade do motor da roda diminuída para 45',
         'serial': make_serial_success('MOTOR_RODA_DECREASE_SPEED'),
     }
 

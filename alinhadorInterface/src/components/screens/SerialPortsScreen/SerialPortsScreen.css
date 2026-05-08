@@ -1,5 +1,5 @@
 /* =========================
-   TELA DE PORTAS SERIAIS
+   MONITOR SERIAL
 ========================= */
 
 .serial-ports-screen {
@@ -15,6 +15,149 @@
   overflow: hidden;
 }
 
+.serial-monitor-header {
+  width: 100%;
+  min-width: 0;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.serial-monitor-status-box {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.serial-monitor-status-item {
+  min-width: 120px;
+
+  border: 1px solid #b7c4de;
+  background: #ffffff;
+  color: #1d3260;
+
+  padding: 8px 10px;
+  border-radius: 10px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  box-sizing: border-box;
+}
+
+.serial-monitor-status-item span {
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.serial-monitor-status-item strong {
+  font-size: 13px;
+}
+
+.status-ok {
+  color: #11953b;
+}
+
+.status-error {
+  color: #b42318;
+}
+
+.serial-monitor-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.serial-monitor-button {
+  border: 1px solid #b7c4de;
+  background: #ffffff;
+  color: #1d3260;
+
+  padding: 9px 12px;
+  border-radius: 8px;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.12s ease;
+}
+
+.serial-monitor-button:hover {
+  background: #eef3ff;
+  transform: translateY(-1px);
+}
+
+.serial-monitor-button.primary {
+  background: #11953b;
+  border-color: #11953b;
+  color: #ffffff;
+}
+
+.serial-monitor-button.primary:hover {
+  background: #0d7d31;
+}
+
+.serial-monitor-button.danger {
+  border-color: #f1b4ae;
+  color: #b42318;
+}
+
+.serial-monitor-button.danger:hover {
+  background: #fff0ee;
+}
+
+.serial-monitor-button.small {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.serial-monitor-grid {
+  min-height: 0;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.8fr);
+  gap: 12px;
+}
+
+.serial-monitor-card,
+.serial-monitor-logs-card {
+  min-width: 0;
+
+  border: 2px solid #b7c4de;
+  background: #f8fafc;
+
+  padding: 10px;
+  border-radius: 12px;
+
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.serial-monitor-card {
+  min-height: 180px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.serial-monitor-card h3,
+.serial-monitor-logs-card h3 {
+  margin: 0;
+  color: #1d3260;
+  font-size: 16px;
+}
+
 /*
   Caixa onde a lista de portas COM é exibida.
 */
@@ -25,12 +168,6 @@
 
   flex: 1;
   min-height: 0;
-
-  border: 2px solid #b7c4de;
-  background: #f8fafc;
-
-  padding: 8px;
-  box-sizing: border-box;
 
   overflow: hidden;
   display: flex;
@@ -107,7 +244,8 @@
   text-overflow: ellipsis;
 }
 
-.serial-port-description {
+.serial-port-description,
+.serial-port-hwid {
   max-width: 100%;
 
   font-size: 12px;
@@ -116,4 +254,152 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.serial-port-hwid {
+  opacity: 0.6;
+}
+
+.serial-command-box {
+  display: flex;
+  gap: 8px;
+}
+
+.serial-command-input {
+  flex: 1;
+  min-width: 0;
+
+  border: 1px solid #b7c4de;
+  background: #ffffff;
+  color: #1d3260;
+
+  padding: 10px 12px;
+  border-radius: 8px;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+}
+
+.serial-command-input:focus {
+  border-color: #11953b;
+}
+
+.serial-command-examples {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.serial-command-examples button {
+  border: 1px solid #d1d9ea;
+  background: #ffffff;
+  color: #1d3260;
+
+  padding: 6px 8px;
+  border-radius: 999px;
+
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.serial-command-examples button:hover {
+  background: #eef3ff;
+}
+
+.serial-monitor-logs-card {
+  flex: 1;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.serial-monitor-logs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.serial-log-list {
+  flex: 1;
+  min-height: 0;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding: 10px;
+  border-radius: 10px;
+
+  background: #0f172a;
+  color: #e2e8f0;
+
+  font-family: monospace;
+  font-size: 12px;
+
+  box-sizing: border-box;
+}
+
+.serial-log-empty {
+  margin: 0;
+  opacity: 0.7;
+}
+
+.serial-log-line {
+  padding: 8px;
+  border-left: 4px solid #64748b;
+  margin-bottom: 8px;
+
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+
+  box-sizing: border-box;
+}
+
+.serial-log-line.sent {
+  border-left-color: #22c55e;
+}
+
+.serial-log-line.received {
+  border-left-color: #f97316;
+}
+
+.serial-log-line span {
+  display: block;
+
+  font-size: 11px;
+  opacity: 0.7;
+
+  margin-bottom: 4px;
+}
+
+.serial-log-line p {
+  margin: 0;
+
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+@media (max-width: 760px) {
+  .serial-monitor-header {
+    flex-direction: column;
+  }
+
+  .serial-monitor-status-box {
+    justify-content: flex-start;
+  }
+
+  .serial-monitor-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .serial-command-box {
+    flex-direction: column;
+  }
 }

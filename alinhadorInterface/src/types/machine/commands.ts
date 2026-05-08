@@ -22,6 +22,17 @@ export interface DisconnectSerialPortCommand {
   action: 'disconnect_serial_port'
 }
 
+// Comando genérico para enviar texto diretamente para o Arduino pela porta serial.
+// Exemplo de uso no React:
+// sendCommand({
+//   action: 'serial_send_command',
+//   command: 'LED_ON',
+// })
+export interface SerialSendCommand {
+  action: 'serial_send_command'
+  command: string
+}
+
 export interface PingCommand {
   action: 'ping'
 }
@@ -59,6 +70,7 @@ export type MachineCommand =
   | ListSerialPortsCommand
   | SelectPortCommand
   | DisconnectSerialPortCommand
+  | SerialSendCommand
   | PingCommand
   | LedOnCommand
   | LedOffCommand

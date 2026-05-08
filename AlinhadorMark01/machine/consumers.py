@@ -14,6 +14,16 @@ class MachineConsumer(WebsocketConsumer):
     WHEEL_UPDATE_INTERVAL_SECONDS = 0.1
 
     def start_serial_listener(self):
+        """
+        Listener contínuo da porta serial.
+
+        Ele fica lendo tudo que chega do Arduino.
+
+        Regras:
+        - Se a linha começar com POS:, atualiza o sensor lateral em tempo real.
+        - Qualquer outra linha recebida é enviada para o frontend como serial_message.
+        """
+
         print('[Serial Listener] Iniciado')
 
         while getattr(self, 'serial_listener_running', False):
@@ -29,13 +39,31 @@ class MachineConsumer(WebsocketConsumer):
 
                 line = line.strip()
 
+                print(f'[Serial Listener] Recebido: {line}')
+
                 if line.startswith('POS:'):
                     value = float(line.replace('POS:', '').strip())
 
                     self.machine_state_service.broadcast_lateral_sensor_state(value)
 
+                    continue
+
+                self.send(text_data=json.dumps({
+                    'type': 'serial_message',
+                    'direction': 'received',
+                    'message': line,
+                }))
+
             except Exception as error:
                 print('[Serial Listener] Erro:', error)
+
+                try:
+                    self.send(text_data=json.dumps({
+                        'type': 'error',
+                        'message': f'Erro no listener serial: {error}',
+                    }))
+                except Exception:
+                    pass
 
     def start_wheel_position_listener(self):
         print('[Wheel Position Listener] Iniciado')
@@ -121,6 +149,7 @@ class MachineConsumer(WebsocketConsumer):
 
     def disconnect(self, close_code):
         self.serial_listener_running = False
+        self.wheel_position_listener_running = False
 
         async_to_sync(self.channel_layer.group_discard)(
             self.GROUP_NAME,
@@ -130,7 +159,6 @@ class MachineConsumer(WebsocketConsumer):
         try:
             if hasattr(self, 'machine_service'):
                 self.machine_service.serial_service.disconnect()
-                self.wheel_position_listener_running = False
         except Exception:
             pass
 

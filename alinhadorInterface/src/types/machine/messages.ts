@@ -46,6 +46,14 @@ export interface SerialPortDisconnectedMessage {
   message: string
 }
 
+// Mensagem genérica para o Monitor Serial.
+// Pode representar uma mensagem enviada ou recebida pela porta serial.
+export interface SerialMessage {
+  type: 'serial_message'
+  direction: MachineLog['direction']
+  message: string
+}
+
 export interface LedStatusMessage {
   type: 'led_status'
   state: LedBackendState
@@ -100,6 +108,7 @@ export type MachineMessage =
   | AvailablePortsMessage
   | SerialPortSelectedMessage
   | SerialPortDisconnectedMessage
+  | SerialMessage
   | LedStatusMessage
   | MachineReadMessage
   | ConnectionMessage
