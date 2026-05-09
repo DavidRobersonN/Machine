@@ -56,6 +56,59 @@ class MachineConsumer(WebsocketConsumer):
 
             return True
 
+        if message_type == 'motor_roda_config_status':
+            payload = {
+                'wheel_total_spokes': data.get('total_spokes'),
+            }
+
+            clean_payload = {
+                key: value
+                for key, value in payload.items()
+                if value is not None
+            }
+
+            if clean_payload:
+                self.machine_state_service.broadcast_service.broadcast_machine_state(
+                    payload=clean_payload,
+                )
+
+            self.send(text_data=json.dumps({
+                'type': 'serial_message',
+                'direction': 'received',
+                'message': (
+                    f"Configuração do motor atualizada: "
+                    f"{data.get('message')}. "
+                    f"Raios: {data.get('total_spokes')}, "
+                    f"passos por volta da roda: {data.get('steps_per_wheel_revolution')}, "
+                    f"graus por raio: {data.get('degrees_per_spoke')}, "
+                    f"passos por grau: {data.get('steps_per_degree')}, "
+                    f"velocidade máxima: {data.get('max_speed')}, "
+                    f"aceleração: {data.get('acceleration')}"
+                ),
+            }))
+
+            return True
+
+        if message_type == 'lateral_sensor_status':
+            self.machine_state_service.broadcast_service.broadcast_machine_state(
+                payload={
+                    'is_lateral_reading_enabled': data.get('reading_enabled'),
+                },
+            )
+
+            self.send(text_data=json.dumps({
+                'type': 'serial_message',
+                'direction': 'received',
+                'message': data.get(
+                    'message',
+                    'Status da leitura lateral atualizado',
+                ),
+            }))
+
+            return True
+
+        return False
+
         if message_type == 'lateral_sensor_status':
             self.machine_state_service.broadcast_service.broadcast_machine_state(
                 payload={

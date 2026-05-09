@@ -9,7 +9,7 @@
 
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 
   box-sizing: border-box;
   overflow: hidden;
@@ -77,7 +77,7 @@
   background: #ffffff;
   color: #1d3260;
 
-  padding: 9px 12px;
+  padding: 8px 11px;
   border-radius: 8px;
 
   font-family: inherit;
@@ -144,11 +144,13 @@
 }
 
 .serial-monitor-card {
-  min-height: 180px;
+  height: 250px;
 
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+
+  overflow: hidden;
 }
 
 .serial-monitor-card h3,
@@ -156,6 +158,12 @@
   margin: 0;
   color: #1d3260;
   font-size: 16px;
+}
+
+.serial-monitor-card .screen-page-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.2;
 }
 
 /*
@@ -263,6 +271,7 @@
 .serial-command-box {
   display: flex;
   gap: 8px;
+  margin-top: 2px;
 }
 
 .serial-command-input {
@@ -273,7 +282,7 @@
   background: #ffffff;
   color: #1d3260;
 
-  padding: 10px 12px;
+  padding: 8px 10px;
   border-radius: 8px;
 
   font-family: inherit;
@@ -288,7 +297,7 @@
 
 .serial-command-examples {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
@@ -297,7 +306,7 @@
   background: #ffffff;
   color: #1d3260;
 
-  padding: 6px 8px;
+  padding: 5px 8px;
   border-radius: 999px;
 
   font-family: inherit;
@@ -311,9 +320,46 @@
   background: #eef3ff;
 }
 
+/* =========================
+   CONFIGURAÇÃO DJANGO
+========================= */
+
+.serial-command-config-box {
+  margin-top: 6px;
+  padding-top: 8px;
+
+  border-top: 1px solid #d1d9ea;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.serial-command-config-box h4 {
+  margin: 0;
+  color: #1d3260;
+  font-size: 14px;
+}
+
+.serial-command-config-box .screen-page-text {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.serial-command-config-box .serial-monitor-button {
+  width: fit-content;
+  padding: 7px 10px;
+  font-size: 12px;
+}
+
+/* =========================
+   LOGS
+========================= */
+
 .serial-monitor-logs-card {
-  flex: 1;
-  min-height: 0;
+  height: 135px;
+  min-height: 135px;
 
   display: flex;
   flex-direction: column;
@@ -401,5 +447,15 @@
 
   .serial-command-box {
     flex-direction: column;
+  }
+
+  .serial-monitor-card {
+    height: auto;
+    min-height: 220px;
+  }
+
+  .serial-monitor-logs-card {
+    height: 180px;
+    min-height: 180px;
   }
 }

@@ -53,6 +53,12 @@ export function SerialPortsScreen({
     setCommand('')
   }
 
+  function handleSyncMachineConfig() {
+    sendCommand({
+      action: 'sync_machine_config',
+    })
+  }
+
   function handleClearLogs() {
     dispatch({
       type: 'CLEAR_LOGS',
@@ -202,6 +208,18 @@ export function SerialPortsScreen({
               onClick={() => setCommand('MOTOR_RODA_SET_ZERO')}
             >
               MOTOR_RODA_SET_ZERO
+            </button>
+          </div>
+
+          <div className="serial-command-config-box">
+            <h4>Configuração Django</h4>
+
+            <button
+              type="button"
+              className="serial-monitor-button primary"
+              onClick={handleSyncMachineConfig}
+            >
+              Enviar configurações para Arduino
             </button>
           </div>
         </div>

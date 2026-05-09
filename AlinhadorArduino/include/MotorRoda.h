@@ -39,6 +39,8 @@ private:
 
   void applySpeed();
 
+  void recalculateWheelConfig();
+
   float normalizeAngle(float angle);
   float calculateShortestDelta(float targetAngle);
 
@@ -82,6 +84,24 @@ public:
   bool isRunning() const;
   bool isClockwise() const;
   float getCurrentSpeed() const;
+
+  // =======================
+  // CONFIGURAÇÃO DINÂMICA
+  // =======================
+
+  void setTotalSpokes(int newTotalSpokes);
+  void setStepsPerWheelRevolution(long newStepsPerWheelRevolution);
+  void setMaxSpeed(float newMaxSpeed);
+  void setAcceleration(float newAcceleration);
+
+  int getTotalSpokes() const;
+  long getStepsPerWheelRevolution() const;
+  float getMaxSpeed() const;
+  float getAcceleration() const;
+  float getDegreesPerSpoke() const;
+  float getStepsPerDegree() const;
+
+  void sendConfigStatus(String message);
 
   // =======================
   // CONTROLE DE POSIÇÃO

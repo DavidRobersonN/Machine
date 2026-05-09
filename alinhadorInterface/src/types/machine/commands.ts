@@ -1,6 +1,14 @@
 // Responsável pelo que o frontend envia para o backend.
 
 // =======================
+// CONFIGURAÇÃO DA MÁQUINA
+// =======================
+
+export interface SyncMachineConfigCommand {
+  action: 'sync_machine_config'
+}
+
+// =======================
 // MOTOR DA RODA - GIRO CONTÍNUO
 // =======================
 
@@ -124,6 +132,7 @@ export interface LateralSensorStopReadingCommand {
 // =======================
 
 export type MachineCommand =
+  | SyncMachineConfigCommand
   | MotorRodaCommand
   | MotorRodaSetZeroCommand
   | MotorRodaGoToAngleCommand

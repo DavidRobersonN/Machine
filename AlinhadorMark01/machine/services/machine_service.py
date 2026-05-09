@@ -1,5 +1,6 @@
 from serial.tools import list_ports
-
+import time
+from machine.models import MachineConfig
 from machine.services.machine_state_service import MachineStateService
 from machine.services.serial_service import SerialService
 
@@ -29,6 +30,13 @@ class MachineService:
 
     def handle_command(self, data: dict) -> dict:
         action = data.get('action')
+
+        # =========================
+        # CONFIGURAÇÃO DA MÁQUINA
+        # =========================
+
+        if action == 'sync_machine_config':
+            return self.sync_machine_config()
 
         # =========================
         # SENSOR LATERAL
@@ -64,7 +72,7 @@ class MachineService:
 
         if action == 'wheel_reset_position':
             return self.wheel_reset_position()
-        
+
         if action == 'motor_roda_set_zero':
             return self.motor_roda_set_zero()
 
@@ -132,6 +140,134 @@ class MachineService:
         }
 
     # =========================
+    # CONFIGURAÇÃO DA MÁQUINA
+    # =========================
+
+    def get_active_machine_config(self) -> MachineConfig:
+        """
+        Busca a configuração ativa da máquina.
+
+        Se nenhuma configuração ativa existir ainda, cria uma configuração padrão.
+        Isso evita erro no sistema quando o banco ainda não tem configuração cadastrada.
+        """
+
+        active_config = (
+            MachineConfig.objects
+            .filter(is_active=True)
+            .order_by('-updated_at')
+            .first()
+        )
+
+        if active_config:
+            return active_config
+
+        return MachineConfig.objects.create(
+            name='Configuração principal',
+            is_active=True,
+        )
+
+    def sync_machine_config(self) -> dict:
+        """
+        Envia para o Arduino a configuração ativa salva no banco.
+
+        Essa configuração vem do Django Admin.
+
+        Exemplo de comandos enviados:
+        CONFIG_WHEEL_TOTAL_SPOKES:36
+        CONFIG_MOTOR_STEPS_PER_WHEEL_TURN:6400
+        CONFIG_MOTOR_MAX_SPEED:1000
+        CONFIG_MOTOR_ACCELERATION:500
+        """
+
+        config = self.get_active_machine_config()
+
+        commands = [
+        (
+            'CONFIG_WHEEL_TOTAL_SPOKES',
+            config.wheel_total_spokes,
+        ),
+        (
+            'CONFIG_MOTOR_STEPS_PER_WHEEL_TURN',
+            config.motor_steps_per_wheel_turn,
+        ),
+        (
+            'CONFIG_MOTOR_MAX_SPEED',
+            config.motor_max_speed,
+        ),
+        (
+            'CONFIG_MOTOR_ACCELERATION',
+            config.motor_acceleration,
+        ),
+        (
+            'CONFIG_MOTOR_STATUS',
+            None,
+        ),
+    ]
+
+        results = []
+
+        for command_name, command_value in commands:
+            if command_value is None:
+                command = command_name
+            else:
+                if isinstance(command_value, float) and command_value.is_integer():
+                    formatted_value = int(command_value)
+                else:
+                    formatted_value = command_value
+
+                command = f'{command_name}:{formatted_value}'
+
+            serial_result = self.serial_service.send_command(command)
+
+            results.append({
+                'command': command,
+                'serial_result': serial_result,
+            })
+
+            time.sleep(0.15)
+
+        self.machine_state_service.update_state({
+            'motor_turns_per_wheel_turn': config.motor_turns_per_wheel_turn,
+        })
+
+        return {
+            'type': 'log',
+            'direction': 'received',
+            'message': self.format_config_sync_message(config, results),
+        }
+
+    def format_config_sync_message(
+        self,
+        config: MachineConfig,
+        results: list[dict],
+    ) -> str:
+        """
+        Formata o resultado do envio da configuração para aparecer nos logs.
+        """
+
+        lines = [
+            f'Configuração enviada para o Arduino: {config.name}',
+            f'Raios da roda: {config.wheel_total_spokes}',
+            f'Passos por volta da roda: {config.motor_steps_per_wheel_turn}',
+            f'Voltas do motor por volta da roda: {config.motor_turns_per_wheel_turn}',
+            '',
+            'Comandos enviados:',
+        ]
+
+        for item in results:
+            command = item.get('command')
+            serial_result = item.get('serial_result', {})
+
+            success = serial_result.get('success', False)
+            message = serial_result.get('message', '')
+
+            status = 'OK' if success else 'ERRO'
+
+            lines.append(f'- {command}: {status} - {message}')
+
+        return '\n'.join(lines)
+
+    # =========================
     # PORTA SERIAL
     # =========================
 
@@ -169,11 +305,14 @@ class MachineService:
 
         self.machine_state_service.update_state({})
 
+        if connected:
+            self.sync_machine_config()
+
         return {
             'type': 'serial_port_selected',
             'port': port,
             'message': (
-                f'Porta {port} selecionada com sucesso'
+                f'Porta {port} selecionada com sucesso e configuração enviada para o Arduino'
                 if connected
                 else f'Porta {port} selecionada, mas não foi possível conectar ao Arduino'
             ),
@@ -506,7 +645,7 @@ class MachineService:
             'direction': 'received',
             'message': 'Posição da roda zerada',
         }
-    
+
     # =========================
     # MOTOR DA RODA - POSIÇÃO
     # =========================

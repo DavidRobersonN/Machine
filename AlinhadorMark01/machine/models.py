@@ -65,3 +65,143 @@ class MachineState(models.Model):
             f'Motor/Wheel Ratio: {self.motor_turns_per_wheel_turn}, '
             f'Lateral Misalignment: {self.lateral_misalignment_current}'
         )
+
+
+class MachineConfig(models.Model):
+    """
+    Guarda as configurações da máquina.
+
+    Diferente do MachineState, este model não representa o estado atual,
+    mas sim os parâmetros usados para configurar o Arduino, sensores e motores.
+
+    A ideia é permitir alterar esses valores pelo Django Admin sem precisar
+    modificar o código do Arduino ou do backend a cada teste.
+    """
+
+    name = models.CharField(
+        max_length=100,
+        default='Configuração principal',
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        help_text='Define se esta configuração é a configuração ativa da máquina.',
+    )
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # =========================
+    # SERIAL
+    # =========================
+
+    serial_baudrate = models.IntegerField(
+        default=9600,
+        help_text='Velocidade de comunicação serial com o Arduino.',
+    )
+
+    # =========================
+    # RODA
+    # =========================
+
+    wheel_total_spokes = models.IntegerField(
+        default=36,
+        help_text='Quantidade total de raios da roda. Exemplo: 36.',
+    )
+
+    # Quantos passos o motor precisa executar para a roda dar 1 volta completa.
+    # Este é o campo mais importante para calibrar a relação motor/roda.
+    motor_steps_per_wheel_turn = models.IntegerField(
+        default=6400,
+        help_text='Quantidade de passos do motor para a roda dar uma volta completa.',
+    )
+
+    # Quantos passos o motor possui em uma volta própria.
+    # Exemplo comum: motor de passo 1.8° = 200 passos por volta.
+    motor_steps_per_motor_turn = models.IntegerField(
+        default=200,
+        help_text='Quantidade de passos do motor para uma volta do próprio eixo.',
+    )
+
+    # Microstepping configurado no driver.
+    # Exemplo: 1, 2, 4, 8, 16, 32.
+    motor_microsteps = models.IntegerField(
+        default=1,
+        help_text='Configuração de micro passos usada no driver do motor.',
+    )
+
+    # Relação mecânica aproximada:
+    # quantas voltas do motor são necessárias para a roda dar uma volta.
+    motor_turns_per_wheel_turn = models.FloatField(
+        default=1,
+        help_text='Quantidade de voltas do motor para a roda dar uma volta completa.',
+    )
+
+    motor_max_speed = models.FloatField(
+        default=1000,
+        help_text='Velocidade máxima do motor usada no Arduino.',
+    )
+
+    motor_acceleration = models.FloatField(
+        default=500,
+        help_text='Aceleração do motor usada no Arduino.',
+    )
+
+    # =========================
+    # PINOS DO MOTOR DA RODA
+    # =========================
+
+    motor_step_pin = models.IntegerField(
+        default=2,
+        help_text='Pino STEP do driver do motor da roda.',
+    )
+
+    motor_dir_pin = models.IntegerField(
+        default=3,
+        help_text='Pino DIR do driver do motor da roda.',
+    )
+
+    motor_enable_pin = models.IntegerField(
+        default=4,
+        help_text='Pino ENABLE do driver do motor da roda.',
+    )
+
+    # =========================
+    # SENSOR LATERAL
+    # =========================
+
+    lateral_sensor_pin = models.CharField(
+        max_length=10,
+        default='A0',
+        help_text='Pino analógico usado pelo sensor lateral. Exemplo: A0.',
+    )
+
+    lateral_sensor_zero_offset = models.FloatField(
+        default=0,
+        help_text='Offset de calibração do sensor lateral em milímetros.',
+    )
+
+    lateral_sensor_dead_zone = models.FloatField(
+        default=0,
+        help_text='Zona morta do sensor lateral em milímetros.',
+    )
+
+    # =========================
+    # LED / TESTES
+    # =========================
+
+    led_pin = models.IntegerField(
+        default=13,
+        help_text='Pino usado para LED de teste/status.',
+    )
+
+    class Meta:
+        verbose_name = 'Configuração da máquina'
+        verbose_name_plural = 'Configurações da máquina'
+
+    def __str__(self):
+        return (
+            f'{self.name} - '
+            f'Raios: {self.wheel_total_spokes}, '
+            f'Passos/volta roda: {self.motor_steps_per_wheel_turn}, '
+            f'Ativa: {self.is_active}'
+        )

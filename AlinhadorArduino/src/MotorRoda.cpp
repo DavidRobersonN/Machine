@@ -26,14 +26,131 @@ MotorRoda::MotorRoda(
   totalSpokes = wheelTotalSpokes;
   stepsPerWheelRevolution = wheelStepsPerRevolution;
 
-  degreesPerSpoke = 360.0 / totalSpokes;
-  stepsPerDegree = stepsPerWheelRevolution / 360.0;
-
   currentWheelAngle = 0.0;
   targetWheelAngle = 0.0;
 
   currentSpoke = 1;
   targetSpoke = 1;
+
+  recalculateWheelConfig();
+}
+
+void MotorRoda::recalculateWheelConfig() {
+  if (totalSpokes < 1) {
+    totalSpokes = 1;
+  }
+
+  if (stepsPerWheelRevolution < 1) {
+    stepsPerWheelRevolution = 1;
+  }
+
+  degreesPerSpoke = 360.0 / totalSpokes;
+  stepsPerDegree = stepsPerWheelRevolution / 360.0;
+
+  currentWheelAngle = normalizeAngle(currentWheelAngle);
+  targetWheelAngle = normalizeAngle(targetWheelAngle);
+
+  currentSpoke = angleToSpoke(currentWheelAngle);
+  targetSpoke = angleToSpoke(targetWheelAngle);
+}
+
+void MotorRoda::setTotalSpokes(int newTotalSpokes) {
+  if (newTotalSpokes < 1) {
+    sendConfigStatus("erro_total_de_raios_invalido");
+    return;
+  }
+
+  totalSpokes = newTotalSpokes;
+
+  recalculateWheelConfig();
+
+  sendConfigStatus("total_de_raios_atualizado");
+}
+
+void MotorRoda::setStepsPerWheelRevolution(long newStepsPerWheelRevolution) {
+  if (newStepsPerWheelRevolution < 1) {
+    sendConfigStatus("erro_passos_por_volta_da_roda_invalido");
+    return;
+  }
+
+  stepsPerWheelRevolution = newStepsPerWheelRevolution;
+
+  recalculateWheelConfig();
+
+  sendConfigStatus("passos_por_volta_da_roda_atualizado");
+}
+
+void MotorRoda::setMaxSpeed(float newMaxSpeed) {
+  if (newMaxSpeed <= 0) {
+    sendConfigStatus("erro_velocidade_maxima_invalida");
+    return;
+  }
+
+  maxSpeed = newMaxSpeed;
+
+  if (currentSpeed > maxSpeed) {
+    currentSpeed = maxSpeed;
+  }
+
+  motor.setMaxSpeed(maxSpeed);
+  applySpeed();
+
+  sendConfigStatus("velocidade_maxima_atualizada");
+}
+
+void MotorRoda::setAcceleration(float newAcceleration) {
+  if (newAcceleration <= 0) {
+    sendConfigStatus("erro_aceleracao_invalida");
+    return;
+  }
+
+  acceleration = newAcceleration;
+
+  motor.setAcceleration(acceleration);
+
+  sendConfigStatus("aceleracao_atualizada");
+}
+
+int MotorRoda::getTotalSpokes() const {
+  return totalSpokes;
+}
+
+long MotorRoda::getStepsPerWheelRevolution() const {
+  return stepsPerWheelRevolution;
+}
+
+float MotorRoda::getMaxSpeed() const {
+  return maxSpeed;
+}
+
+float MotorRoda::getAcceleration() const {
+  return acceleration;
+}
+
+float MotorRoda::getDegreesPerSpoke() const {
+  return degreesPerSpoke;
+}
+
+float MotorRoda::getStepsPerDegree() const {
+  return stepsPerDegree;
+}
+
+void MotorRoda::sendConfigStatus(String message) {
+  Serial.print("{\"success\":true,\"type\":\"motor_roda_config_status\",\"message\":\"");
+  Serial.print(message);
+  Serial.print("\",\"total_spokes\":");
+  Serial.print(totalSpokes);
+  Serial.print(",\"steps_per_wheel_revolution\":");
+  Serial.print(stepsPerWheelRevolution);
+  Serial.print(",\"degrees_per_spoke\":");
+  Serial.print(degreesPerSpoke, 4);
+  Serial.print(",\"steps_per_degree\":");
+  Serial.print(stepsPerDegree, 4);
+  Serial.print(",\"max_speed\":");
+  Serial.print(maxSpeed);
+  Serial.print(",\"acceleration\":");
+  Serial.print(acceleration);
+  Serial.println("}");
 }
 
 void MotorRoda::begin() {

@@ -152,13 +152,17 @@ def test_select_serial_port_without_port():
         'message': 'Nenhuma porta serial foi informada',
     }
 
-
 def test_select_serial_port_success():
     service = MachineService()
 
     service.serial_service.set_port = Mock()
     service.serial_service.connect = Mock(return_value=True)
     service.machine_state_service.update_state = Mock()
+    service.sync_machine_config = Mock(return_value={
+        'type': 'log',
+        'direction': 'received',
+        'message': 'Configuração enviada para o Arduino',
+    })
 
     response = service.select_serial_port({
         'port': 'COM9',
@@ -167,11 +171,12 @@ def test_select_serial_port_success():
     service.serial_service.set_port.assert_called_once_with('COM9')
     service.serial_service.connect.assert_called_once()
     service.machine_state_service.update_state.assert_called_once_with({})
+    service.sync_machine_config.assert_called_once()
 
     assert response == {
         'type': 'serial_port_selected',
         'port': 'COM9',
-        'message': 'Porta COM9 selecionada com sucesso',
+        'message': 'Porta COM9 selecionada com sucesso e configuração enviada para o Arduino',
     }
 
 

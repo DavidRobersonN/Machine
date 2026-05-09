@@ -37,6 +37,63 @@ void SerialCommandHandler::update() {
 void SerialCommandHandler::handleCommand(String command) {
   command.trim();
 
+  // =======================
+  // CONFIGURAÇÃO DINÂMICA
+  // =======================
+
+  if (command.startsWith("CONFIG_WHEEL_TOTAL_SPOKES:")) {
+    String value = command.substring(
+      String("CONFIG_WHEEL_TOTAL_SPOKES:").length()
+    );
+
+    int totalSpokes = value.toInt();
+
+    motorRoda.setTotalSpokes(totalSpokes);
+    return;
+  }
+
+  if (command.startsWith("CONFIG_MOTOR_STEPS_PER_WHEEL_TURN:")) {
+    String value = command.substring(
+      String("CONFIG_MOTOR_STEPS_PER_WHEEL_TURN:").length()
+    );
+
+    long stepsPerWheelTurn = value.toInt();
+
+    motorRoda.setStepsPerWheelRevolution(stepsPerWheelTurn);
+    return;
+  }
+
+  if (command.startsWith("CONFIG_MOTOR_MAX_SPEED:")) {
+    String value = command.substring(
+      String("CONFIG_MOTOR_MAX_SPEED:").length()
+    );
+
+    float maxSpeed = value.toFloat();
+
+    motorRoda.setMaxSpeed(maxSpeed);
+    return;
+  }
+
+  if (command.startsWith("CONFIG_MOTOR_ACCELERATION:")) {
+    String value = command.substring(
+      String("CONFIG_MOTOR_ACCELERATION:").length()
+    );
+
+    float acceleration = value.toFloat();
+
+    motorRoda.setAcceleration(acceleration);
+    return;
+  }
+
+  if (command == "CONFIG_MOTOR_STATUS") {
+    motorRoda.sendConfigStatus("status_configuracao_motor_roda");
+    return;
+  }
+
+  // =======================
+  // SENSOR LATERAL
+  // =======================
+
   if (command == "LATERAL_SENSOR_START_READING") {
     lateralSensor.startReading();
     return;
@@ -46,6 +103,15 @@ void SerialCommandHandler::handleCommand(String command) {
     lateralSensor.stopReading();
     return;
   }
+
+  if (command == "READ_LATERAL_SENSOR") {
+    lateralSensor.sendNow();
+    return;
+  }
+
+  // =======================
+  // LED
+  // =======================
 
   if (command == "LED_ON") {
     led.turnOn();
@@ -62,13 +128,12 @@ void SerialCommandHandler::handleCommand(String command) {
     return;
   }
 
+  // =======================
+  // TESTE DE CONEXÃO
+  // =======================
+
   if (command == "PING") {
     sendPong();
-    return;
-  }
-
-  if (command == "READ_LATERAL_SENSOR") {
-    lateralSensor.sendNow();
     return;
   }
 
