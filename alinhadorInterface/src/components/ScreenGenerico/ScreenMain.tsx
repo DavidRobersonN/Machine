@@ -4,13 +4,13 @@ import type { ReactNode } from 'react'
 import './Styles.css'
 
 type ScreenMainProps = {
+  statusBar?: ReactNode
   children?: ReactNode
-  painelControls?: ReactNode
 }
 
 function ScreenMainComponent({
+  statusBar,
   children,
-  painelControls,
 }: ScreenMainProps) {
   return (
     <div className="screen-main-layout">
@@ -21,14 +21,14 @@ function ScreenMainComponent({
               {children}
             </div>
           </div>
+
+          {statusBar && (
+            <div className="screen-main-statusbar">
+              {statusBar}
+            </div>
+          )}
         </div>
       </div>
-
-      {painelControls && (
-        <div className="screen-main-painel-controls">
-          {painelControls}
-        </div>
-      )}
     </div>
   )
 }

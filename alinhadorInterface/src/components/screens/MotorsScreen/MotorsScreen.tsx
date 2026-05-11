@@ -1,8 +1,11 @@
+import { memo } from 'react'
+
 import { WheelPositionControl } from '../../../components/controls/WheelPositionControl/WheelPositionControl'
+import { MotorRodaControl } from '../../PainelComponents/Motors/MotorRodaControl'
 
 import './MotorsScreen.css'
 
-export function MotorsScreen() {
+function MotorsScreenComponent() {
   return (
     <div className="screen-page motors-screen">
       <header className="motors-screen__header">
@@ -12,9 +15,17 @@ export function MotorsScreen() {
         </div>
       </header>
 
-      <div className="motors-dashboard-area">
-        <WheelPositionControl />
+      <div className="motors-screen-layout">
+        <div className="motors-dashboard-area">
+          <WheelPositionControl />
+        </div>
+
+        <div className="motors-control-bottom-area">
+          <MotorRodaControl />
+        </div>
       </div>
     </div>
   )
 }
+
+export const MotorsScreen = memo(MotorsScreenComponent)
