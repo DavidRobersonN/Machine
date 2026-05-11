@@ -10,30 +10,209 @@
 
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 
   box-sizing: border-box;
+  overflow: hidden;
 }
 
-/*
-  Título da tela.
+/* =========================
+   HEADER
+========================= */
 
-  A classe .screen-page-title vem do global.css.
-  Aqui apenas ajustamos o comportamento dela dentro
-  da tela de alinhamento lateral.
-*/
+.lateral-alignment-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+
+  flex-shrink: 0;
+}
+
+.lateral-alignment-kicker {
+  display: inline-flex;
+
+  margin-bottom: 4px;
+
+  color: #11953b;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 .lateral-alignment-screen .screen-page-title {
   margin: 0;
 
-  color: #1d3260;
-  font-size: 32px;
-  line-height: 1.1;
+  color: #0f2a5f;
+  font-size: 1.9rem;
+  line-height: 1;
+  font-weight: 900;
 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.lateral-alignment-header p {
+  margin: 6px 0 0;
+
+  color: #475569;
+  font-size: 0.84rem;
+  line-height: 1.3;
+}
+
+/* =========================
+   STATUS
+========================= */
+
+.lateral-alignment-status {
+  width: 220px;
+  min-width: 200px;
+
+  padding: 12px;
+  border-radius: 16px;
+
+  border: 2px solid #b7c4de;
+  background: #ffffff;
+
+  box-sizing: border-box;
+}
+
+.lateral-alignment-status span {
+  display: block;
+
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.lateral-alignment-status strong {
+  display: block;
+
+  margin-top: 4px;
+
+  color: #0f2a5f;
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.lateral-alignment-status p {
+  margin: 5px 0 0;
+
+  color: #64748b;
+  font-size: 0.75rem;
+  line-height: 1.25;
+}
+
+.lateral-alignment-status.ok {
+  border-color: #8ecfa4;
+  background: #edf8f1;
+}
+
+.lateral-alignment-status.ok strong {
+  color: #11953b;
+}
+
+.lateral-alignment-status.warning {
+  border-color: #fed7aa;
+  background: #fff7ed;
+}
+
+.lateral-alignment-status.warning strong {
+  color: #c2410c;
+}
+
+.lateral-alignment-status.danger {
+  border-color: #fecaca;
+  background: #fff5f5;
+}
+
+.lateral-alignment-status.danger strong {
+  color: #b42318;
+}
+
+/* =========================
+   CARD PRINCIPAL
+========================= */
+
+.lateral-alignment-main-card {
+  min-width: 0;
+  flex: 1;
+  min-height: 0;
+
+  border: 2px solid #d6e1f3;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+
+  border-radius: 18px;
+
+  padding: 14px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  overflow: hidden;
+}
+
+.lateral-alignment-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+
+  flex-shrink: 0;
+}
+
+.lateral-alignment-chart-header h3 {
+  margin: 0;
+
+  color: #0f2a5f;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.lateral-alignment-chart-header p {
+  margin: 5px 0 0;
+
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.lateral-alignment-current-value {
+  min-width: 140px;
+
+  padding: 10px 12px;
+  border-radius: 14px;
+
+  background: #eef3ff;
+  border: 1px solid #b7c4de;
+
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  box-sizing: border-box;
+}
+
+.lateral-alignment-current-value span {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.lateral-alignment-current-value strong {
+  color: #2563eb;
+  font-family: monospace;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
 
 /* =========================
    CARDS INFERIORES
@@ -45,8 +224,10 @@
   min-width: 0;
 
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
+
+  flex-shrink: 0;
 
   box-sizing: border-box;
 }
@@ -54,24 +235,32 @@
 .lateral-alignment-card {
   min-width: 0;
 
-  background: #07111f;
-  border: 1px solid rgba(0, 255, 170, 0.2);
-  border-radius: 12px;
+  background: #ffffff;
+  border: 2px solid #d6e1f3;
+  border-radius: 14px;
 
-  padding: 12px;
+  padding: 11px 12px;
   box-sizing: border-box;
 
   overflow: hidden;
+}
+
+.lateral-alignment-card.current {
+  border-color: #8ecfa4;
+  background: #edf8f1;
 }
 
 .lateral-alignment-card span {
   display: block;
   max-width: 100%;
 
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 
-  font-size: 12px;
-  color: #78a99a;
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 
   white-space: nowrap;
   overflow: hidden;
@@ -82,8 +271,9 @@
   display: block;
   max-width: 100%;
 
-  font-size: 18px;
-  color: #e8fff7;
+  color: #0f2a5f;
+  font-size: 1rem;
+  font-weight: 900;
   font-family: monospace;
 
   white-space: nowrap;
@@ -91,18 +281,47 @@
   text-overflow: ellipsis;
 }
 
+.lateral-alignment-card.current strong {
+  color: #11953b;
+}
 
 /* =========================
    RESPONSIVIDADE
 ========================= */
 
 @media (max-width: 980px) {
+  .lateral-alignment-header {
+    flex-direction: column;
+  }
+
+  .lateral-alignment-status {
+    width: 100%;
+  }
+
+  .lateral-alignment-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .lateral-alignment-chart-header {
+    flex-direction: column;
+  }
+
+  .lateral-alignment-current-value {
+    width: 100%;
+  }
+
   .lateral-alignment-cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 560px) {
+  .lateral-alignment-screen {
+    overflow-y: auto;
+  }
+
   .lateral-alignment-cards {
     grid-template-columns: 1fr;
   }

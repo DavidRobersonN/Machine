@@ -36,11 +36,20 @@ export function HomePage() {
     handleSelectPort,
   } = useHomeMachinePage()
 
+const shouldShowSidebar =
+  currentScreen !== 'menu' &&
+  currentScreen !== 'motors' &&
+  currentScreen !== 'alignment' &&
+  currentScreen !== 'serial' &&
+  currentScreen !== 'logs'
+
   return (
     <PainelMachineTemplate
       screenMain={
         <ScreenMain
-          sidebar={<ScreenSidebar {...sidebarProps} />}
+          sidebar={
+            shouldShowSidebar ? <ScreenSidebar {...sidebarProps} /> : undefined
+          }
           statusBar={<ScreenStatusBar {...statusBarProps} />}
           painelControls={
             <MachinePainelControls currentScreen={currentScreen} />

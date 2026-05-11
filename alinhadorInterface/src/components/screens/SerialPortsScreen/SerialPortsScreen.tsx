@@ -26,6 +26,9 @@ export function SerialPortsScreen({
 
   const [command, setCommand] = useState('')
 
+  const isWebSocketConnected = state.connected
+  const isArduinoConnected = arduinoConnected === 'Conectado'
+
   function handleListSerialPorts() {
     sendCommand({
       action: 'list_serial_ports',
@@ -69,46 +72,48 @@ export function SerialPortsScreen({
     <div className="screen-page serial-ports-screen">
       <header className="serial-monitor-header">
         <div>
+          <span className="serial-monitor-kicker">Comunicação</span>
+
           <h2 className="screen-page-title">Monitor Serial</h2>
 
           <p className="screen-page-text">
-            Monitore a porta serial do Arduino e envie comandos manualmente.
+            Conecte o Arduino, envie comandos manuais e sincronize as
+            configurações salvas no Django Admin.
           </p>
         </div>
 
         <div className="serial-monitor-status-box">
           <div className="serial-monitor-status-item">
             <span>WebSocket</span>
-            <strong className={state.connected ? 'status-ok' : 'status-error'}>
-              {state.connected ? 'Conectado' : 'Desconectado'}
+
+            <strong className={isWebSocketConnected ? 'status-ok' : 'status-error'}>
+              {isWebSocketConnected ? 'Conectado' : 'Desconectado'}
             </strong>
           </div>
 
           <div className="serial-monitor-status-item">
             <span>Arduino</span>
-            <strong
-              className={
-                arduinoConnected === 'Conectado' ? 'status-ok' : 'status-error'
-              }
-            >
+
+            <strong className={isArduinoConnected ? 'status-ok' : 'status-error'}>
               {arduinoConnected}
             </strong>
           </div>
 
           <div className="serial-monitor-status-item">
-            <span>Porta</span>
+            <span>Porta atual</span>
+
             <strong>{selectedPort ?? 'Nenhuma'}</strong>
           </div>
         </div>
       </header>
 
-      <section className="serial-monitor-actions">
+      <section className="serial-monitor-toolbar">
         <button
           type="button"
-          className="serial-monitor-button"
+          className="serial-monitor-button primary"
           onClick={handleListSerialPorts}
         >
-          Atualizar portas
+          🔄 Atualizar portas
         </button>
 
         <button
@@ -116,17 +121,41 @@ export function SerialPortsScreen({
           className="serial-monitor-button danger"
           onClick={handleDisconnectSerialPort}
         >
-          Desconectar
+          ⏏ Desconectar
+        </button>
+
+        <button
+          type="button"
+          className="serial-monitor-button success"
+          onClick={handleSyncMachineConfig}
+        >
+          ⚙️ Enviar configurações
         </button>
       </section>
 
       <section className="serial-monitor-grid">
-        <div className="serial-monitor-card">
-          <h3>Portas COM</h3>
+        <article className="serial-monitor-card serial-monitor-card--ports">
+          <div className="serial-monitor-card-header">
+            <div>
+              <span className="serial-monitor-card-kicker">Portas disponíveis</span>
+              <h3>Portas COM</h3>
+            </div>
+
+            <span className="serial-monitor-count">
+              {ports.length}
+            </span>
+          </div>
 
           <div className="serial-ports-box">
             {ports.length === 0 ? (
-              <p className="screen-page-text">Nenhuma porta encontrada.</p>
+              <div className="serial-monitor-empty">
+                <strong>Nenhuma porta encontrada</strong>
+
+                <p>
+                  Clique em “Atualizar portas” para buscar dispositivos
+                  conectados.
+                </p>
+              </div>
             ) : (
               <div className="serial-port-list">
                 {ports.map((port) => {
@@ -141,7 +170,17 @@ export function SerialPortsScreen({
                       }`}
                       onClick={() => onSelectPort(port.device)}
                     >
-                      <span className="serial-port-device">{port.device}</span>
+                      <div className="serial-port-item-header">
+                        <span className="serial-port-device">
+                          {port.device}
+                        </span>
+
+                        {isSelected && (
+                          <span className="serial-port-selected-badge">
+                            Selecionada
+                          </span>
+                        )}
+                      </div>
 
                       <span className="serial-port-description">
                         {port.description || 'Sem descrição'}
@@ -156,12 +195,17 @@ export function SerialPortsScreen({
               </div>
             )}
           </div>
-        </div>
+        </article>
 
-        <div className="serial-monitor-card">
-          <h3>Enviar comando</h3>
+        <article className="serial-monitor-card serial-monitor-card--command">
+          <div className="serial-monitor-card-header">
+            <div>
+              <span className="serial-monitor-card-kicker">Comando manual</span>
+              <h3>Enviar comando</h3>
+            </div>
+          </div>
 
-          <p className="screen-page-text">
+          <p className="serial-monitor-help-text">
             Digite exatamente o comando que o Arduino espera receber.
           </p>
 
@@ -181,7 +225,7 @@ export function SerialPortsScreen({
 
             <button
               type="button"
-              className="serial-monitor-button primary"
+              className="serial-monitor-button success"
               onClick={handleSendCommand}
             >
               Enviar
@@ -205,6 +249,13 @@ export function SerialPortsScreen({
 
             <button
               type="button"
+              onClick={() => setCommand('CONFIG_MOTOR_STATUS')}
+            >
+              CONFIG_MOTOR_STATUS
+            </button>
+
+            <button
+              type="button"
               onClick={() => setCommand('MOTOR_RODA_SET_ZERO')}
             >
               MOTOR_RODA_SET_ZERO
@@ -212,22 +263,32 @@ export function SerialPortsScreen({
           </div>
 
           <div className="serial-command-config-box">
-            <h4>Configuração Django</h4>
+            <div>
+              <h4>Configuração Django</h4>
+
+              <p>
+                Envia para o Arduino os valores salvos no Django Admin, como
+                passos por volta, velocidade máxima e aceleração.
+              </p>
+            </div>
 
             <button
               type="button"
-              className="serial-monitor-button primary"
+              className="serial-monitor-button success"
               onClick={handleSyncMachineConfig}
             >
-              Enviar configurações para Arduino
+              ⚙️ Sincronizar configuração
             </button>
           </div>
-        </div>
+        </article>
       </section>
 
       <section className="serial-monitor-logs-card">
         <div className="serial-monitor-logs-header">
-          <h3>Logs seriais</h3>
+          <div>
+            <span className="serial-monitor-card-kicker">Histórico</span>
+            <h3>Logs seriais</h3>
+          </div>
 
           <button
             type="button"

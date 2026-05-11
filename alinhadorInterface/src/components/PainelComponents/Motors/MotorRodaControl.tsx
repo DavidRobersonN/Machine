@@ -2,7 +2,7 @@ import { useMachineContext } from '../../../context/MachineContext'
 import { MotorPassoGenerico } from '../../MotorPassoGenerico/MotorPassoGenerico'
 
 export function MotorRodaControl() {
-  const { sendCommand } = useMachineContext()
+  const { state, sendCommand } = useMachineContext()
 
   function handleStart() {
     sendCommand({
@@ -49,6 +49,10 @@ export function MotorRodaControl() {
   return (
     <MotorPassoGenerico
       title="Motor da roda"
+      subtitle="Controle manual de giro, sentido e velocidade."
+      isRunning={state.wheel_is_running}
+      direction={state.wheel_direction}
+      speedPercent={state.speed_motor_roda}
       onStart={handleStart}
       onStop={handleStop}
       onClockwise={handleClockwise}
@@ -56,8 +60,8 @@ export function MotorRodaControl() {
       onIncreaseSpeed={handleIncreaseSpeed}
       onDecreaseSpeed={handleDecreaseSpeed}
       onResetPosition={handleResetPosition}
-      clockwiseLabel="Girar horário"
-      counterClockwiseLabel="Girar anti-horário"
+      clockwiseLabel="Horário"
+      counterClockwiseLabel="Anti-horário"
     />
   )
 }
