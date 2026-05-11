@@ -9,18 +9,156 @@
 
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 
   box-sizing: border-box;
   overflow: hidden;
 }
 
-/*
-  Caixa onde os logs são exibidos.
+/* =========================
+   HEADER
+========================= */
 
-  A altura flexível faz a caixa ocupar o espaço restante
-  abaixo do título da tela.
-*/
+.logs-screen-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+
+  flex-shrink: 0;
+}
+
+.logs-screen-kicker {
+  display: inline-flex;
+
+  margin-bottom: 3px;
+
+  color: #11953b;
+  font-size: 0.66rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.logs-screen .screen-page-title {
+  margin: 0;
+
+  color: #0f2a5f;
+  font-size: 1.65rem;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.logs-screen-header p {
+  max-width: 760px;
+
+  margin: 5px 0 0;
+
+  color: #475569;
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+/* =========================
+   RESUMO / FILTROS
+========================= */
+
+.logs-screen-summary {
+  width: 100%;
+
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+
+  flex-shrink: 0;
+
+  box-sizing: border-box;
+}
+
+.logs-summary-card {
+  min-width: 0;
+
+  padding: 1px 1px;
+  border-radius: 14px;
+
+  background: #ffffff;
+  border: 2px solid #d6e1f3;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  text-align: center;
+  font-family: inherit;
+
+  cursor: pointer;
+
+  box-sizing: border-box;
+
+  transition:
+    transform 0.12s ease,
+    border-color 0.12s ease,
+    background 0.12s ease;
+}
+
+.logs-summary-card:hover {
+  transform: translateY(-1px);
+  background: #f8fafc;
+}
+
+.logs-summary-card.active {
+  border-color: #11953b;
+  background: #edf8f1;
+}
+
+.logs-summary-card span {
+  color: #64748b;
+  font-size: 0.66rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.logs-summary-card strong {
+  color: #0f2a5f;
+  font-size: 1.1rem;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.logs-summary-card.sent {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.logs-summary-card.sent strong {
+  color: #2563eb;
+}
+
+.logs-summary-card.received {
+  border-color: #fed7aa;
+  background: #fff7ed;
+}
+
+.logs-summary-card.received strong {
+  color: #c2410c;
+}
+
+.logs-summary-card.error {
+  border-color: #fecaca;
+  background: #fff5f5;
+}
+
+.logs-summary-card.error strong {
+  color: #b42318;
+}
+
+/* =========================
+   BOX DE LOGS
+========================= */
+
 .logs-screen-box {
   width: 100%;
   max-width: 100%;
@@ -29,12 +167,219 @@
   flex: 1;
   min-height: 0;
 
-  border: 2px solid #b7c4de;
-  background: #f8fafc;
+  border: 2px solid #d6e1f3;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 
-  padding: 8px;
+  padding: 10px;
+  border-radius: 18px;
+
   box-sizing: border-box;
 
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+
   overflow: hidden;
+}
+
+.logs-screen-box-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+
+  flex-shrink: 0;
+}
+
+.logs-screen-box-header h3 {
+  margin: 0;
+
+  color: #0f2a5f;
+  font-size: 0.95rem;
+  line-height: 1.1;
+  font-weight: 900;
+}
+
+.logs-screen-clear-button {
+  border: 1px solid #fecaca;
+  background: #fff5f5;
+  color: #b42318;
+
+  padding: 6px 10px;
+  border-radius: 10px;
+
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 900;
+
+  cursor: pointer;
+
+  transition:
+    background 0.12s ease,
+    transform 0.12s ease;
+}
+
+.logs-screen-clear-button:hover {
+  background: #fee2e2;
+  transform: translateY(-1px);
+}
+
+/*
+  Ajuste local do ScreenLogs somente dentro da tela de Logs.
+  Assim não altera outros lugares que usam ScreenLogs.
+*/
+.logs-screen-box .screen-logs-wrapper {
+  flex: 1;
+  min-height: 0;
+}
+
+.logs-screen-box .screen-log {
+  height: 100%;
+  min-height: 0;
+
+  padding: 8px;
+  border-radius: 14px;
+
+  background: #0f172a;
+  color: #e2e8f0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  font-family: monospace;
+  font-size: 0.72rem;
+
+  box-sizing: border-box;
+}
+
+.logs-screen-box .screen-log-empty {
+  margin: 0;
+
+  color: #94a3b8;
+  opacity: 0.9;
+}
+
+.logs-screen-box .screen-log-line {
+  width: 100%;
+  min-width: 0;
+
+  /*
+    Impede que as caixinhas sejam espremidas
+    quando tiver muitos logs.
+    Em vez de reduzir a altura dos itens,
+    a área escura cria rolagem vertical.
+  */
+  flex-shrink: 0;
+
+  padding: 10px 12px;
+  border-left: 4px solid #64748b;
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.06);
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  box-sizing: border-box;
+}
+
+.logs-screen-box .screen-log-line.sent {
+  border-left-color: #22c55e;
+}
+
+.logs-screen-box .screen-log-line.received {
+  border-left-color: #f97316;
+}
+
+.logs-screen-box .screen-log-line.error-message {
+  border-left-color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.logs-screen-box .screen-log-line.config-message {
+  border-left-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.logs-screen-box .screen-log-line.long-message {
+  padding: 9px;
+}
+
+.logs-screen-box .log-type {
+  display: inline-flex;
+  width: fit-content;
+
+  padding: 2px 7px;
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+
+  font-size: 0.64rem;
+  line-height: 1.2;
+  font-weight: 900;
+}
+
+.logs-screen-box .screen-log-line.sent .log-type {
+  color: #86efac;
+}
+
+.logs-screen-box .screen-log-line.received .log-type {
+  color: #fdba74;
+}
+
+.logs-screen-box .screen-log-line.error-message .log-type {
+  color: #fca5a5;
+}
+
+.logs-screen-box .screen-log-line.config-message .log-type {
+  color: #93c5fd;
+}
+
+.logs-screen-box .log-message {
+  color: #f8fafc;
+
+  white-space: pre-wrap;
+  word-break: break-word;
+
+  line-height: 1.45;
+  font-size: 0.76rem;
+}
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 780px) {
+  .logs-screen-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .logs-screen-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .logs-screen {
+    overflow-y: auto;
+  }
+
+  .logs-screen-box {
+    min-height: 320px;
+  }
+
+  .logs-screen-box-header {
+    flex-direction: column;
+  }
+
+  .logs-screen-clear-button {
+    width: 100%;
+  }
 }

@@ -13,24 +13,54 @@ type ScreenLogsProps = {
   emptyMessage?: string
 }
 
+function isErrorLog(message: string) {
+  const normalizedMessage = message.toLowerCase()
+
+  return (
+    normalizedMessage.includes('erro') ||
+    normalizedMessage.includes('error') ||
+    normalizedMessage.includes('falha') ||
+    normalizedMessage.includes('desconectado') ||
+    normalizedMessage.includes('comando_desconhecido')
+  )
+}
+
+function isConfigLog(message: string) {
+  const normalizedMessage = message.toLowerCase()
+
+  return (
+    normalizedMessage.includes('configuração') ||
+    normalizedMessage.includes('configuracao') ||
+    normalizedMessage.includes('config_') ||
+    normalizedMessage.includes('sync_machine_config') ||
+    normalizedMessage.includes('motor_roda_config_status')
+  )
+}
+
+function getLogClassName(log: ScreenLogItem) {
+  const classNames = ['screen-log-line', log.direction]
+
+  if (log.message.length > 120) {
+    classNames.push('long-message')
+  }
+
+  if (isConfigLog(log.message)) {
+    classNames.push('config-message')
+  }
+
+  if (isErrorLog(log.message)) {
+    classNames.push('error-message')
+  }
+
+  return classNames.join(' ')
+}
+
 export function ScreenLogs({
   logs = [],
   emptyMessage = 'Nenhuma mensagem ainda...',
 }: ScreenLogsProps) {
-  /*
-    Referência para a área rolável dos logs.
-
-    Usamos essa referência para conseguir mover
-    a barra de rolagem automaticamente quando
-    chegar uma nova mensagem.
-  */
   const logRef = useRef<HTMLDivElement | null>(null)
 
-  /*
-    Sempre que a lista de logs mudar,
-    rolamos automaticamente para o final,
-    mostrando a mensagem mais recente.
-  */
   useEffect(() => {
     if (logRef.current) {
       logRef.current.scrollTop = logRef.current.scrollHeight
@@ -45,8 +75,8 @@ export function ScreenLogs({
         ) : (
           logs.map((log, index) => (
             <div
-              key={index}
-              className={`screen-log-line ${log.direction}`}
+              key={`${log.direction}-${index}-${log.message}`}
+              className={getLogClassName(log)}
             >
               <span className="log-type">
                 {log.direction === 'sent' ? '→ Enviado' : '← Recebido'}
