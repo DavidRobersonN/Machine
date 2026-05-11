@@ -219,25 +219,6 @@ export function MachineProvider({ children }: MachineProviderProps) {
       return
     }
 
-    if (message.type === 'led_status') {
-      dispatch({
-        type: 'MACHINE_UPDATED',
-        payload: {
-          led: message.state,
-          arduino_connected: message.serial.arduino_connected,
-        },
-      })
-
-      dispatch({
-        type: 'ADD_LOG',
-        payload: {
-          direction: 'received',
-          message: message.serial.message,
-        },
-      })
-      return
-    }
-
     if (message.type === 'machine_read') {
       dispatch({
         type: 'MACHINE_UPDATED',

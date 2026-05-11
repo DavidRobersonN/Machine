@@ -1,4 +1,5 @@
-import { LedScreen } from './LedScreen/LedScreen'
+import { memo, useCallback } from 'react'
+
 import { LogsScreen } from './LogsScreen/LogsScreen'
 import { MenuScreen } from './MenuScreen/MenuScreen'
 import { SerialPortsScreen } from './SerialPortsScreen/SerialPortsScreen'
@@ -13,15 +14,17 @@ import type {
   SelectedSerialPortState,
   SerialPortInfo,
   ArduinoConnectionState,
-  LedUiState,
   MisalignmentPoint,
   WheelDirection,
 } from '../../types/machine'
 
 // Este componente é responsável por renderizar a tela principal do painel,
 // exibindo o conteúdo de acordo com a tela selecionada no menu lateral.
-// Ele recebe as informações necessárias para cada tela e as funções de controle como props,
-// garantindo que a lógica de navegação e controle esteja centralizada aqui.
+//
+// Importante:
+// Usamos memo com comparação personalizada para evitar que telas paradas,
+// como StartScreen e MenuScreen, fiquem renderizando toda hora por causa
+// de atualizações de sensor, motor ou logs.
 
 type MachineScreenRendererProps = {
   currentScreen: AppScreen
@@ -37,8 +40,6 @@ type MachineScreenRendererProps = {
   wheelIsRunning: boolean
   motorTurnsPerWheelTurn: number
 
-  led: LedUiState
-
   lateralMisalignmentCurrent: number
   lateralMisalignmentHistory: MisalignmentPoint[]
   onSelectPort: (port: string) => void
@@ -46,27 +47,32 @@ type MachineScreenRendererProps = {
   onListSerialPorts: () => void
 }
 
-export function MachineScreenRenderer({
-  currentScreen,
-  logs,
-  availablePorts,
-  selectedPort,
-  arduinoConnected,
-  speedMotorRoda,
+function MachineScreenRendererComponent(props: MachineScreenRendererProps) {
+  const {
+    currentScreen,
+    logs,
+    availablePorts,
+    selectedPort,
+    arduinoConnected,
+    lateralMisalignmentCurrent,
+    lateralMisalignmentHistory,
+    onSelectPort,
+    onGoToScreen,
+    onListSerialPorts,
+  } = props
 
-  wheelPositionDegrees,
-  wheelTotalTurns,
-  wheelDirection,
-  wheelIsRunning,
-  motorTurnsPerWheelTurn,
+  const handleSelectLogs = useCallback(() => {
+    onGoToScreen('logs')
+  }, [onGoToScreen])
 
-  led,
-  lateralMisalignmentCurrent,
-  lateralMisalignmentHistory,
-  onSelectPort,
-  onGoToScreen,
-  onListSerialPorts,
-}: MachineScreenRendererProps) {
+  const handleSelectMotors = useCallback(() => {
+    onGoToScreen('motors')
+  }, [onGoToScreen])
+
+  const handleSelectAlignment = useCallback(() => {
+    onGoToScreen('alignment')
+  }, [onGoToScreen])
+
   switch (currentScreen) {
     case 'start':
       return <StartScreen />
@@ -74,32 +80,15 @@ export function MachineScreenRenderer({
     case 'menu':
       return (
         <MenuScreen
-          onSelectLed={() => onGoToScreen('led')}
-          onSelectLogs={() => onGoToScreen('logs')}
+          onSelectLogs={handleSelectLogs}
           onSelectSerial={onListSerialPorts}
-          onSelectMotors={() => onGoToScreen('motors')}
-          onSelectAlignment={() => onGoToScreen('alignment')}
-        />
-      )
-
-    case 'led':
-      return (
-        <LedScreen
-          led={led}
+          onSelectMotors={handleSelectMotors}
+          onSelectAlignment={handleSelectAlignment}
         />
       )
 
     case 'motors':
-      return (
-        <MotorsScreen
-          speedPercent={speedMotorRoda}
-          wheelPositionDegrees={wheelPositionDegrees}
-          wheelTotalTurns={wheelTotalTurns}
-          wheelDirection={wheelDirection}
-          wheelIsRunning={wheelIsRunning}
-          motorTurnsPerWheelTurn={motorTurnsPerWheelTurn}
-        />
-      )
+      return <MotorsScreen />
 
     case 'alignment':
       return (
@@ -110,9 +99,7 @@ export function MachineScreenRenderer({
       )
 
     case 'logs':
-      return (
-        <LogsScreen logs={logs} />
-      )
+      return <LogsScreen logs={logs} />
 
     case 'serial':
       return (
@@ -128,3 +115,53 @@ export function MachineScreenRenderer({
       return null
   }
 }
+
+function areMachineScreenRendererPropsEqual(
+  previousProps: MachineScreenRendererProps,
+  nextProps: MachineScreenRendererProps,
+) {
+  if (previousProps.currentScreen !== nextProps.currentScreen) {
+    return false
+  }
+
+  switch (nextProps.currentScreen) {
+    case 'start':
+      return true
+
+    case 'menu':
+      return (
+        previousProps.onGoToScreen === nextProps.onGoToScreen &&
+        previousProps.onListSerialPorts === nextProps.onListSerialPorts
+      )
+
+    case 'motors':
+      return true
+
+    case 'alignment':
+      return (
+        previousProps.lateralMisalignmentCurrent ===
+          nextProps.lateralMisalignmentCurrent &&
+        previousProps.lateralMisalignmentHistory ===
+          nextProps.lateralMisalignmentHistory
+      )
+
+    case 'logs':
+      return previousProps.logs === nextProps.logs
+
+    case 'serial':
+      return (
+        previousProps.availablePorts === nextProps.availablePorts &&
+        previousProps.selectedPort === nextProps.selectedPort &&
+        previousProps.arduinoConnected === nextProps.arduinoConnected &&
+        previousProps.onSelectPort === nextProps.onSelectPort
+      )
+
+    default:
+      return true
+  }
+}
+
+export const MachineScreenRenderer = memo(
+  MachineScreenRendererComponent,
+  areMachineScreenRendererPropsEqual,
+)

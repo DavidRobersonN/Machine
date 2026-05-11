@@ -1,7 +1,8 @@
+import { memo, useMemo } from 'react'
+
 import './MenuScreen.css'
 
 type MenuScreenProps = {
-  onSelectLed: () => void
   onSelectLogs: () => void
   onSelectSerial: () => void
   onSelectMotors: () => void
@@ -17,52 +18,52 @@ type MenuCard = {
   featured?: boolean
 }
 
-export function MenuScreen({
-  onSelectLed,
+function MenuScreenComponent({
   onSelectLogs,
   onSelectSerial,
   onSelectMotors,
   onSelectAlignment,
 }: MenuScreenProps) {
-  const menuCards: MenuCard[] = [
-    {
-      title: 'Motores',
-      description: 'Controle da roda, velocidade, sentido e posição por raio.',
-      badge: 'Controle principal',
-      icon: '⚙️',
-      onClick: onSelectMotors,
-      featured: true,
-    },
-    {
-      title: 'Alinhamento lateral',
-      description: 'Acompanhe o sensor lateral e o histórico de oscilação.',
-      badge: 'Sensor',
-      icon: '📈',
-      onClick: onSelectAlignment,
-      featured: true,
-    },
-    {
-      title: 'Portas COM',
-      description: 'Conecte o Arduino, monitore a serial e envie configurações.',
-      badge: 'Comunicação',
-      icon: '🔌',
-      onClick: onSelectSerial,
-    },
-    {
-      title: 'Logs',
-      description: 'Consulte mensagens enviadas, recebidas e eventos do sistema.',
-      badge: 'Diagnóstico',
-      icon: '📋',
-      onClick: onSelectLogs,
-    },
-    {
-      title: 'LED',
-      description: 'Teste rápido de comunicação entre interface, backend e Arduino.',
-      badge: 'Teste',
-      icon: '💡',
-      onClick: onSelectLed,
-    },
-  ]
+  const menuCards = useMemo<MenuCard[]>(
+    () => [
+      {
+        title: 'Motores',
+        description: 'Controle da roda, velocidade, sentido e posição por raio.',
+        badge: 'Controle principal',
+        icon: '⚙️',
+        onClick: onSelectMotors,
+        featured: true,
+      },
+      {
+        title: 'Alinhamento lateral',
+        description: 'Acompanhe o sensor lateral e o histórico de oscilação.',
+        badge: 'Sensor',
+        icon: '📈',
+        onClick: onSelectAlignment,
+        featured: true,
+      },
+      {
+        title: 'Portas COM',
+        description: 'Conecte o Arduino, monitore a serial e envie configurações.',
+        badge: 'Comunicação',
+        icon: '🔌',
+        onClick: onSelectSerial,
+      },
+      {
+        title: 'Logs',
+        description: 'Consulte mensagens enviadas, recebidas e eventos do sistema.',
+        badge: 'Diagnóstico',
+        icon: '📋',
+        onClick: onSelectLogs,
+      },
+    ],
+    [
+      onSelectLogs,
+      onSelectSerial,
+      onSelectMotors,
+      onSelectAlignment,
+    ],
+  )
 
   return (
     <div className="menu-screen">
@@ -104,3 +105,5 @@ export function MenuScreen({
     </div>
   )
 }
+
+export const MenuScreen = memo(MenuScreenComponent)

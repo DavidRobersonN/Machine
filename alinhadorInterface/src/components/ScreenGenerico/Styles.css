@@ -53,15 +53,10 @@
 
 /* Conteúdo dinâmico da tela */
 .screen-main-content {
-  /*
-    Ocupa o espaço restante depois da sidebar.
-
-    Como a sidebar tem 125px:
-    900px - 125px = área principal larga suficiente.
-  */
   flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
+  height: 100%;
 
   padding: 16px;
   box-sizing: border-box;
@@ -78,10 +73,6 @@
   flex-direction: column;
   justify-content: flex-start;
 
-  /*
-    Evita barra horizontal.
-    Se a tela precisar, só terá rolagem vertical.
-  */
   overflow-y: auto;
   overflow-x: hidden;
 }

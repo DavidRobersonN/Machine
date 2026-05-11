@@ -1,1 +1,1 @@
-export type AppScreen = 'start' | 'menu' | 'led' | 'logs' | 'serial' | 'girarRoda' | 'motors' | 'alignment'
+export type AppScreen = 'start' | 'menu' | 'logs' | 'serial' | 'girarRoda' | 'motors' | 'alignment'
