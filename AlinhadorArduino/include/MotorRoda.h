@@ -37,9 +37,13 @@ private:
   int currentSpoke;
   int targetSpoke;
 
+  unsigned long lastPositionStatusMillis;
+  unsigned long positionStatusIntervalMs;
+
   void applySpeed();
 
   void recalculateWheelConfig();
+  void updateCurrentWheelPositionFromMotor();
 
   float normalizeAngle(float angle);
   float calculateShortestDelta(float targetAngle);
@@ -49,6 +53,8 @@ private:
   int angleToSpoke(float angle);
 
   void sendPositionStatus(String status);
+  void sendCompactPositionStatus();
+  float getWheelTotalTurns();
 
 public:
   MotorRoda(

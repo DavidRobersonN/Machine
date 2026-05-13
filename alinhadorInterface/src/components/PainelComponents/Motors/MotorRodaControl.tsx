@@ -1,4 +1,4 @@
-import { useMachineContext } from '../../../context/MachineContext'
+import { useMachineContext } from '../../../context/useMachineContext'
 import { MotorPassoGenerico } from '../../MotorPassoGenerico/MotorPassoGenerico'
 
 export function MotorRodaControl() {

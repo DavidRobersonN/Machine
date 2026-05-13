@@ -1,4 +1,4 @@
-import { useMachineContext } from '../../context/MachineContext'
+import { useMachineContext } from '../../context/useMachineContext'
 
 export function useSerialPortActions() {
   const { sendCommand } = useMachineContext()

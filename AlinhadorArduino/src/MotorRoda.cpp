@@ -32,6 +32,9 @@ MotorRoda::MotorRoda(
   currentSpoke = 1;
   targetSpoke = 1;
 
+  lastPositionStatusMillis = 0;
+  positionStatusIntervalMs = 100;
+
   recalculateWheelConfig();
 }
 
@@ -159,11 +162,21 @@ void MotorRoda::begin() {
   motor.setSpeed(currentSpeed);
 
   motor.setCurrentPosition(0);
+  updateCurrentWheelPositionFromMotor();
 }
 
 void MotorRoda::update() {
   if (mode == MOTOR_RODA_CONTINUOUS) {
     motor.runSpeed();
+    updateCurrentWheelPositionFromMotor();
+
+    unsigned long now = millis();
+
+    if (now - lastPositionStatusMillis >= positionStatusIntervalMs) {
+      lastPositionStatusMillis = now;
+      sendCompactPositionStatus();
+    }
+
     return;
   }
 
@@ -388,6 +401,14 @@ void MotorRoda::setZero() {
   sendPositionStatus("zero_set");
 }
 
+void MotorRoda::updateCurrentWheelPositionFromMotor() {
+  long currentSteps = motor.currentPosition();
+  float totalTurns = ((float) currentSteps) / stepsPerWheelRevolution;
+
+  currentWheelAngle = normalizeAngle(totalTurns * 360.0);
+  currentSpoke = angleToSpoke(currentWheelAngle);
+}
+
 void MotorRoda::goToAngle(float angle) {
   float normalizedTargetAngle = normalizeAngle(angle);
   float deltaAngle = calculateShortestDelta(normalizedTargetAngle);
@@ -441,6 +462,7 @@ void MotorRoda::goToPreviousSpoke() {
 }
 
 void MotorRoda::sendCurrentPositionStatus() {
+  updateCurrentWheelPositionFromMotor();
   sendPositionStatus("position_status");
 }
 
@@ -457,6 +479,16 @@ void MotorRoda::sendPositionStatus(String status) {
   Serial.print(targetSpoke);
   Serial.print(",\"total_spokes\":");
   Serial.print(totalSpokes);
+  Serial.print(",\"wheel_total_turns\":");
+  Serial.print(getWheelTotalTurns(), 6);
+  Serial.print(",\"is_running\":");
+
+  if (mode == MOTOR_RODA_CONTINUOUS) {
+    Serial.print("true");
+  } else {
+    Serial.print("false");
+  }
+
   Serial.print(",\"is_positioning\":");
 
   if (mode == MOTOR_RODA_POSITIONING) {
@@ -468,8 +500,36 @@ void MotorRoda::sendPositionStatus(String status) {
   Serial.println("}");
 }
 
+void MotorRoda::sendCompactPositionStatus() {
+  Serial.print("WHEEL_POS:");
+  Serial.print(currentWheelAngle, 2);
+  Serial.print(",");
+  Serial.print(getWheelTotalTurns(), 6);
+  Serial.print(",");
+  Serial.print(currentSpoke);
+  Serial.print(",");
+
+  if (mode == MOTOR_RODA_CONTINUOUS) {
+    Serial.print("1");
+  } else {
+    Serial.print("0");
+  }
+
+  Serial.print(",");
+
+  if (mode == MOTOR_RODA_POSITIONING) {
+    Serial.println("1");
+  } else {
+    Serial.println("0");
+  }
+}
+
 float MotorRoda::getCurrentWheelAngle() const {
   return currentWheelAngle;
+}
+
+float MotorRoda::getWheelTotalTurns() {
+  return ((float) motor.currentPosition()) / stepsPerWheelRevolution;
 }
 
 int MotorRoda::getCurrentSpoke() const {

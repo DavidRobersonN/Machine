@@ -1,6 +1,6 @@
 import time
 
-from machine.models import MachineState
+from machine.models import MachineConfig, MachineState
 from machine.services.broadcast_service import BroadcastService
 from machine.services.serial_service import SerialService
 
@@ -19,13 +19,38 @@ class MachineStateService:
     # 0.25 significa:
     # - em 100%, a roda dá 0.25 volta por segundo
     # - ou seja, 1 volta completa a cada 4 segundos
-    MAX_WHEEL_TURNS_PER_SECOND = 0.5
-
     def __init__(self, serial_service: SerialService):
         self.broadcast_service = BroadcastService()
         self.serial_service = serial_service
         self.last_lateral_broadcast_time = 0.0
         self.lateral_broadcast_interval = 0.016
+
+    def get_active_machine_config(self) -> MachineConfig:
+        active_config = (
+            MachineConfig.objects
+            .filter(is_active=True)
+            .order_by('-updated_at')
+            .first()
+        )
+
+        if active_config:
+            return active_config
+
+        return MachineConfig.objects.create(
+            name='Configuracao principal',
+            is_active=True,
+        )
+
+    def calculate_wheel_turns_per_second(self, speed_percent: int) -> float:
+        config = self.get_active_machine_config()
+
+        wheel_steps_per_second = max(config.motor_max_speed, 0)
+        steps_per_wheel_turn = max(config.motor_steps_per_wheel_turn, 1)
+        max_wheel_turns_per_second = (
+            wheel_steps_per_second / steps_per_wheel_turn
+        )
+
+        return (speed_percent / self.MAX_SPEED) * max_wheel_turns_per_second
 
     def broadcast_lateral_sensor_state(self, value: float) -> None:
         """
@@ -58,15 +83,18 @@ class MachineStateService:
 
         Regra usada:
         - speed_motor_roda vai de 0 a 100.
-        - 100 significa 0.25 volta por segundo.
-        - 50 significa 0.125 volta por segundo.
-        - 25 significa 0.0625 volta por segundo.
+        - 100 usa a velocidade maxima do motor configurada no Django Admin.
+        - As voltas por segundo da roda sao calculadas por:
+          motor_max_speed / motor_steps_per_wheel_turn.
 
         Depois, quando o Arduino enviar a posição real da roda,
         essa simulação poderá ser removida.
         """
 
         state, _ = MachineState.objects.get_or_create(id=1)
+
+        if self.serial_service.is_connected():
+            return
 
         if not state.wheel_is_running:
             return
@@ -79,9 +107,7 @@ class MachineStateService:
 
         speed_percent = max(0, min(state.speed_motor_roda, self.MAX_SPEED))
 
-        turns_per_second = (
-            speed_percent / self.MAX_SPEED
-        ) * self.MAX_WHEEL_TURNS_PER_SECOND
+        turns_per_second = self.calculate_wheel_turns_per_second(speed_percent)
 
         delta_turns = turns_per_second * interval_seconds
 
@@ -148,6 +174,24 @@ class MachineStateService:
         if 'wheel_is_running' in data:
             state.wheel_is_running = data['wheel_is_running']
 
+        if 'wheel_current_angle' in data:
+            state.wheel_current_angle = data['wheel_current_angle']
+
+        if 'wheel_target_angle' in data:
+            state.wheel_target_angle = data['wheel_target_angle']
+
+        if 'wheel_current_spoke' in data:
+            state.wheel_current_spoke = data['wheel_current_spoke']
+
+        if 'wheel_target_spoke' in data:
+            state.wheel_target_spoke = data['wheel_target_spoke']
+
+        if 'wheel_total_spokes' in data:
+            state.wheel_total_spokes = data['wheel_total_spokes']
+
+        if 'wheel_is_positioning' in data:
+            state.wheel_is_positioning = data['wheel_is_positioning']
+
         if 'motor_turns_per_wheel_turn' in data:
             state.motor_turns_per_wheel_turn = data['motor_turns_per_wheel_turn']
 
@@ -158,6 +202,41 @@ class MachineStateService:
         self.broadcast_service.broadcast_machine_state(
             payload=self.serialize_state(state)
         )
+
+        return state
+
+    def update_wheel_position_from_serial(self, data: dict) -> MachineState:
+        state, _ = MachineState.objects.get_or_create(id=1)
+
+        if 'wheel_position_degrees' in data:
+            state.wheel_position_degrees = data['wheel_position_degrees']
+
+        if 'wheel_total_turns' in data:
+            state.wheel_total_turns = data['wheel_total_turns']
+
+        if 'wheel_is_running' in data:
+            state.wheel_is_running = data['wheel_is_running']
+
+        if 'wheel_current_angle' in data:
+            state.wheel_current_angle = data['wheel_current_angle']
+
+        if 'wheel_target_angle' in data:
+            state.wheel_target_angle = data['wheel_target_angle']
+
+        if 'wheel_current_spoke' in data:
+            state.wheel_current_spoke = data['wheel_current_spoke']
+
+        if 'wheel_target_spoke' in data:
+            state.wheel_target_spoke = data['wheel_target_spoke']
+
+        if 'wheel_total_spokes' in data:
+            state.wheel_total_spokes = data['wheel_total_spokes']
+
+        if 'wheel_is_positioning' in data:
+            state.wheel_is_positioning = data['wheel_is_positioning']
+
+        state.arduino_connected = self.serial_service.is_connected()
+        state.save()
 
         return state
 
@@ -187,6 +266,13 @@ class MachineStateService:
             'wheel_direction': state.wheel_direction,
             'wheel_is_running': state.wheel_is_running,
             'motor_turns_per_wheel_turn': state.motor_turns_per_wheel_turn,
+
+            'wheel_current_angle': state.wheel_current_angle,
+            'wheel_target_angle': state.wheel_target_angle,
+            'wheel_current_spoke': state.wheel_current_spoke,
+            'wheel_target_spoke': state.wheel_target_spoke,
+            'wheel_total_spokes': state.wheel_total_spokes,
+            'wheel_is_positioning': state.wheel_is_positioning,
 
             'lateral_misalignment_current': state.lateral_misalignment_current,
         }

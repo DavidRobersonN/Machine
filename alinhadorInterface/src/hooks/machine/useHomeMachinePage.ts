@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 
-import { useMachineContext } from '../../context/MachineContext'
+import { useMachineContext } from '../../context/useMachineContext'
 import { useMachineScreenData } from './useMachineScreenData'
 
 import type { AppScreen } from '../../types/navigation'

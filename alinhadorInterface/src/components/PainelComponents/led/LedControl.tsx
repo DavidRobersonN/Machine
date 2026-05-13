@@ -1,5 +1,5 @@
 import { ToggleControl } from '../../controls/ToggleControl/ToggleControl'
-import { useMachineContext } from '../../../context/MachineContext'
+import { useMachineContext } from '../../../context/useMachineContext'
 
 export function LedControl() {
   const { sendCommand } = useMachineContext()

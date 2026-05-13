@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { useMachineContext } from '../../../context/MachineContext'
+import { useMachineContext } from '../../../context/useMachineContext'
 
 import './LateralAlignmentControl.css'
 

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 
-import { useMachineContext } from '../../../context/MachineContext'
+import { useMachineContext } from '../../../context/useMachineContext'
 import { ScreenLogs } from '../../ScreenGenerico/ScreenLogs'
 import type { MachineLog } from '../../../types/machine/machine'
 

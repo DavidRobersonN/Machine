@@ -11,7 +11,47 @@ from machine.services.machine_service import MachineService
 class MachineConsumer(WebsocketConsumer):
     GROUP_NAME = 'machine_updates'
 
-    WHEEL_UPDATE_INTERVAL_SECONDS = 0.1
+    def handle_wheel_position_line(self, line: str) -> bool:
+        if not line.startswith('WHEEL_POS:'):
+            return False
+
+        values = line.replace('WHEEL_POS:', '', 1).split(',')
+
+        if len(values) != 5:
+            return False
+
+        try:
+            current_angle = float(values[0])
+            total_turns = float(values[1])
+            current_spoke = int(values[2])
+            is_running = values[3] == '1'
+            is_positioning = values[4] == '1'
+        except ValueError:
+            return False
+
+        payload = {
+            'wheel_position_degrees': current_angle,
+            'wheel_total_turns': total_turns,
+            'wheel_current_angle': current_angle,
+            'wheel_current_spoke': current_spoke,
+            'wheel_is_running': is_running,
+            'wheel_is_positioning': is_positioning,
+        }
+
+        self.machine_state_service.update_wheel_position_from_serial({
+            'wheel_position_degrees': current_angle,
+            'wheel_total_turns': total_turns,
+            'wheel_is_running': is_running,
+            'wheel_current_angle': current_angle,
+            'wheel_current_spoke': current_spoke,
+            'wheel_is_positioning': is_positioning,
+        })
+
+        self.machine_state_service.broadcast_service.broadcast_machine_state(
+            payload=payload,
+        )
+
+        return True
 
     def handle_serial_json_message(self, data: dict) -> bool:
         """
@@ -25,11 +65,14 @@ class MachineConsumer(WebsocketConsumer):
 
         if message_type == 'motor_roda_position_status':
             payload = {
+                'wheel_position_degrees': data.get('current_angle'),
+                'wheel_total_turns': data.get('wheel_total_turns'),
                 'wheel_current_angle': data.get('current_angle'),
                 'wheel_target_angle': data.get('target_angle'),
                 'wheel_current_spoke': data.get('current_spoke'),
                 'wheel_target_spoke': data.get('target_spoke'),
                 'wheel_total_spokes': data.get('total_spokes'),
+                'wheel_is_running': data.get('is_running'),
                 'wheel_is_positioning': data.get('is_positioning'),
             }
 
@@ -38,6 +81,27 @@ class MachineConsumer(WebsocketConsumer):
                 for key, value in payload.items()
                 if value is not None
             }
+
+            state_payload = {
+                key: value
+                for key, value in clean_payload.items()
+                if key in {
+                    'wheel_position_degrees',
+                    'wheel_total_turns',
+                    'wheel_is_running',
+                    'wheel_current_angle',
+                    'wheel_target_angle',
+                    'wheel_current_spoke',
+                    'wheel_target_spoke',
+                    'wheel_total_spokes',
+                    'wheel_is_positioning',
+                }
+            }
+
+            if state_payload:
+                self.machine_state_service.update_wheel_position_from_serial(
+                    state_payload,
+                )
 
             self.machine_state_service.broadcast_service.broadcast_machine_state(
                 payload=clean_payload,
@@ -164,6 +228,9 @@ class MachineConsumer(WebsocketConsumer):
 
                     continue
 
+                if self.handle_wheel_position_line(line):
+                    continue
+
                 print(f'[Serial Listener] Recebido: {line}')
 
                 if line.startswith('{') and line.endswith('}'):
@@ -197,21 +264,6 @@ class MachineConsumer(WebsocketConsumer):
                 except Exception:
                     pass
 
-    def start_wheel_position_listener(self):
-        print('[Wheel Position Listener] Iniciado')
-
-        while getattr(self, 'wheel_position_listener_running', False):
-            try:
-                self.machine_state_service.update_wheel_position_realtime(
-                    interval_seconds=self.WHEEL_UPDATE_INTERVAL_SECONDS,
-                )
-
-                time.sleep(self.WHEEL_UPDATE_INTERVAL_SECONDS)
-
-            except Exception as error:
-                print('[Wheel Position Listener] Erro:', error)
-                time.sleep(self.WHEEL_UPDATE_INTERVAL_SECONDS)
-
     def connect(self):
         self.machine_service = MachineService()
         self.machine_state_service = self.machine_service.machine_state_service
@@ -227,13 +279,6 @@ class MachineConsumer(WebsocketConsumer):
 
         threading.Thread(
             target=self.start_serial_listener,
-            daemon=True,
-        ).start()
-
-        self.wheel_position_listener_running = True
-
-        threading.Thread(
-            target=self.start_wheel_position_listener,
             daemon=True,
         ).start()
 
@@ -281,7 +326,6 @@ class MachineConsumer(WebsocketConsumer):
 
     def disconnect(self, close_code):
         self.serial_listener_running = False
-        self.wheel_position_listener_running = False
 
         async_to_sync(self.channel_layer.group_discard)(
             self.GROUP_NAME,

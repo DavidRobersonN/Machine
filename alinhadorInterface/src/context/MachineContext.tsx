@@ -1,37 +1,25 @@
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useReducer,
   useRef,
 } from 'react'
-import type { Dispatch, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 import { useMachineSocket } from '../hooks/useMachineSocket'
+import { MachineContext } from './machineContextCore'
 import { initialMachineState, machineReducer } from './machineReducer'
 import type {
-  MachineAction,
   MachineCommand,
   MachineMessage,
   MachineUpdatePayload,
-  MachineState,
 } from '../types/machine/machine'
 
 // O contexto da máquina é responsável por armazenar o estado global da máquina,
 // fornecer funções para enviar comandos para o backend e receber mensagens do backend.
 // O valor atual e o histórico do sensor lateral são atualizados quando chega
 // machine_update do backend.
-
-type MachineContextValue = {
-  state: MachineState
-  dispatch: Dispatch<MachineAction>
-  send: (payload: MachineCommand) => boolean
-  sendCommand: (payload: MachineCommand) => boolean
-}
-
-const MachineContext = createContext<MachineContextValue | undefined>(undefined)
 
 type MachineProviderProps = {
   children: ReactNode
@@ -331,16 +319,4 @@ export function MachineProvider({ children }: MachineProviderProps) {
       {children}
     </MachineContext.Provider>
   )
-}
-
-export function useMachineContext() {
-  const context = useContext(MachineContext)
-
-  if (!context) {
-    throw new Error(
-      'useMachineContext precisa ser usado dentro de MachineProvider',
-    )
-  }
-
-  return context
 }

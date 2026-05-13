@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react'
 
 import type { MisalignmentPoint } from '../../../types/machine/machine'
 
-import { useMachineContext } from '../../../context/MachineContext'
+import { useMachineContext } from '../../../context/useMachineContext'
 import { OscillationChart } from '../../OscillationChart/OscillationChart'
 
 import './LateralAlignmentScreen.css'

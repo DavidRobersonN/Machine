@@ -6,7 +6,7 @@ import { LateralAlignmentControl } from './LateralAlignmentControl'
 
 const sendCommandMock = vi.fn()
 
-vi.mock('../../../context/MachineContext', () => {
+vi.mock('../../../context/useMachineContext', () => {
   return {
     useMachineContext: () => ({
       sendCommand: sendCommandMock,

@@ -80,11 +80,8 @@ def test_connect_accepts_websocket_adds_group_starts_listeners_and_sends_initial
     assert consumer.machine_service == fake_machine_service
     assert consumer.machine_state_service == fake_machine_state_service
 
-    # O consumer atual inicia 2 threads:
-    # 1. start_serial_listener
-    # 2. start_wheel_position_listener
-    assert mock_thread.call_count == 2
-    assert fake_thread_instance.start.call_count == 2
+    assert mock_thread.call_count == 1
+    assert fake_thread_instance.start.call_count == 1
 
     messages = get_sent_json_messages(consumer)
 
@@ -175,15 +172,11 @@ def test_disconnect_stops_listeners_removes_group_and_disconnects_serial_service
 
     consumer.machine_service = fake_machine_service
     consumer.serial_listener_running = True
-    consumer.wheel_position_listener_running = True
 
     with patch('machine.consumers.async_to_sync', side_effect=lambda func: func):
         consumer.disconnect(close_code=1000)
 
     assert consumer.serial_listener_running is False
-
-    if hasattr(consumer, 'wheel_position_listener_running'):
-        assert consumer.wheel_position_listener_running is False
 
     consumer.channel_layer.group_discard.assert_called_once_with(
         'machine_updates',
@@ -197,15 +190,11 @@ def test_disconnect_without_machine_service_does_not_raise_error():
     consumer = make_consumer()
 
     consumer.serial_listener_running = True
-    consumer.wheel_position_listener_running = True
 
     with patch('machine.consumers.async_to_sync', side_effect=lambda func: func):
         consumer.disconnect(close_code=1000)
 
     assert consumer.serial_listener_running is False
-
-    if hasattr(consumer, 'wheel_position_listener_running'):
-        assert consumer.wheel_position_listener_running is False
 
     consumer.channel_layer.group_discard.assert_called_once_with(
         'machine_updates',
@@ -236,6 +225,42 @@ def test_machine_update_sends_machine_update_message_to_frontend():
     ]
 
 
+def test_handle_wheel_position_line_broadcasts_real_wheel_position():
+    consumer = make_consumer()
+
+    fake_broadcast_service = Mock()
+
+    fake_machine_state_service = Mock()
+    fake_machine_state_service.broadcast_service = fake_broadcast_service
+
+    consumer.machine_state_service = fake_machine_state_service
+
+    was_handled = consumer.handle_wheel_position_line(
+        'WHEEL_POS:90.50,1.251389,10,1,0',
+    )
+
+    assert was_handled is True
+
+    fake_machine_state_service.update_wheel_position_from_serial.assert_called_once_with({
+        'wheel_position_degrees': 90.5,
+        'wheel_total_turns': 1.251389,
+        'wheel_is_running': True,
+        'wheel_current_angle': 90.5,
+        'wheel_current_spoke': 10,
+        'wheel_is_positioning': False,
+    })
+    fake_broadcast_service.broadcast_machine_state.assert_called_once_with(
+        payload={
+            'wheel_position_degrees': 90.5,
+            'wheel_total_turns': 1.251389,
+            'wheel_current_angle': 90.5,
+            'wheel_current_spoke': 10,
+            'wheel_is_running': True,
+            'wheel_is_positioning': False,
+        }
+    )
+
+
 def test_handle_serial_json_message_motor_roda_position_status_broadcasts_machine_update():
     consumer = make_consumer()
 
@@ -255,6 +280,8 @@ def test_handle_serial_json_message_motor_roda_position_status_broadcasts_machin
         'current_spoke': 10,
         'target_spoke': 10,
         'total_spokes': 36,
+        'wheel_total_turns': 1.25,
+        'is_running': True,
         'is_positioning': False,
     })
 
@@ -262,14 +289,28 @@ def test_handle_serial_json_message_motor_roda_position_status_broadcasts_machin
 
     fake_broadcast_service.broadcast_machine_state.assert_called_once_with(
         payload={
+            'wheel_position_degrees': 90.0,
+            'wheel_total_turns': 1.25,
             'wheel_current_angle': 90.0,
             'wheel_target_angle': 90.0,
             'wheel_current_spoke': 10,
             'wheel_target_spoke': 10,
             'wheel_total_spokes': 36,
+            'wheel_is_running': True,
             'wheel_is_positioning': False,
         }
     )
+    fake_machine_state_service.update_wheel_position_from_serial.assert_called_once_with({
+        'wheel_position_degrees': 90.0,
+        'wheel_total_turns': 1.25,
+        'wheel_is_running': True,
+        'wheel_current_angle': 90.0,
+        'wheel_target_angle': 90.0,
+        'wheel_current_spoke': 10,
+        'wheel_target_spoke': 10,
+        'wheel_total_spokes': 36,
+        'wheel_is_positioning': False,
+    })
 
     messages = get_sent_json_messages(consumer)
 
@@ -306,6 +347,8 @@ def test_handle_serial_json_message_motor_roda_position_status_ignores_none_valu
         'current_spoke': 12,
         'target_spoke': None,
         'total_spokes': 36,
+        'wheel_total_turns': None,
+        'is_running': None,
         'is_positioning': True,
     })
 
@@ -313,12 +356,20 @@ def test_handle_serial_json_message_motor_roda_position_status_ignores_none_valu
 
     fake_broadcast_service.broadcast_machine_state.assert_called_once_with(
         payload={
+            'wheel_position_degrees': 110.0,
             'wheel_current_angle': 110.0,
             'wheel_current_spoke': 12,
             'wheel_total_spokes': 36,
             'wheel_is_positioning': True,
         }
     )
+    fake_machine_state_service.update_wheel_position_from_serial.assert_called_once_with({
+        'wheel_position_degrees': 110.0,
+        'wheel_current_angle': 110.0,
+        'wheel_current_spoke': 12,
+        'wheel_total_spokes': 36,
+        'wheel_is_positioning': True,
+    })
 
 
 def test_handle_serial_json_message_lateral_sensor_status_broadcasts_reading_enabled():
@@ -456,6 +507,8 @@ def test_start_serial_listener_handles_motor_roda_position_status_json_line():
         'current_spoke': 10,
         'target_spoke': 10,
         'total_spokes': 36,
+        'wheel_total_turns': 1.25,
+        'is_running': True,
         'is_positioning': False,
     })
 
@@ -484,11 +537,14 @@ def test_start_serial_listener_handles_motor_roda_position_status_json_line():
 
     fake_broadcast_service.broadcast_machine_state.assert_called_once_with(
         payload={
+            'wheel_position_degrees': 90.0,
+            'wheel_total_turns': 1.25,
             'wheel_current_angle': 90.0,
             'wheel_target_angle': 90.0,
             'wheel_current_spoke': 10,
             'wheel_target_spoke': 10,
             'wheel_total_spokes': 36,
+            'wheel_is_running': True,
             'wheel_is_positioning': False,
         }
     )

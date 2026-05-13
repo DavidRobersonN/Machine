@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from machine.models import MachineState
+from machine.models import MachineConfig, MachineState
 from machine.services.machine_state_service import MachineStateService
 
 
@@ -45,6 +45,12 @@ def make_expected_payload(
     wheel_direction='stopped',
     wheel_is_running=False,
     motor_turns_per_wheel_turn=1.0,
+    wheel_current_angle=0.0,
+    wheel_target_angle=None,
+    wheel_current_spoke=1,
+    wheel_target_spoke=None,
+    wheel_total_spokes=36,
+    wheel_is_positioning=False,
     lateral_misalignment_current=0.0,
 ):
     return {
@@ -57,6 +63,12 @@ def make_expected_payload(
         'wheel_direction': wheel_direction,
         'wheel_is_running': wheel_is_running,
         'motor_turns_per_wheel_turn': motor_turns_per_wheel_turn,
+        'wheel_current_angle': wheel_current_angle,
+        'wheel_target_angle': wheel_target_angle,
+        'wheel_current_spoke': wheel_current_spoke,
+        'wheel_target_spoke': wheel_target_spoke,
+        'wheel_total_spokes': wheel_total_spokes,
+        'wheel_is_positioning': wheel_is_positioning,
         'lateral_misalignment_current': lateral_misalignment_current,
     }
 
@@ -70,6 +82,95 @@ def test_initial_state_of_service():
     assert service.SPEED_STEP == 5
     assert service.MIN_SPEED == 0
     assert service.MAX_SPEED == 100
+
+
+def test_calculate_wheel_turns_per_second_uses_active_machine_config():
+    service, _ = make_service()
+
+    MachineConfig.objects.create(
+        is_active=True,
+        motor_max_speed=1000,
+        motor_steps_per_wheel_turn=6400,
+    )
+
+    assert service.calculate_wheel_turns_per_second(100) == pytest.approx(
+        0.15625,
+    )
+    assert service.calculate_wheel_turns_per_second(50) == pytest.approx(
+        0.078125,
+    )
+
+
+def test_update_wheel_position_realtime_uses_calibrated_wheel_speed():
+    service, serial_service = make_service(connected=False)
+
+    MachineConfig.objects.create(
+        is_active=True,
+        motor_max_speed=1000,
+        motor_steps_per_wheel_turn=6400,
+    )
+
+    MachineState.objects.create(
+        id=1,
+        speed_motor_roda=100,
+        wheel_direction='clockwise',
+        wheel_is_running=True,
+    )
+
+    service.update_wheel_position_realtime(interval_seconds=1)
+
+    state = MachineState.objects.get(id=1)
+
+    assert state.wheel_total_turns == pytest.approx(0.15625)
+    assert state.wheel_position_degrees == pytest.approx(56.25)
+    assert state.arduino_connected is False
+    serial_service.is_connected.assert_called()
+    service.broadcast_service.broadcast_machine_state.assert_called_once()
+
+
+def test_update_wheel_position_realtime_does_not_simulate_when_serial_connected():
+    service, _ = make_service(connected=True)
+
+    MachineState.objects.create(
+        id=1,
+        speed_motor_roda=100,
+        wheel_direction='clockwise',
+        wheel_is_running=True,
+    )
+
+    service.update_wheel_position_realtime(interval_seconds=1)
+
+    state = MachineState.objects.get(id=1)
+
+    assert state.wheel_total_turns == 0
+    assert state.wheel_position_degrees == 0
+    service.broadcast_service.broadcast_machine_state.assert_not_called()
+
+
+def test_update_wheel_position_from_serial_updates_real_wheel_state_without_broadcast():
+    service, _ = make_service(connected=True)
+
+    state = service.update_wheel_position_from_serial({
+        'wheel_position_degrees': 90.0,
+        'wheel_total_turns': 1.25,
+        'wheel_is_running': True,
+        'wheel_current_angle': 90.0,
+        'wheel_current_spoke': 10,
+        'wheel_total_spokes': 36,
+        'wheel_is_positioning': False,
+    })
+
+    state.refresh_from_db()
+
+    assert state.wheel_position_degrees == 90.0
+    assert state.wheel_total_turns == 1.25
+    assert state.wheel_is_running is True
+    assert state.wheel_current_angle == 90.0
+    assert state.wheel_current_spoke == 10
+    assert state.wheel_total_spokes == 36
+    assert state.wheel_is_positioning is False
+    assert state.arduino_connected is True
+    service.broadcast_service.broadcast_machine_state.assert_not_called()
 
 
 def test_serialize_state():

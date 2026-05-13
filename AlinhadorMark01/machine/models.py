@@ -40,6 +40,14 @@ class MachineState(models.Model):
     # Informa se a roda está girando no momento.
     wheel_is_running = models.BooleanField(default=False)
 
+    # Estado de posicionamento espelhado do Arduino.
+    wheel_current_angle = models.FloatField(default=0)
+    wheel_target_angle = models.FloatField(null=True, blank=True, default=None)
+    wheel_current_spoke = models.IntegerField(default=1)
+    wheel_target_spoke = models.IntegerField(null=True, blank=True, default=None)
+    wheel_total_spokes = models.IntegerField(default=36)
+    wheel_is_positioning = models.BooleanField(default=False)
+
     # Relação de transmissão:
     # quantas voltas do motor são necessárias para a roda dar uma volta completa.
     # Exemplo:
@@ -62,6 +70,8 @@ class MachineState(models.Model):
             f'Wheel Turns: {self.wheel_total_turns}, '
             f'Wheel Direction: {self.wheel_direction}, '
             f'Wheel Running: {self.wheel_is_running}, '
+            f'Wheel Angle: {self.wheel_current_angle}, '
+            f'Wheel Spoke: {self.wheel_current_spoke}/{self.wheel_total_spokes}, '
             f'Motor/Wheel Ratio: {self.motor_turns_per_wheel_turn}, '
             f'Lateral Misalignment: {self.lateral_misalignment_current}'
         )

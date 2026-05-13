@@ -180,6 +180,43 @@ def test_select_serial_port_success():
     }
 
 
+@patch('machine.services.machine_service.time.sleep')
+def test_sync_wheel_positioning_config_uses_active_admin_config(_sleep):
+    service = MachineService()
+
+    config = Mock()
+    config.wheel_total_spokes = 40
+    config.motor_steps_per_wheel_turn = 1200
+    config.motor_turns_per_wheel_turn = 1.5
+    config.motor_max_speed = 900.0
+    config.motor_acceleration = 450.0
+
+    service.get_active_machine_config = Mock(return_value=config)
+    service.serial_service.send_command = Mock(
+        return_value=make_serial_success('CONFIG')
+    )
+    service.machine_state_service.update_state = Mock()
+
+    service.sync_wheel_positioning_config()
+
+    assert service.serial_service.send_command.call_args_list[0].args == (
+        'CONFIG_WHEEL_TOTAL_SPOKES:40',
+    )
+    assert service.serial_service.send_command.call_args_list[1].args == (
+        'CONFIG_MOTOR_STEPS_PER_WHEEL_TURN:1200',
+    )
+    assert service.serial_service.send_command.call_args_list[2].args == (
+        'CONFIG_MOTOR_MAX_SPEED:900.0',
+    )
+    assert service.serial_service.send_command.call_args_list[3].args == (
+        'CONFIG_MOTOR_ACCELERATION:450.0',
+    )
+    service.machine_state_service.update_state.assert_called_once_with({
+        'motor_turns_per_wheel_turn': 1.5,
+        'wheel_total_spokes': 40,
+    })
+
+
 def test_select_serial_port_connection_failed():
     service = MachineService()
 
@@ -387,6 +424,7 @@ def test_read_machine_state():
 def test_motor_roda_start_when_direction_is_stopped():
     service = MachineService()
 
+    service.sync_wheel_positioning_config = Mock()
     service.machine_state_service.get_current_state = Mock(return_value={
         'wheel_direction': 'stopped',
     })
@@ -398,10 +436,14 @@ def test_motor_roda_start_when_direction_is_stopped():
     response = service.motor_roda_start()
 
     service.machine_state_service.get_current_state.assert_called_once()
+    service.sync_wheel_positioning_config.assert_called_once()
     service.serial_service.send_command.assert_called_once_with('MOTOR_RODA_START')
     service.machine_state_service.update_state.assert_called_once_with({
         'wheel_is_running': True,
         'wheel_direction': 'clockwise',
+        'wheel_target_angle': None,
+        'wheel_target_spoke': None,
+        'wheel_is_positioning': False,
     })
 
     assert response == {
@@ -414,6 +456,7 @@ def test_motor_roda_start_when_direction_is_stopped():
 def test_motor_roda_start_keeps_current_direction_when_not_stopped():
     service = MachineService()
 
+    service.sync_wheel_positioning_config = Mock()
     service.machine_state_service.get_current_state = Mock(return_value={
         'wheel_direction': 'counter_clockwise',
     })
@@ -424,9 +467,13 @@ def test_motor_roda_start_keeps_current_direction_when_not_stopped():
 
     response = service.motor_roda_start()
 
+    service.sync_wheel_positioning_config.assert_called_once()
     service.machine_state_service.update_state.assert_called_once_with({
         'wheel_is_running': True,
         'wheel_direction': 'counter_clockwise',
+        'wheel_target_angle': None,
+        'wheel_target_spoke': None,
+        'wheel_is_positioning': False,
     })
 
     assert response['type'] == 'log'
@@ -675,6 +722,11 @@ def test_wheel_reset_position():
     service.machine_state_service.update_state.assert_called_once_with({
         'wheel_position_degrees': 0,
         'wheel_total_turns': 0,
+        'wheel_current_angle': 0,
+        'wheel_target_angle': 0,
+        'wheel_current_spoke': 1,
+        'wheel_target_spoke': 1,
+        'wheel_is_positioning': False,
     })
 
     assert response == {
@@ -702,6 +754,11 @@ def test_handle_command_motor_roda_set_zero():
     service.machine_state_service.update_state.assert_called_once_with({
         'wheel_position_degrees': 0,
         'wheel_total_turns': 0,
+        'wheel_current_angle': 0,
+        'wheel_target_angle': 0,
+        'wheel_current_spoke': 1,
+        'wheel_target_spoke': 1,
+        'wheel_is_positioning': False,
     })
 
     assert response['type'] == 'log'
@@ -712,6 +769,7 @@ def test_handle_command_motor_roda_set_zero():
 def test_handle_command_motor_roda_go_to_angle():
     service = MachineService()
 
+    service.sync_wheel_positioning_config = Mock()
     service.serial_service.send_command = Mock(
         return_value=make_serial_success('MOTOR_RODA_GO_TO_ANGLE:90')
     )
@@ -721,6 +779,7 @@ def test_handle_command_motor_roda_go_to_angle():
         'angle': 90,
     })
 
+    service.sync_wheel_positioning_config.assert_not_called()
     service.serial_service.send_command.assert_called_once_with(
         'MOTOR_RODA_GO_TO_ANGLE:90'
     )
@@ -733,6 +792,7 @@ def test_handle_command_motor_roda_go_to_angle():
 def test_handle_command_motor_roda_go_to_angle_accepts_string_number():
     service = MachineService()
 
+    service.sync_wheel_positioning_config = Mock()
     service.serial_service.send_command = Mock(
         return_value=make_serial_success('MOTOR_RODA_GO_TO_ANGLE:180.5')
     )
@@ -742,6 +802,7 @@ def test_handle_command_motor_roda_go_to_angle_accepts_string_number():
         'angle': '180.5',
     })
 
+    service.sync_wheel_positioning_config.assert_not_called()
     service.serial_service.send_command.assert_called_once_with(
         'MOTOR_RODA_GO_TO_ANGLE:180.5'
     )
@@ -751,10 +812,13 @@ def test_handle_command_motor_roda_go_to_angle_accepts_string_number():
 
 def test_handle_command_motor_roda_go_to_angle_without_angle():
     service = MachineService()
+    service.sync_wheel_positioning_config = Mock()
 
     response = service.handle_command({
         'action': 'motor_roda_go_to_angle',
     })
+
+    service.sync_wheel_positioning_config.assert_not_called()
 
     assert response == {
         'type': 'error',
@@ -764,11 +828,14 @@ def test_handle_command_motor_roda_go_to_angle_without_angle():
 
 def test_handle_command_motor_roda_go_to_angle_invalid_angle():
     service = MachineService()
+    service.sync_wheel_positioning_config = Mock()
 
     response = service.handle_command({
         'action': 'motor_roda_go_to_angle',
         'angle': 'abc',
     })
+
+    service.sync_wheel_positioning_config.assert_not_called()
 
     assert response == {
         'type': 'error',
@@ -779,6 +846,7 @@ def test_handle_command_motor_roda_go_to_angle_invalid_angle():
 def test_handle_command_motor_roda_go_to_spoke():
     service = MachineService()
 
+    service.sync_wheel_positioning_config = Mock()
     service.serial_service.send_command = Mock(
         return_value=make_serial_success('MOTOR_RODA_GO_TO_SPOKE:12')
     )
@@ -788,6 +856,7 @@ def test_handle_command_motor_roda_go_to_spoke():
         'spoke': 12,
     })
 
+    service.sync_wheel_positioning_config.assert_not_called()
     service.serial_service.send_command.assert_called_once_with(
         'MOTOR_RODA_GO_TO_SPOKE:12'
     )
@@ -799,10 +868,13 @@ def test_handle_command_motor_roda_go_to_spoke():
 
 def test_handle_command_motor_roda_go_to_spoke_without_spoke():
     service = MachineService()
+    service.sync_wheel_positioning_config = Mock()
 
     response = service.handle_command({
         'action': 'motor_roda_go_to_spoke',
     })
+
+    service.sync_wheel_positioning_config.assert_not_called()
 
     assert response == {
         'type': 'error',
@@ -812,11 +884,14 @@ def test_handle_command_motor_roda_go_to_spoke_without_spoke():
 
 def test_handle_command_motor_roda_go_to_spoke_invalid_spoke():
     service = MachineService()
+    service.sync_wheel_positioning_config = Mock()
 
     response = service.handle_command({
         'action': 'motor_roda_go_to_spoke',
         'spoke': 'abc',
     })
+
+    service.sync_wheel_positioning_config.assert_not_called()
 
     assert response == {
         'type': 'error',
@@ -826,11 +901,14 @@ def test_handle_command_motor_roda_go_to_spoke_invalid_spoke():
 
 def test_handle_command_motor_roda_go_to_spoke_less_than_one():
     service = MachineService()
+    service.sync_wheel_positioning_config = Mock()
 
     response = service.handle_command({
         'action': 'motor_roda_go_to_spoke',
         'spoke': 0,
     })
+
+    service.sync_wheel_positioning_config.assert_not_called()
 
     assert response == {
         'type': 'error',
@@ -841,6 +919,7 @@ def test_handle_command_motor_roda_go_to_spoke_less_than_one():
 def test_handle_command_motor_roda_next_spoke():
     service = MachineService()
 
+    service.sync_wheel_positioning_config = Mock()
     service.serial_service.send_command = Mock(
         return_value=make_serial_success('MOTOR_RODA_NEXT_SPOKE')
     )
@@ -849,6 +928,7 @@ def test_handle_command_motor_roda_next_spoke():
         'action': 'motor_roda_next_spoke',
     })
 
+    service.sync_wheel_positioning_config.assert_not_called()
     service.serial_service.send_command.assert_called_once_with(
         'MOTOR_RODA_NEXT_SPOKE'
     )
@@ -861,6 +941,7 @@ def test_handle_command_motor_roda_next_spoke():
 def test_handle_command_motor_roda_previous_spoke():
     service = MachineService()
 
+    service.sync_wheel_positioning_config = Mock()
     service.serial_service.send_command = Mock(
         return_value=make_serial_success('MOTOR_RODA_PREVIOUS_SPOKE')
     )
@@ -869,6 +950,7 @@ def test_handle_command_motor_roda_previous_spoke():
         'action': 'motor_roda_previous_spoke',
     })
 
+    service.sync_wheel_positioning_config.assert_not_called()
     service.serial_service.send_command.assert_called_once_with(
         'MOTOR_RODA_PREVIOUS_SPOKE'
     )

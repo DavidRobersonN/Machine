@@ -228,6 +228,7 @@ class MachineService:
 
         self.machine_state_service.update_state({
             'motor_turns_per_wheel_turn': config.motor_turns_per_wheel_turn,
+            'wheel_total_spokes': config.wheel_total_spokes,
         })
 
         return {
@@ -266,6 +267,45 @@ class MachineService:
             lines.append(f'- {command}: {status} - {message}')
 
         return '\n'.join(lines)
+
+    def sync_wheel_positioning_config(self) -> None:
+        """
+        Reenvia a calibracao usada nos comandos de posicionamento da roda.
+
+        O Arduino volta para os valores padrao do firmware quando reinicia.
+        Por isso, antes de mover por raio/angulo, garantimos que ele recebeu
+        os valores atuais do Django Admin.
+        """
+
+        config = self.get_active_machine_config()
+
+        commands = [
+            (
+                'CONFIG_WHEEL_TOTAL_SPOKES',
+                config.wheel_total_spokes,
+            ),
+            (
+                'CONFIG_MOTOR_STEPS_PER_WHEEL_TURN',
+                config.motor_steps_per_wheel_turn,
+            ),
+            (
+                'CONFIG_MOTOR_MAX_SPEED',
+                config.motor_max_speed,
+            ),
+            (
+                'CONFIG_MOTOR_ACCELERATION',
+                config.motor_acceleration,
+            ),
+        ]
+
+        for command_name, command_value in commands:
+            self.serial_service.send_command(f'{command_name}:{command_value}')
+            time.sleep(0.15)
+
+        self.machine_state_service.update_state({
+            'motor_turns_per_wheel_turn': config.motor_turns_per_wheel_turn,
+            'wheel_total_spokes': config.wheel_total_spokes,
+        })
 
     # =========================
     # PORTA SERIAL
@@ -442,11 +482,16 @@ class MachineService:
         if current_direction == 'stopped':
             current_direction = 'clockwise'
 
+        self.sync_wheel_positioning_config()
+
         serial_result = self.serial_service.send_command('MOTOR_RODA_START')
 
         self.machine_state_service.update_state({
             'wheel_is_running': True,
             'wheel_direction': current_direction,
+            'wheel_target_angle': None,
+            'wheel_target_spoke': None,
+            'wheel_is_positioning': False,
         })
 
         return {
@@ -638,6 +683,11 @@ class MachineService:
         self.machine_state_service.update_state({
             'wheel_position_degrees': 0,
             'wheel_total_turns': 0,
+            'wheel_current_angle': 0,
+            'wheel_target_angle': 0,
+            'wheel_current_spoke': 1,
+            'wheel_target_spoke': 1,
+            'wheel_is_positioning': False,
         })
 
         return {
@@ -656,6 +706,11 @@ class MachineService:
         self.machine_state_service.update_state({
             'wheel_position_degrees': 0,
             'wheel_total_turns': 0,
+            'wheel_current_angle': 0,
+            'wheel_target_angle': 0,
+            'wheel_current_spoke': 1,
+            'wheel_target_spoke': 1,
+            'wheel_is_positioning': False,
         })
 
         return {

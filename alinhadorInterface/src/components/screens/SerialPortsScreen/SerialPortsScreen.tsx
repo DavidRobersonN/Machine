@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { useMachineContext } from '../../../context/MachineContext'
+import { useMachineContext } from '../../../context/useMachineContext'
 
 import type {
   SelectedSerialPortState,
