@@ -22,7 +22,7 @@ function getPointStatus(value: number) {
     return { label: 'OK', className: 'ok' }
   }
 
-  if (absoluteValue <= 5) {
+  if (absoluteValue <= 3) {
     return { label: 'Atencao', className: 'warning' }
   }
 
