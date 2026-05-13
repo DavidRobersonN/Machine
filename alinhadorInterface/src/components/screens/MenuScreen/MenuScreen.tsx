@@ -7,6 +7,7 @@ type MenuScreenProps = {
   onSelectSerial: () => void
   onSelectMotors: () => void
   onSelectAlignment: () => void
+  onSelectWheelMap: () => void
 }
 
 type MenuCard = {
@@ -23,37 +24,46 @@ function MenuScreenComponent({
   onSelectSerial,
   onSelectMotors,
   onSelectAlignment,
+  onSelectWheelMap,
 }: MenuScreenProps) {
   const menuCards = useMemo<MenuCard[]>(
     () => [
       {
         title: 'Motores',
-        description: 'Controle da roda, velocidade, sentido e posição por raio.',
+        description: 'Controle da roda, velocidade, sentido e posicao por raio.',
         badge: 'Controle principal',
-        icon: '⚙️',
+        icon: 'M',
         onClick: onSelectMotors,
         featured: true,
       },
       {
         title: 'Alinhamento lateral',
-        description: 'Acompanhe o sensor lateral e o histórico de oscilação.',
+        description: 'Acompanhe o sensor lateral e o historico de oscilacao.',
         badge: 'Sensor',
-        icon: '📈',
+        icon: 'L',
         onClick: onSelectAlignment,
         featured: true,
       },
       {
+        title: 'Mapa da roda',
+        description: 'Cruze raio, angulo e leitura lateral em uma visao circular.',
+        badge: 'Diagnostico',
+        icon: 'O',
+        onClick: onSelectWheelMap,
+        featured: true,
+      },
+      {
         title: 'Portas COM',
-        description: 'Conecte o Arduino, monitore a serial e envie configurações.',
-        badge: 'Comunicação',
-        icon: '🔌',
+        description: 'Conecte o Arduino, monitore a serial e envie configuracoes.',
+        badge: 'Comunicacao',
+        icon: 'C',
         onClick: onSelectSerial,
       },
       {
         title: 'Logs',
         description: 'Consulte mensagens enviadas, recebidas e eventos do sistema.',
-        badge: 'Diagnóstico',
-        icon: '📋',
+        badge: 'Diagnostico',
+        icon: 'D',
         onClick: onSelectLogs,
       },
     ],
@@ -62,6 +72,7 @@ function MenuScreenComponent({
       onSelectSerial,
       onSelectMotors,
       onSelectAlignment,
+      onSelectWheelMap,
     ],
   )
 
@@ -69,12 +80,12 @@ function MenuScreenComponent({
     <div className="menu-screen">
       <header className="menu-screen-header">
         <div>
-          <span className="menu-screen-kicker">Painel da máquina</span>
+          <span className="menu-screen-kicker">Painel da maquina</span>
 
           <h2 className="menu-screen-title">Menu principal</h2>
 
           <p className="menu-screen-description">
-            Escolha uma área para controlar, monitorar ou configurar a máquina
+            Escolha uma area para controlar, monitorar ou configurar a maquina
             alinhadora de rodas.
           </p>
         </div>
@@ -98,7 +109,7 @@ function MenuScreenComponent({
               <p>{card.description}</p>
             </div>
 
-            <span className="menu-card-action">Abrir →</span>
+            <span className="menu-card-action">Abrir</span>
           </button>
         ))}
       </section>

@@ -6,6 +6,7 @@ import { SerialPortsScreen } from './SerialPortsScreen/SerialPortsScreen'
 import { StartScreen } from './StartScreen/StartScreen'
 import { MotorsScreen } from '../screens/MotorsScreen/MotorsScreen'
 import { LateralAlignmentScreen } from './LateralAlignmentScreen/LateralAlignmentScreen'
+import { WheelAlignmentMapScreen } from './WheelAlignmentMapScreen/WheelAlignmentMapScreen'
 
 import type { AppScreen } from '../../types/navigation'
 
@@ -73,6 +74,10 @@ function MachineScreenRendererComponent(props: MachineScreenRendererProps) {
     onGoToScreen('alignment')
   }, [onGoToScreen])
 
+  const handleSelectWheelMap = useCallback(() => {
+    onGoToScreen('wheelMap')
+  }, [onGoToScreen])
+
   switch (currentScreen) {
     case 'start':
       return <StartScreen />
@@ -84,6 +89,7 @@ function MachineScreenRendererComponent(props: MachineScreenRendererProps) {
           onSelectSerial={onListSerialPorts}
           onSelectMotors={handleSelectMotors}
           onSelectAlignment={handleSelectAlignment}
+          onSelectWheelMap={handleSelectWheelMap}
         />
       )
 
@@ -97,6 +103,9 @@ function MachineScreenRendererComponent(props: MachineScreenRendererProps) {
           history={lateralMisalignmentHistory}
         />
       )
+
+    case 'wheelMap':
+      return <WheelAlignmentMapScreen />
 
     case 'logs':
       return <LogsScreen logs={logs} />
@@ -144,6 +153,9 @@ function areMachineScreenRendererPropsEqual(
         previousProps.lateralMisalignmentHistory ===
           nextProps.lateralMisalignmentHistory
       )
+
+    case 'wheelMap':
+      return true
 
     case 'logs':
       return previousProps.logs === nextProps.logs

@@ -182,6 +182,7 @@ function getBottomActions({
       ]
 
     case 'alignment':
+    case 'wheelMap':
       return [
         {
           label: 'Voltar ao menu',
