@@ -5,6 +5,8 @@
 
 class LateralSensor {
 private:
+  static const int FILTER_WINDOW_SIZE = 5;
+
   int sensorPin;
 
   unsigned long interval;
@@ -15,6 +17,17 @@ private:
 
   bool readingEnabled;
   float lastSentSensorMm;
+  float lastFilteredSensorMm;
+  bool hasFilteredSensorMm;
+
+  float filterWindow[FILTER_WINDOW_SIZE];
+  int filterWindowIndex;
+  int filterWindowCount;
+
+  void resetFilter();
+  float readRawMm();
+  float calculateMedian(float sample);
+  float limitSuddenJump(float value);
 
 public:
   LateralSensor(

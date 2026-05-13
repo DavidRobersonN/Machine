@@ -31,6 +31,21 @@ export const initialMachineState: MachineState = {
   is_lateral_reading_enabled: false,
 }
 
+function addLateralMisalignmentPoint(
+  history: MachineState['lateral_misalignment_history'],
+  value: number,
+) {
+  const newPoint = {
+    id: Date.now(),
+    value,
+  }
+
+  return [
+    ...history,
+    newPoint,
+  ].slice(-100)
+}
+
 export function machineReducer(
   state: MachineState,
   action: MachineAction,
@@ -43,19 +58,12 @@ export function machineReducer(
       }
 
     case 'ADD_LATERAL_MISALIGNMENT_POINT': {
-      const newPoint = {
-        id: Date.now(),
-        value: action.payload,
-      }
-
-      const updatedHistory = [
-        ...state.lateral_misalignment_history,
-        newPoint,
-      ].slice(-100)
-
       return {
         ...state,
-        lateral_misalignment_history: updatedHistory,
+        lateral_misalignment_history: addLateralMisalignmentPoint(
+          state.lateral_misalignment_history,
+          action.payload,
+        ),
       }
     }
 
@@ -192,9 +200,13 @@ export function machineReducer(
             ? lateralValue
             : state.lateral_misalignment_current,
 
-        // O histórico agora é atualizado pela action ADD_LATERAL_MISALIGNMENT_POINT.
-        // Isso evita adicionar ponto duplicado toda vez que chega machine_update.
-        lateral_misalignment_history: state.lateral_misalignment_history,
+        lateral_misalignment_history:
+          lateralValue !== undefined
+            ? addLateralMisalignmentPoint(
+                state.lateral_misalignment_history,
+                lateralValue,
+              )
+            : state.lateral_misalignment_history,
 
         is_lateral_reading_enabled:
           action.payload.is_lateral_reading_enabled !== undefined

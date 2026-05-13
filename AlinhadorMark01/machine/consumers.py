@@ -157,14 +157,14 @@ class MachineConsumer(WebsocketConsumer):
 
                 line = line.strip()
 
-                print(f'[Serial Listener] Recebido: {line}')
-
                 if line.startswith('POS:'):
                     value = float(line.replace('POS:', '').strip())
 
                     self.machine_state_service.broadcast_lateral_sensor_state(value)
 
                     continue
+
+                print(f'[Serial Listener] Recebido: {line}')
 
                 if line.startswith('{') and line.endswith('}'):
                     try:

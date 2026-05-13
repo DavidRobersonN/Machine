@@ -56,11 +56,16 @@ export function LateralAlignmentScreen({
     })
   }, [sendCommand])
 
-  const { maxValue, minValue, averageValue, amplitudeValue } = useMemo(() => {
+  const {
+    maxLeftValue,
+    maxRightValue,
+    averageValue,
+    amplitudeValue,
+  } = useMemo(() => {
     if (history.length === 0) {
       return {
-        maxValue: 0,
-        minValue: 0,
+        maxLeftValue: 0,
+        maxRightValue: 0,
         averageValue: 0,
         amplitudeValue: 0,
       }
@@ -68,6 +73,8 @@ export function LateralAlignmentScreen({
 
     let max = history[0].value
     let min = history[0].value
+    let maxLeft = 0
+    let maxRight = 0
     let total = 0
 
     for (const point of history) {
@@ -79,12 +86,20 @@ export function LateralAlignmentScreen({
         min = point.value
       }
 
+      if (point.value < 0) {
+        maxLeft = Math.max(maxLeft, Math.abs(point.value))
+      }
+
+      if (point.value > 0) {
+        maxRight = Math.max(maxRight, point.value)
+      }
+
       total += point.value
     }
 
     return {
-      maxValue: max,
-      minValue: min,
+      maxLeftValue: maxLeft,
+      maxRightValue: maxRight,
       averageValue: total / history.length,
       amplitudeValue: max - min,
     }
@@ -170,14 +185,14 @@ export function LateralAlignmentScreen({
           <strong>{value.toFixed(2)} mm</strong>
         </div>
 
-        <div className="lateral-alignment-card">
-          <span>Máximo</span>
-          <strong>{maxValue.toFixed(2)} mm</strong>
+        <div className="lateral-alignment-card left">
+          <span>Max. esquerda</span>
+          <strong>{maxLeftValue.toFixed(2)} mm</strong>
         </div>
 
-        <div className="lateral-alignment-card">
-          <span>Mínimo</span>
-          <strong>{minValue.toFixed(2)} mm</strong>
+        <div className="lateral-alignment-card right">
+          <span>Max. direita</span>
+          <strong>{maxRightValue.toFixed(2)} mm</strong>
         </div>
 
         <div className="lateral-alignment-card">

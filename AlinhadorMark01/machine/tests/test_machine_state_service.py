@@ -66,7 +66,7 @@ def test_initial_state_of_service():
 
     assert service.serial_service == serial_service
     assert service.last_lateral_broadcast_time == 0.0
-    assert service.lateral_broadcast_interval == 0.05
+    assert service.lateral_broadcast_interval == 0.016
     assert service.SPEED_STEP == 5
     assert service.MIN_SPEED == 0
     assert service.MAX_SPEED == 100
@@ -228,7 +228,7 @@ def test_broadcast_lateral_sensor_state_does_not_send_when_interval_has_not_pass
     service.last_lateral_broadcast_time = 10.0
 
     with patch('machine.services.machine_state_service.time.monotonic') as monotonic:
-        monotonic.return_value = 10.02
+        monotonic.return_value = 10.01
 
         service.broadcast_lateral_sensor_state(12.5)
 

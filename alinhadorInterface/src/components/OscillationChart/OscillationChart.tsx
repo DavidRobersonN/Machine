@@ -42,7 +42,7 @@ export function OscillationChart({
   unit = ' mm',
 }: OscillationChartProps) {
   const width = 520
-  const height = 180
+  const height = 240
   const padding = 20
 
   const usableWidth = width - padding * 2

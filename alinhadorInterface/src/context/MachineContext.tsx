@@ -2,10 +2,10 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useReducer,
   useRef,
-  useEffect,
 } from 'react'
 import type { Dispatch, ReactNode } from 'react'
 
@@ -15,13 +15,14 @@ import type {
   MachineAction,
   MachineCommand,
   MachineMessage,
+  MachineUpdatePayload,
   MachineState,
 } from '../types/machine/machine'
 
 // O contexto da máquina é responsável por armazenar o estado global da máquina,
 // fornecer funções para enviar comandos para o backend e receber mensagens do backend.
-// O valor atual do sensor lateral é atualizado quando chega mensagem do backend.
-// O histórico do gráfico é alimentado a cada 100ms com o último valor recebido.
+// O valor atual e o histórico do sensor lateral são atualizados quando chega
+// machine_update do backend.
 
 type MachineContextValue = {
   state: MachineState
@@ -36,28 +37,58 @@ type MachineProviderProps = {
   children: ReactNode
 }
 
+const LATERAL_PLAYBACK_INTERVAL_MS = 33
+const MAX_LATERAL_BUFFER_POINTS = 30
+
+function isLateralSensorOnlyPayload(
+  payload: MachineUpdatePayload,
+): payload is MachineUpdatePayload & { lateral_misalignment_current: number } {
+  return (
+    Object.keys(payload).length === 1 &&
+    payload.lateral_misalignment_current !== undefined
+  )
+}
+
 export function MachineProvider({ children }: MachineProviderProps) {
   const [state, dispatch] = useReducer(machineReducer, initialMachineState)
+  const lateralBufferRef = useRef<number[]>([])
 
-  const latestLateralValueRef = useRef(0)
-  const hasReceivedLateralValueRef = useRef(false)
+  const playNextLateralValue = useCallback(() => {
+    const lateralValue = lateralBufferRef.current.shift()
+
+    if (lateralValue === undefined) {
+      return
+    }
+
+    dispatch({
+      type: 'MACHINE_UPDATED',
+      payload: {
+        lateral_misalignment_current: lateralValue,
+      },
+    })
+  }, [])
+
+  const enqueueLateralSensorValue = useCallback((lateralValue: number) => {
+    lateralBufferRef.current.push(lateralValue)
+
+    const overflow =
+      lateralBufferRef.current.length - MAX_LATERAL_BUFFER_POINTS
+
+    if (overflow > 0) {
+      lateralBufferRef.current.splice(0, overflow)
+    }
+  }, [])
 
   useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      if (!hasReceivedLateralValueRef.current) {
-        return
-      }
-
-      dispatch({
-        type: 'ADD_LATERAL_MISALIGNMENT_POINT',
-        payload: latestLateralValueRef.current,
-      })
-    }, 100)
+    const intervalId = window.setInterval(
+      playNextLateralValue,
+      LATERAL_PLAYBACK_INTERVAL_MS,
+    )
 
     return () => {
       window.clearInterval(intervalId)
     }
-  }, [])
+  }, [playNextLateralValue])
 
   const handleConnected = useCallback(() => {
     dispatch({ type: 'SOCKET_CONNECTED' })
@@ -110,11 +141,14 @@ export function MachineProvider({ children }: MachineProviderProps) {
     }
 
     if (message.type === 'machine_update') {
-      const lateralValue = message.payload.lateral_misalignment_current
+      if (isLateralSensorOnlyPayload(message.payload)) {
+        enqueueLateralSensorValue(message.payload.lateral_misalignment_current)
 
-      if (lateralValue !== undefined) {
-        latestLateralValueRef.current = lateralValue
-        hasReceivedLateralValueRef.current = true
+        return
+      }
+
+      if (message.payload.is_lateral_reading_enabled === false) {
+        lateralBufferRef.current = []
       }
 
       dispatch({
@@ -246,7 +280,7 @@ export function MachineProvider({ children }: MachineProviderProps) {
         },
       })
     }
-  }, [])
+  }, [enqueueLateralSensorValue])
 
   const { send } = useMachineSocket({
     onConnected: handleConnected,

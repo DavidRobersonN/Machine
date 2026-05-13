@@ -183,6 +183,8 @@ describe('machineReducer', () => {
     })
 
     expect(newState.lateral_misalignment_current).toBe(12.5)
+    expect(newState.lateral_misalignment_history).toHaveLength(1)
+    expect(newState.lateral_misalignment_history[0].value).toBe(12.5)
   })
 
   it('deve ligar o LED quando payload.led for ON', () => {

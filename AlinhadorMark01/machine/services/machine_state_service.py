@@ -25,14 +25,16 @@ class MachineStateService:
         self.broadcast_service = BroadcastService()
         self.serial_service = serial_service
         self.last_lateral_broadcast_time = 0.0
-        self.lateral_broadcast_interval = 0.05
+        self.lateral_broadcast_interval = 0.016
 
     def broadcast_lateral_sensor_state(self, value: float) -> None:
         """
         Envia o valor do sensor lateral para o frontend em tempo real,
         sem salvar no banco de dados.
 
-        O envio é limitado a aproximadamente 20 atualizações por segundo.
+        O envio aceita até aproximadamente 60 atualizações por segundo.
+        Como o Arduino lê a cada 20 ms, na prática acompanha as 50 leituras/s
+        sem descartar leituras por pequenas variações de temporização.
         """
 
         now = time.monotonic()
