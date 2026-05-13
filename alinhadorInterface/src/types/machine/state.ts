@@ -27,6 +27,7 @@ export type MisalignmentPoint = {
 
 export interface MachineState {
   connected: boolean
+  led: LedUiState
   arduino_connected: ArduinoConnectionState
   logs: MachineLog[]
   available_ports: SerialPortInfo[]

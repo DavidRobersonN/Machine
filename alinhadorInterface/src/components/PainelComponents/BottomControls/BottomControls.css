@@ -1,0 +1,223 @@
+.bottom-control-button {
+  --button-bg: #ffffff;
+  --button-border: #cbd8ef;
+  --button-color: #10295d;
+  --button-shadow: rgba(15, 23, 42, 0.14);
+  --button-icon-bg: #edf3ff;
+  --button-icon-color: #21406f;
+
+  min-width: 136px;
+  min-height: 46px;
+
+  border: 1px solid var(--button-border);
+  border-radius: 12px;
+
+  padding: 8px 14px 8px 10px;
+  box-sizing: border-box;
+
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, var(--button-bg) 100%);
+  color: var(--button-color);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  font-family: inherit;
+  font-size: 0.86rem;
+  line-height: 1.1;
+  font-weight: 900;
+  text-align: center;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 8px 18px var(--button-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.14s ease,
+    border-color 0.14s ease,
+    background 0.14s ease;
+}
+
+.bottom-control-button:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 22px var(--button-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.bottom-control-button:active {
+  transform: translateY(0);
+  box-shadow:
+    0 4px 10px var(--button-shadow),
+    inset 0 1px 2px rgba(15, 23, 42, 0.12);
+}
+
+.bottom-control-button:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.26);
+  outline-offset: 3px;
+}
+
+.bottom-control-button__icon {
+  position: relative;
+
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+
+  border-radius: 8px;
+
+  background: var(--button-icon-bg);
+  color: var(--button-icon-color);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 0.78rem;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.bottom-control-button__icon::before,
+.bottom-control-button__icon::after {
+  content: "";
+  position: absolute;
+  display: block;
+}
+
+.bottom-control-button__label {
+  min-width: 0;
+  max-width: 180px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bottom-control-button--green {
+  --button-bg: #eaf8ef;
+  --button-border: #84c99b;
+  --button-color: #0f6f31;
+  --button-shadow: rgba(17, 149, 59, 0.18);
+  --button-icon-bg: #11953b;
+  --button-icon-color: #ffffff;
+}
+
+.bottom-control-button--orange {
+  --button-bg: #fff5e6;
+  --button-border: #f1ba65;
+  --button-color: #8a4b00;
+  --button-shadow: rgba(214, 128, 19, 0.16);
+  --button-icon-bg: #e88b00;
+  --button-icon-color: #ffffff;
+}
+
+.bottom-control-button--red {
+  --button-bg: #fff0f0;
+  --button-border: #ee9b9b;
+  --button-color: #98211f;
+  --button-shadow: rgba(180, 35, 24, 0.16);
+  --button-icon-bg: #b42318;
+  --button-icon-color: #ffffff;
+}
+
+.bottom-control-button--enter .bottom-control-button__icon::before {
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: translate(-60%, -50%) rotate(45deg);
+}
+
+.bottom-control-button--back .bottom-control-button__icon::before {
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+  transform: translate(-40%, -50%) rotate(-45deg);
+}
+
+.bottom-control-button--clear .bottom-control-button__icon::before,
+.bottom-control-button--clear .bottom-control-button__icon::after {
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.bottom-control-button--clear .bottom-control-button__icon::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.bottom-control-button--clear .bottom-control-button__icon::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.bottom-control-button--refresh .bottom-control-button__icon::before {
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-left-color: transparent;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+}
+
+.bottom-control-button--refresh .bottom-control-button__icon::after {
+  right: 4px;
+  top: 5px;
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 5px solid currentColor;
+}
+
+.bottom-control-button--disconnect .bottom-control-button__icon::before {
+  top: 5px;
+  left: 50%;
+  width: 2px;
+  height: 9px;
+  border-radius: 999px;
+  background: currentColor;
+  transform: translateX(-50%);
+}
+
+.bottom-control-button--disconnect .bottom-control-button__icon::after,
+.bottom-control-button--default .bottom-control-button__icon::before {
+  bottom: 5px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: currentColor;
+  transform: translateX(-50%);
+}
+
+@media (max-width: 700px) {
+  .bottom-control-button {
+    flex: 1 1 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bottom-control-button {
+    width: 100%;
+  }
+
+  .bottom-control-button__label {
+    max-width: none;
+  }
+}

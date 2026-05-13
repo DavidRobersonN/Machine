@@ -72,13 +72,13 @@ export function SerialPortsScreen({
     <div className="screen-page serial-ports-screen">
       <header className="serial-monitor-header">
         <div>
-          <span className="serial-monitor-kicker">Comunicação</span>
+          <span className="serial-monitor-kicker">Comunicacao</span>
 
-          <h2 className="screen-page-title">Monitor Serial</h2>
+          <h2 className="screen-page-title">Monitor serial</h2>
 
           <p className="screen-page-text">
             Conecte o Arduino, envie comandos manuais e sincronize as
-            configurações salvas no Django Admin.
+            configuracoes salvas no Django Admin.
           </p>
         </div>
 
@@ -113,7 +113,7 @@ export function SerialPortsScreen({
           className="serial-monitor-button primary"
           onClick={handleListSerialPorts}
         >
-          🔄 Atualizar portas
+          Atualizar portas
         </button>
 
         <button
@@ -121,7 +121,7 @@ export function SerialPortsScreen({
           className="serial-monitor-button danger"
           onClick={handleDisconnectSerialPort}
         >
-          ⏏ Desconectar
+          Desconectar
         </button>
 
         <button
@@ -129,7 +129,7 @@ export function SerialPortsScreen({
           className="serial-monitor-button success"
           onClick={handleSyncMachineConfig}
         >
-          ⚙️ Enviar configurações
+          Enviar configuracao
         </button>
       </section>
 
@@ -137,7 +137,7 @@ export function SerialPortsScreen({
         <article className="serial-monitor-card serial-monitor-card--ports">
           <div className="serial-monitor-card-header">
             <div>
-              <span className="serial-monitor-card-kicker">Portas disponíveis</span>
+              <span className="serial-monitor-card-kicker">Portas disponiveis</span>
               <h3>Portas COM</h3>
             </div>
 
@@ -152,7 +152,7 @@ export function SerialPortsScreen({
                 <strong>Nenhuma porta encontrada</strong>
 
                 <p>
-                  Clique em “Atualizar portas” para buscar dispositivos
+                  Clique em "Atualizar portas" para buscar dispositivos
                   conectados.
                 </p>
               </div>
@@ -183,7 +183,7 @@ export function SerialPortsScreen({
                       </div>
 
                       <span className="serial-port-description">
-                        {port.description || 'Sem descrição'}
+                        {port.description || 'Sem descricao'}
                       </span>
 
                       <span className="serial-port-hwid">
@@ -264,11 +264,11 @@ export function SerialPortsScreen({
 
           <div className="serial-command-config-box">
             <div>
-              <h4>Configuração Django</h4>
+              <h4>Configuracao Django</h4>
 
               <p>
                 Envia para o Arduino os valores salvos no Django Admin, como
-                passos por volta, velocidade máxima e aceleração.
+                passos por volta, velocidade maxima e aceleracao.
               </p>
             </div>
 
@@ -277,7 +277,7 @@ export function SerialPortsScreen({
               className="serial-monitor-button success"
               onClick={handleSyncMachineConfig}
             >
-              ⚙️ Sincronizar configuração
+              Sincronizar
             </button>
           </div>
         </article>
@@ -286,7 +286,7 @@ export function SerialPortsScreen({
       <section className="serial-monitor-logs-card">
         <div className="serial-monitor-logs-header">
           <div>
-            <span className="serial-monitor-card-kicker">Histórico</span>
+            <span className="serial-monitor-card-kicker">Historico</span>
             <h3>Logs seriais</h3>
           </div>
 

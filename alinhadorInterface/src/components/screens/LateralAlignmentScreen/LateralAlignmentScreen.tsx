@@ -1,7 +1,8 @@
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import type { MisalignmentPoint } from '../../../types/machine/machine'
 
+import { useMachineContext } from '../../../context/MachineContext'
 import { OscillationChart } from '../../OscillationChart/OscillationChart'
 
 import './LateralAlignmentScreen.css'
@@ -41,6 +42,20 @@ export function LateralAlignmentScreen({
   value,
   history,
 }: LateralAlignmentScreenProps) {
+  const { state, sendCommand } = useMachineContext()
+
+  const handleStartLateralReading = useCallback(() => {
+    sendCommand({
+      action: 'lateral_sensor_start_reading',
+    })
+  }, [sendCommand])
+
+  const handleStopLateralReading = useCallback(() => {
+    sendCommand({
+      action: 'lateral_sensor_stop_reading',
+    })
+  }, [sendCommand])
+
   const { maxValue, minValue, averageValue, amplitudeValue } = useMemo(() => {
     if (history.length === 0) {
       return {
@@ -76,6 +91,7 @@ export function LateralAlignmentScreen({
   }, [history])
 
   const status = getAlignmentStatus(value)
+  const isReadingEnabled = state.is_lateral_reading_enabled
 
   return (
     <div className="screen-page lateral-alignment-screen">
@@ -97,6 +113,33 @@ export function LateralAlignmentScreen({
           <p>{status.description}</p>
         </div>
       </header>
+
+      <section className="lateral-alignment-actions">
+        <div className="lateral-alignment-actions__status">
+          <span>Leitura</span>
+          <strong>{isReadingEnabled ? 'Ativa' : 'Parada'}</strong>
+        </div>
+
+        <div className="lateral-alignment-actions__buttons">
+          <button
+            type="button"
+            className="lateral-alignment-action-button primary"
+            onClick={handleStartLateralReading}
+            disabled={isReadingEnabled}
+          >
+            Iniciar leitura
+          </button>
+
+          <button
+            type="button"
+            className="lateral-alignment-action-button danger"
+            onClick={handleStopLateralReading}
+            disabled={!isReadingEnabled}
+          >
+            Parar leitura
+          </button>
+        </div>
+      </section>
 
       <section className="lateral-alignment-main-card">
         <div className="lateral-alignment-chart-header">

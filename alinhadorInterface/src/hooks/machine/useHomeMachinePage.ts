@@ -139,15 +139,6 @@ function getBottomActions({
         },
       ]
 
-    case 'led':
-      return [
-        {
-          label: 'Voltar ao menu',
-          onClick: () => goToScreen('menu'),
-          variant: 'orange' as const,
-        },
-      ]
-
     case 'motors':
       return [
         {

@@ -135,6 +135,111 @@
 }
 
 /* =========================
+   ACOES DA TELA
+========================= */
+
+.lateral-alignment-actions {
+  width: 100%;
+  min-width: 0;
+
+  padding: 12px;
+  border: 2px solid #d6e1f3;
+  border-radius: 14px;
+
+  background: #ffffff;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.lateral-alignment-actions__status {
+  min-width: 120px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.lateral-alignment-actions__status span {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.lateral-alignment-actions__status strong {
+  color: #0f2a5f;
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.lateral-alignment-actions__buttons {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.lateral-alignment-action-button {
+  min-width: 138px;
+  min-height: 42px;
+
+  border: 1px solid transparent;
+  border-radius: 10px;
+
+  padding: 9px 14px;
+  box-sizing: border-box;
+
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 900;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.12s ease,
+    background 0.12s ease,
+    opacity 0.12s ease;
+}
+
+.lateral-alignment-action-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.lateral-alignment-action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.lateral-alignment-action-button.primary {
+  background: #11953b;
+  border-color: #11953b;
+  color: #ffffff;
+}
+
+.lateral-alignment-action-button.primary:hover:not(:disabled) {
+  background: #0d7d31;
+}
+
+.lateral-alignment-action-button.danger {
+  background: #b42318;
+  border-color: #b42318;
+  color: #ffffff;
+}
+
+.lateral-alignment-action-button.danger:hover:not(:disabled) {
+  background: #991b1b;
+}
+
+/* =========================
    CARD PRINCIPAL
 ========================= */
 
@@ -157,6 +262,27 @@
   gap: 10px;
 
   overflow: hidden;
+}
+
+.lateral-alignment-main-card .oscillation-chart {
+  flex: 1;
+  min-height: 0;
+
+  padding: 10px;
+  border-radius: 14px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.lateral-alignment-main-card .oscillation-chart-header {
+  display: none;
+}
+
+.lateral-alignment-main-card .oscillation-chart-svg {
+  flex: 1;
+  min-height: 130px;
+  height: auto;
 }
 
 .lateral-alignment-chart-header {
@@ -304,6 +430,20 @@
 }
 
 @media (max-width: 700px) {
+  .lateral-alignment-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .lateral-alignment-actions__buttons {
+    width: 100%;
+  }
+
+  .lateral-alignment-action-button {
+    flex: 1;
+    min-width: 0;
+  }
+
   .lateral-alignment-chart-header {
     flex-direction: column;
   }
@@ -320,6 +460,14 @@
 @media (max-width: 560px) {
   .lateral-alignment-screen {
     overflow-y: auto;
+  }
+
+  .lateral-alignment-actions__buttons {
+    flex-direction: column;
+  }
+
+  .lateral-alignment-action-button {
+    width: 100%;
   }
 
   .lateral-alignment-cards {
