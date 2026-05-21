@@ -7,3 +7,4 @@ export type AppScreen =
   | 'motors'
   | 'alignment'
   | 'wheelMap'
+  | 'spokeTension'

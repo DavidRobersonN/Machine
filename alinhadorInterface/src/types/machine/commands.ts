@@ -128,6 +128,33 @@ export interface LateralSensorStopReadingCommand {
 }
 
 // =======================
+// TENSÃO DOS RAIOS - HX711
+// =======================
+
+export interface SpokeTensionStartCollectionCommand {
+  action: 'spoke_tension_start_collection'
+}
+
+export interface SpokeTensionStopCollectionCommand {
+  action: 'spoke_tension_stop_collection'
+}
+
+export interface SpokeTensionTareCommand {
+  action: 'spoke_tension_tare'
+  side: 'left' | 'right' | 'both'
+}
+
+export interface SpokeTensionSetCalibrationCommand {
+  action: 'spoke_tension_set_calibration'
+  side: 'left' | 'right'
+  factor: number
+}
+
+export interface SpokeTensionStatusCommand {
+  action: 'spoke_tension_status'
+}
+
+// =======================
 // UNION PRINCIPAL
 // =======================
 
@@ -152,3 +179,8 @@ export type MachineCommand =
   | LateralSensorCalibrateZeroCommand
   | LateralSensorStartReadingCommand
   | LateralSensorStopReadingCommand
+  | SpokeTensionStartCollectionCommand
+  | SpokeTensionStopCollectionCommand
+  | SpokeTensionTareCommand
+  | SpokeTensionSetCalibrationCommand
+  | SpokeTensionStatusCommand

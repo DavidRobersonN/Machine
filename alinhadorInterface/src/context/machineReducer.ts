@@ -1,4 +1,5 @@
 import type { MachineAction, MachineState } from '../types/machine/machine'
+import { angleToSpoke } from '../utils/wheelReference'
 
 // O reducer é uma função pura que recebe o estado atual e uma ação,
 // e retorna um novo estado atualizado com base na ação recebida.
@@ -29,6 +30,10 @@ export const initialMachineState: MachineState = {
   lateral_misalignment_current: 0,
   lateral_misalignment_history: [],
   is_lateral_reading_enabled: false,
+
+  spoke_tension_left_kg: 0,
+  spoke_tension_right_kg: 0,
+  is_spoke_tension_collecting: false,
 }
 
 function addLateralMisalignmentPoint(
@@ -112,6 +117,21 @@ export function machineReducer(
 
     case 'MACHINE_UPDATED': {
       const lateralValue = action.payload.lateral_misalignment_current
+      const wheelPositionDegrees = action.payload.wheel_position_degrees
+      const wheelCurrentAngle =
+        action.payload.wheel_current_angle !== undefined
+          ? action.payload.wheel_current_angle
+          : wheelPositionDegrees
+      const wheelTotalSpokes =
+        action.payload.wheel_total_spokes !== undefined
+          ? action.payload.wheel_total_spokes
+          : state.wheel_total_spokes
+      const wheelCurrentSpoke =
+        action.payload.wheel_current_spoke !== undefined
+          ? action.payload.wheel_current_spoke
+          : wheelCurrentAngle !== undefined
+            ? angleToSpoke(wheelCurrentAngle, wheelTotalSpokes)
+            : undefined
 
       return {
         ...state,
@@ -141,8 +161,8 @@ export function machineReducer(
             : state.speed_motor_roda,
 
         wheel_position_degrees:
-          action.payload.wheel_position_degrees !== undefined
-            ? action.payload.wheel_position_degrees
+          wheelPositionDegrees !== undefined
+            ? wheelPositionDegrees
             : state.wheel_position_degrees,
 
         wheel_total_turns:
@@ -166,8 +186,8 @@ export function machineReducer(
             : state.motor_turns_per_wheel_turn,
 
         wheel_current_angle:
-          action.payload.wheel_current_angle !== undefined
-            ? action.payload.wheel_current_angle
+          wheelCurrentAngle !== undefined
+            ? wheelCurrentAngle
             : state.wheel_current_angle,
 
         wheel_target_angle:
@@ -176,8 +196,8 @@ export function machineReducer(
             : state.wheel_target_angle,
 
         wheel_current_spoke:
-          action.payload.wheel_current_spoke !== undefined
-            ? action.payload.wheel_current_spoke
+          wheelCurrentSpoke !== undefined
+            ? wheelCurrentSpoke
             : state.wheel_current_spoke,
 
         wheel_target_spoke:
@@ -186,8 +206,8 @@ export function machineReducer(
             : state.wheel_target_spoke,
 
         wheel_total_spokes:
-          action.payload.wheel_total_spokes !== undefined
-            ? action.payload.wheel_total_spokes
+          wheelTotalSpokes !== undefined
+            ? wheelTotalSpokes
             : state.wheel_total_spokes,
 
         wheel_is_positioning:
@@ -212,6 +232,21 @@ export function machineReducer(
           action.payload.is_lateral_reading_enabled !== undefined
             ? action.payload.is_lateral_reading_enabled
             : state.is_lateral_reading_enabled,
+
+        spoke_tension_left_kg:
+          action.payload.spoke_tension_left_kg !== undefined
+            ? action.payload.spoke_tension_left_kg
+            : state.spoke_tension_left_kg,
+
+        spoke_tension_right_kg:
+          action.payload.spoke_tension_right_kg !== undefined
+            ? action.payload.spoke_tension_right_kg
+            : state.spoke_tension_right_kg,
+
+        is_spoke_tension_collecting:
+          action.payload.is_spoke_tension_collecting !== undefined
+            ? action.payload.is_spoke_tension_collecting
+            : state.is_spoke_tension_collecting,
       }
     }
 

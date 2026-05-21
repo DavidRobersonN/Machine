@@ -43,6 +43,14 @@ export interface MachineUpdatePayload {
 
   lateral_misalignment_current?: number
   is_lateral_reading_enabled?: boolean
+
+  // =======================
+  // TENSÃO DOS RAIOS - HX711
+  // =======================
+
+  spoke_tension_left_kg?: number
+  spoke_tension_right_kg?: number
+  is_spoke_tension_collecting?: boolean
 }
 
 export interface MachineUpdateMessage {

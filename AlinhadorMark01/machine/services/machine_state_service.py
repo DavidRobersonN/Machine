@@ -52,6 +52,29 @@ class MachineStateService:
 
         return (speed_percent / self.MAX_SPEED) * max_wheel_turns_per_second
 
+    def normalize_wheel_angle(self, angle: float) -> float:
+        return angle % 360
+
+    def angle_to_spoke(self, angle: float, total_spokes: int) -> int:
+        safe_total_spokes = max(total_spokes, 1)
+        degrees_per_spoke = 360 / safe_total_spokes
+        spoke = round(self.normalize_wheel_angle(angle) / degrees_per_spoke) + 1
+
+        if spoke > safe_total_spokes:
+            return 1
+
+        return max(spoke, 1)
+
+    def sync_wheel_reference_from_position(self, state: MachineState) -> None:
+        state.wheel_position_degrees = self.normalize_wheel_angle(
+            state.wheel_position_degrees,
+        )
+        state.wheel_current_angle = state.wheel_position_degrees
+        state.wheel_current_spoke = self.angle_to_spoke(
+            state.wheel_current_angle,
+            state.wheel_total_spokes,
+        )
+
     def broadcast_lateral_sensor_state(self, value: float) -> None:
         """
         Envia o valor do sensor lateral para o frontend em tempo real,
@@ -119,6 +142,7 @@ class MachineStateService:
         state.wheel_position_degrees = (
             state.wheel_position_degrees + (delta_turns * 360)
         ) % 360
+        self.sync_wheel_reference_from_position(state)
 
         state.arduino_connected = self.serial_service.is_connected()
 
@@ -142,6 +166,8 @@ class MachineStateService:
                 'wheel_total_turns': state.wheel_total_turns,
                 'wheel_direction': state.wheel_direction,
                 'wheel_is_running': state.wheel_is_running,
+                'wheel_current_angle': state.wheel_current_angle,
+                'wheel_current_spoke': state.wheel_current_spoke,
                 'motor_turns_per_wheel_turn': state.motor_turns_per_wheel_turn,
             }
         )
@@ -151,6 +177,15 @@ class MachineStateService:
 
         if 'lateral_misalignment_current' in data:
             state.lateral_misalignment_current = data['lateral_misalignment_current']
+
+        if 'spoke_tension_left_kg' in data:
+            state.spoke_tension_left_kg = data['spoke_tension_left_kg']
+
+        if 'spoke_tension_right_kg' in data:
+            state.spoke_tension_right_kg = data['spoke_tension_right_kg']
+
+        if 'is_spoke_tension_collecting' in data:
+            state.is_spoke_tension_collecting = data['is_spoke_tension_collecting']
 
         if 'led' in data:
             state.led = data['led']
@@ -194,6 +229,13 @@ class MachineStateService:
 
         if 'motor_turns_per_wheel_turn' in data:
             state.motor_turns_per_wheel_turn = data['motor_turns_per_wheel_turn']
+
+        if (
+            'wheel_position_degrees' in data and
+            'wheel_current_angle' not in data and
+            'wheel_current_spoke' not in data
+        ):
+            self.sync_wheel_reference_from_position(state)
 
         state.arduino_connected = self.serial_service.is_connected()
 
@@ -275,6 +317,9 @@ class MachineStateService:
             'wheel_is_positioning': state.wheel_is_positioning,
 
             'lateral_misalignment_current': state.lateral_misalignment_current,
+            'spoke_tension_left_kg': state.spoke_tension_left_kg,
+            'spoke_tension_right_kg': state.spoke_tension_right_kg,
+            'is_spoke_tension_collecting': state.is_spoke_tension_collecting,
         }
 
     def motor_roda_start(self):

@@ -16,6 +16,12 @@ const int LATERAL_SENSOR_PIN = A0;
 const int MOTOR_RODA_STEP_PIN = 31;
 const int MOTOR_RODA_DIR_PIN = 32;
 
+// Sensores HX711 para tensão dos raios
+const int SPOKE_TENSION_LEFT_DOUT_PIN = 3;
+const int SPOKE_TENSION_LEFT_SCK_PIN = 2;
+const int SPOKE_TENSION_RIGHT_DOUT_PIN = 5;
+const int SPOKE_TENSION_RIGHT_SCK_PIN = 4;
+
 // =======================
 // CONFIGURAÇÕES DO MOTOR
 // =======================
@@ -52,5 +58,13 @@ const unsigned long SENSOR_INTERVAL = 20;
 // RAW 1023 = +15 mm
 const float SENSOR_RANGE_MM = 30.0;
 const float SENSOR_HALF_RANGE_MM = SENSOR_RANGE_MM / 2.0;
+
+// =======================
+// CONFIGURAÇÕES DO HX711
+// =======================
+
+const unsigned long SPOKE_TENSION_INTERVAL = 80;
+const float SPOKE_TENSION_LEFT_CALIBRATION_FACTOR = -7050.0;
+const float SPOKE_TENSION_RIGHT_CALIBRATION_FACTOR = -7050.0;
 
 #endif

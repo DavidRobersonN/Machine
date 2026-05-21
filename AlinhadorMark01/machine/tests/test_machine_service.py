@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 from machine.services.machine_service import MachineService
+from machine.services.simulated_serial_service import SimulatedSerialService
 
 
 def make_serial_success(command: str) -> dict:
@@ -119,6 +120,11 @@ def test_list_serial_ports_without_connected_port():
     assert response['selected_port'] is None
     assert response['ports'] == [
         {
+            'device': SimulatedSerialService.PORT,
+            'description': SimulatedSerialService.DESCRIPTION,
+            'hwid': SimulatedSerialService.HWID,
+        },
+        {
             'device': 'COM9',
             'description': 'Arduino Uno',
             'hwid': 'USB123',
@@ -138,7 +144,13 @@ def test_list_serial_ports_with_connected_port():
         response = service.list_serial_ports()
 
     assert response['type'] == 'available_ports'
-    assert response['ports'] == []
+    assert response['ports'] == [
+        {
+            'device': SimulatedSerialService.PORT,
+            'description': SimulatedSerialService.DESCRIPTION,
+            'hwid': SimulatedSerialService.HWID,
+        },
+    ]
     assert response['selected_port'] == 'COM9'
 
 
@@ -177,6 +189,35 @@ def test_select_serial_port_success():
         'type': 'serial_port_selected',
         'port': 'COM9',
         'message': 'Porta COM9 selecionada com sucesso e configuração enviada para o Arduino',
+    }
+
+
+def test_select_simulated_serial_port_uses_simulated_service():
+    service = MachineService()
+
+    service.machine_state_service.update_state = Mock()
+    service.sync_machine_config = Mock(return_value={
+        'type': 'log',
+        'direction': 'received',
+        'message': 'Configuracao enviada para o Arduino simulado',
+    })
+
+    response = service.select_serial_port({
+        'port': SimulatedSerialService.PORT,
+    })
+
+    assert isinstance(service.serial_service, SimulatedSerialService)
+    assert service.serial_service.is_connected() is True
+    assert service.machine_state_service.serial_service is service.serial_service
+    service.machine_state_service.update_state.assert_called_once_with({})
+    service.sync_machine_config.assert_called_once()
+    assert response == {
+        'type': 'serial_port_selected',
+        'port': SimulatedSerialService.PORT,
+        'message': (
+            f'Porta {SimulatedSerialService.PORT} selecionada com sucesso '
+            'e configuração enviada para o Arduino'
+        ),
     }
 
 

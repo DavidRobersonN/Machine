@@ -14,6 +14,9 @@ class MachineStateAdmin(admin.ModelAdmin):
         'wheel_direction',
         'wheel_is_running',
         'lateral_misalignment_current',
+        'spoke_tension_left_kg',
+        'spoke_tension_right_kg',
+        'is_spoke_tension_collecting',
         'updated_at',
     )
 
@@ -53,6 +56,16 @@ class MachineStateAdmin(admin.ModelAdmin):
                 )
             },
         ),
+        (
+            'Tensão dos raios - HX711',
+            {
+                'fields': (
+                    'spoke_tension_left_kg',
+                    'spoke_tension_right_kg',
+                    'is_spoke_tension_collecting',
+                )
+            },
+        ),
     )
 
 
@@ -65,6 +78,8 @@ class MachineConfigAdmin(admin.ModelAdmin):
         'wheel_total_spokes',
         'motor_steps_per_wheel_turn',
         'motor_turns_per_wheel_turn',
+        'spoke_tension_left_calibration_factor',
+        'spoke_tension_right_calibration_factor',
         'serial_baudrate',
         'updated_at',
     )
@@ -133,6 +148,20 @@ class MachineConfigAdmin(admin.ModelAdmin):
                     'lateral_sensor_pin',
                     'lateral_sensor_zero_offset',
                     'lateral_sensor_dead_zone',
+                )
+            },
+        ),
+        (
+            'Tensão dos raios - HX711',
+            {
+                'fields': (
+                    'spoke_tension_left_dout_pin',
+                    'spoke_tension_left_sck_pin',
+                    'spoke_tension_right_dout_pin',
+                    'spoke_tension_right_sck_pin',
+                    'spoke_tension_left_calibration_factor',
+                    'spoke_tension_right_calibration_factor',
+                    'spoke_tension_read_interval_ms',
                 )
             },
         ),

@@ -1,4 +1,5 @@
 import type { WheelDirection } from '../../types/machine'
+import { normalizeDegrees } from '../../utils/wheelReference'
 
 import './WheelRotationViewer.css'
 
@@ -9,10 +10,6 @@ type WheelRotationViewerProps = {
   direction: WheelDirection
   isRunning: boolean
   motorTurnsPerWheelTurn: number
-}
-
-function normalizeDegrees(value: number) {
-  return ((value % 360) + 360) % 360
 }
 
 function getDirectionLabel(direction: WheelDirection) {
@@ -54,7 +51,7 @@ export function WheelRotationViewer({
     totalTurns = 2   => 720 graus => 2 voltas completas
     totalTurns = 0.5 => 180 graus => meia volta
   */
-  const visualRotationDegrees = totalTurns * 360
+  const visualRotationDegrees = normalizedPosition
 
   return (
     <div className="wheel-viewer">

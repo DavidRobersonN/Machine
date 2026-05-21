@@ -5,6 +5,7 @@
 #include "LateralSensor.h"
 #include "MotorRoda.h"
 #include "SerialCommandHandler.h"
+#include "SpokeTensionSensor.h"
 
 // =======================
 // OBJETOS DO SISTEMA
@@ -30,10 +31,21 @@ MotorRoda motorRoda(
   MOTOR_RODA_STEPS_PER_WHEEL_REVOLUTION
 );
 
+SpokeTensionSensor spokeTensionSensor(
+  SPOKE_TENSION_LEFT_DOUT_PIN,
+  SPOKE_TENSION_LEFT_SCK_PIN,
+  SPOKE_TENSION_RIGHT_DOUT_PIN,
+  SPOKE_TENSION_RIGHT_SCK_PIN,
+  SPOKE_TENSION_INTERVAL,
+  SPOKE_TENSION_LEFT_CALIBRATION_FACTOR,
+  SPOKE_TENSION_RIGHT_CALIBRATION_FACTOR
+);
+
 SerialCommandHandler serialCommandHandler(
   led,
   lateralSensor,
-  motorRoda
+  motorRoda,
+  spokeTensionSensor
 );
 
 // =======================
@@ -46,10 +58,11 @@ void setup() {
   led.begin();
   lateralSensor.begin();
   motorRoda.begin();
+  spokeTensionSensor.begin();
 
   delay(300);
 
-  Serial.println("{\"success\":true,\"type\":\"startup\",\"message\":\"arduino_iniciado_com_sensor_lateral\"}");
+  Serial.println("{\"success\":true,\"type\":\"startup\",\"message\":\"arduino_iniciado_com_sensor_lateral_e_hx711\"}");
   Serial.flush();
 }
 
@@ -63,4 +76,6 @@ void loop() {
   motorRoda.update();
 
   lateralSensor.update();
+
+  spokeTensionSensor.update();
 }

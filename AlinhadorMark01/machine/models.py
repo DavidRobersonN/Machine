@@ -60,6 +60,14 @@ class MachineState(models.Model):
 
     lateral_misalignment_current = models.FloatField(default=0)
 
+    # =========================
+    # TENSÃO DOS RAIOS - HX711
+    # =========================
+
+    spoke_tension_left_kg = models.FloatField(default=0)
+    spoke_tension_right_kg = models.FloatField(default=0)
+    is_spoke_tension_collecting = models.BooleanField(default=False)
+
     def __str__(self):
         return (
             f'MachineState #{self.id} - '
@@ -73,7 +81,9 @@ class MachineState(models.Model):
             f'Wheel Angle: {self.wheel_current_angle}, '
             f'Wheel Spoke: {self.wheel_current_spoke}/{self.wheel_total_spokes}, '
             f'Motor/Wheel Ratio: {self.motor_turns_per_wheel_turn}, '
-            f'Lateral Misalignment: {self.lateral_misalignment_current}'
+            f'Lateral Misalignment: {self.lateral_misalignment_current}, '
+            f'Spoke Tension L/R: {self.spoke_tension_left_kg}/'
+            f'{self.spoke_tension_right_kg}'
         )
 
 
@@ -193,6 +203,52 @@ class MachineConfig(models.Model):
     lateral_sensor_dead_zone = models.FloatField(
         default=0,
         help_text='Zona morta do sensor lateral em milímetros.',
+    )
+
+    # =========================
+    # TENSÃO DOS RAIOS - HX711
+    # =========================
+
+    spoke_tension_left_dout_pin = models.IntegerField(
+        'Pino DOUT esquerdo',
+        default=3,
+        help_text='Pino DT/DOUT do HX711 do lado esquerdo.',
+    )
+
+    spoke_tension_left_sck_pin = models.IntegerField(
+        'Pino SCK esquerdo',
+        default=2,
+        help_text='Pino SCK/CLK do HX711 do lado esquerdo.',
+    )
+
+    spoke_tension_right_dout_pin = models.IntegerField(
+        'Pino DOUT direito',
+        default=5,
+        help_text='Pino DT/DOUT do HX711 do lado direito.',
+    )
+
+    spoke_tension_right_sck_pin = models.IntegerField(
+        'Pino SCK direito',
+        default=4,
+        help_text='Pino SCK/CLK do HX711 do lado direito.',
+    )
+
+    spoke_tension_left_calibration_factor = models.FloatField(
+        'Fator de calibração esquerdo',
+        default=-7050,
+        help_text='Fator de calibração do HX711 esquerdo.',
+    )
+
+    spoke_tension_right_calibration_factor = models.FloatField(
+        'Fator de calibração direito',
+        default=-7050,
+        help_text='Fator de calibração do HX711 direito.',
+    )
+
+    spoke_tension_read_interval_ms = models.IntegerField(
+        'Intervalo de leitura em ms',
+        default=80,
+        help_text='Intervalo de leitura/envio dos HX711 em milissegundos.',
     )
 
     # =========================

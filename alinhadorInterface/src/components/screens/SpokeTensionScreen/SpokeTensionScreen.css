@@ -1,0 +1,493 @@
+.spoke-tension-screen {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: visible;
+}
+
+.screen-main:has(.spoke-tension-screen) {
+  height: 720px;
+}
+
+.spoke-tension-header,
+.spoke-tension-actions,
+.spoke-tension-layout,
+.spoke-tension-bottom {
+  flex-shrink: 0;
+}
+
+.spoke-tension-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.spoke-tension-kicker {
+  display: inline-flex;
+  margin-bottom: 4px;
+  color: #0f766e;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.spoke-tension-screen .screen-page-title {
+  margin: 0;
+  color: #0f2a5f;
+  font-size: 1.8rem;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.spoke-tension-header p {
+  margin: 6px 0 0;
+  color: #475569;
+  font-size: 0.84rem;
+  line-height: 1.3;
+}
+
+.spoke-tension-reference,
+.spoke-tension-sensor-panel,
+.spoke-tension-wheel-card,
+.spoke-tension-calibration,
+.spoke-tension-summary,
+.spoke-tension-table-area {
+  border: 2px solid #d6e1f3;
+  border-radius: 8px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.spoke-tension-reference {
+  width: 230px;
+  min-width: 210px;
+  padding: 11px 12px;
+  background: #ecfeff;
+  border-color: #99f6e4;
+}
+
+.spoke-tension-reference span,
+.spoke-tension-sensor-panel span,
+.spoke-tension-summary span {
+  display: block;
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.spoke-tension-reference strong {
+  display: block;
+  margin-top: 5px;
+  color: #0f766e;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.spoke-tension-reference small {
+  display: block;
+  margin-top: 3px;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.spoke-tension-actions {
+  padding: 10px;
+  border: 2px solid #d6e1f3;
+  border-radius: 8px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.spoke-tension-actions__group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spoke-tension-button,
+.spoke-tension-calibration button {
+  min-height: 38px;
+  border: 1px solid #b7c4de;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  color: #0f2a5f;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.spoke-tension-button:hover:not(:disabled),
+.spoke-tension-calibration button:hover {
+  background: #eef3ff;
+}
+
+.spoke-tension-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.spoke-tension-button--primary {
+  color: #ffffff;
+  border-color: #0f766e;
+  background: #0f766e;
+}
+
+.spoke-tension-button--primary:hover:not(:disabled) {
+  background: #115e59;
+}
+
+.spoke-tension-button--danger {
+  color: #b42318;
+  border-color: #fecaca;
+  background: #fff5f5;
+}
+
+.spoke-tension-layout {
+  min-width: 0;
+  min-height: 230px;
+  flex: 0 0 230px;
+  display: grid;
+  grid-template-columns: minmax(170px, 0.36fr) minmax(360px, 1.18fr) minmax(170px, 0.36fr);
+  gap: 10px;
+  overflow: hidden;
+}
+
+.spoke-tension-sensor-panel {
+  min-width: 0;
+  min-height: 180px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.spoke-tension-sensor-panel strong {
+  color: #0f2a5f;
+  font-family: monospace;
+  font-size: clamp(1.45rem, 3vw, 2.4rem);
+  line-height: 1;
+  font-weight: 900;
+}
+
+.spoke-tension-sensor-panel small {
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.spoke-tension-sensor-panel--left {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.spoke-tension-sensor-panel--right {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.spoke-tension-wheel-card {
+  min-width: 0;
+  min-height: 230px;
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.spoke-tension-wheel-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: #475569;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.spoke-tension-wheel-card__header strong {
+  color: #0f766e;
+}
+
+.spoke-tension-wheel {
+  min-height: 170px;
+  flex: 1 1 auto;
+  width: 100%;
+  max-height: 370px;
+  overflow: visible;
+}
+
+.spoke-tension-wheel__rotor {
+  transform-origin: center;
+  transform-box: fill-box;
+  will-change: transform;
+}
+
+.spoke-tension-wheel__rim {
+  fill: none;
+  stroke: #64748b;
+  stroke-width: 4;
+}
+
+.spoke-tension-wheel__hub {
+  fill: #f8fafc;
+  stroke: #64748b;
+  stroke-width: 2;
+}
+
+.spoke-tension-wheel__spoke {
+  stroke: #94a3b8;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.spoke-tension-wheel__spoke.is-current {
+  stroke: #ef4444;
+  stroke-width: 4;
+}
+
+.spoke-tension-wheel__spoke.is-left-measured {
+  stroke: #2563eb;
+  stroke-width: 5.5;
+}
+
+.spoke-tension-wheel__spoke.is-right-measured {
+  stroke: #16a34a;
+  stroke-width: 5.5;
+}
+
+.spoke-tension-wheel__fixture {
+  filter: drop-shadow(0 2px 2px rgba(15, 23, 42, 0.16));
+}
+
+.spoke-tension-wheel__fixture path {
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.spoke-tension-wheel__fixture circle {
+  fill: #ffffff;
+  stroke-width: 2;
+}
+
+.spoke-tension-wheel__fixture--left path {
+  fill: rgba(37, 99, 235, 0.22);
+  stroke: #2563eb;
+}
+
+.spoke-tension-wheel__fixture--left circle {
+  stroke: #2563eb;
+}
+
+.spoke-tension-wheel__fixture--right path {
+  fill: rgba(22, 163, 74, 0.22);
+  stroke: #16a34a;
+}
+
+.spoke-tension-wheel__fixture--right circle {
+  stroke: #16a34a;
+}
+
+.spoke-tension-wheel__reference {
+  stroke: #ef4444;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.spoke-tension-bottom {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.spoke-tension-calibration {
+  padding: 10px;
+}
+
+.spoke-tension-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.spoke-tension-section-header h3 {
+  margin: 0;
+  color: #0f2a5f;
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.spoke-tension-calibration__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.spoke-tension-calibration label {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid #d6e1f3;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.spoke-tension-calibration label span {
+  color: #475569;
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.spoke-tension-calibration input {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 9px;
+  color: #0f2a5f;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  box-sizing: border-box;
+}
+
+.spoke-tension-calibration label div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.spoke-tension-summary {
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.spoke-tension-summary div {
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid #d6e1f3;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.spoke-tension-summary strong {
+  display: block;
+  margin-top: 5px;
+  color: #0f2a5f;
+  font-family: monospace;
+  font-size: 0.9rem;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spoke-tension-table-area {
+  flex: 0 0 170px;
+  min-height: 170px;
+  overflow: auto;
+}
+
+.spoke-tension-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #0f2a5f;
+  font-size: 0.78rem;
+}
+
+.spoke-tension-table th,
+.spoke-tension-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.spoke-tension-table th {
+  position: sticky;
+  top: 0;
+  background: #ecfeff;
+  color: #475569;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 1080px) {
+  .screen-main:has(.spoke-tension-screen) {
+    height: auto;
+  }
+
+  .spoke-tension-screen {
+    overflow: auto;
+  }
+
+  .spoke-tension-layout,
+  .spoke-tension-bottom {
+    grid-template-columns: 1fr;
+    overflow: visible;
+  }
+
+  .spoke-tension-wheel {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 760px) {
+  .spoke-tension-header,
+  .spoke-tension-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .spoke-tension-reference {
+    width: 100%;
+  }
+
+  .spoke-tension-actions__group,
+  .spoke-tension-calibration label,
+  .spoke-tension-summary,
+  .spoke-tension-calibration__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .spoke-tension-actions__group {
+    flex-direction: column;
+  }
+
+  .spoke-tension-button,
+  .spoke-tension-calibration button {
+    width: 100%;
+  }
+
+  .spoke-tension-calibration label div {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

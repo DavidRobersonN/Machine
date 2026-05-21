@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
 import { useMachineContext } from '../../../context/useMachineContext'
+import {
+  WHEEL_REFERENCE_SPOKE,
+  getWheelReferenceAngle,
+  getWheelVisualRotationDegrees,
+  normalizeDegrees,
+} from '../../../utils/wheelReference'
 
 import './WheelPositionControl.css'
-
-function normalizeDegrees(value: number) {
-  return ((value % 360) + 360) % 360
-}
 
 export function WheelPositionControl() {
   const { state, sendCommand } = useMachineContext()
@@ -21,15 +23,12 @@ export function WheelPositionControl() {
   const isPositioning = state.wheel_is_positioning
   const isFreeRunning = state.wheel_is_running && !isPositioning
   const visibleTargetSpoke = isFreeRunning ? null : targetSpoke
-  const wheelVisualAngle = normalizeDegrees(state.wheel_position_degrees)
+  const wheelVisualAngle = getWheelReferenceAngle(state)
+  const wheelVisualRotationDegrees = getWheelVisualRotationDegrees(state)
   const targetMarkerAngle =
     targetAngle !== null ? normalizeDegrees(targetAngle) : null
 
   const degreesPerSpoke = totalSpokes > 0 ? 360 / totalSpokes : 0
-  const currentPointerAngle = wheelVisualAngle - 90
-  const currentPointerRadians = (currentPointerAngle * Math.PI) / 180
-  const currentPointerX = 100 + 76 * Math.cos(currentPointerRadians)
-  const currentPointerY = 100 + 76 * Math.sin(currentPointerRadians)
   const targetMarkerPosition =
     targetMarkerAngle !== null && visibleTargetSpoke !== null
       ? (() => {
@@ -63,7 +62,7 @@ export function WheelPositionControl() {
       const innerX = center + innerRadius * Math.cos(angleRadians)
       const innerY = center + innerRadius * Math.sin(angleRadians)
 
-      const isCurrentSpoke = spokeNumber === currentSpoke
+      const isReferenceSpoke = spokeNumber === WHEEL_REFERENCE_SPOKE
       const isTargetSpoke = spokeNumber === visibleTargetSpoke
 
       return {
@@ -72,11 +71,11 @@ export function WheelPositionControl() {
         outerY,
         innerX,
         innerY,
-        isCurrentSpoke,
+        isReferenceSpoke,
         isTargetSpoke,
       }
     })
-  }, [currentSpoke, totalSpokes, visibleTargetSpoke])
+  }, [totalSpokes, visibleTargetSpoke])
 
   function handleSetZero() {
     sendCommand({
@@ -274,7 +273,12 @@ export function WheelPositionControl() {
             role="img"
             aria-label={`Roda com ${totalSpokes} raios. Raio atual ${currentSpoke}.`}
           >
-            <g className="wheel-position-control__wheel-rotor">
+            <g
+              className="wheel-position-control__wheel-rotor"
+              style={{
+                transform: `rotate(${wheelVisualRotationDegrees}deg)`,
+              }}
+            >
               <circle
                 className="wheel-position-control__wheel-outer"
                 cx="100"
@@ -293,7 +297,7 @@ export function WheelPositionControl() {
                 <line
                   key={`line-${marker.spokeNumber}`}
                   className={
-                    marker.isCurrentSpoke
+                    marker.isReferenceSpoke
                       ? 'wheel-position-control__wheel-spoke wheel-position-control__wheel-spoke--current'
                       : marker.isTargetSpoke
                         ? 'wheel-position-control__wheel-spoke wheel-position-control__wheel-spoke--target'
@@ -310,7 +314,7 @@ export function WheelPositionControl() {
                 <circle
                   key={`marker-${marker.spokeNumber}`}
                   className={
-                    marker.isCurrentSpoke
+                    marker.isReferenceSpoke
                       ? 'wheel-position-control__wheel-marker wheel-position-control__wheel-marker--current'
                       : marker.isTargetSpoke
                         ? 'wheel-position-control__wheel-marker wheel-position-control__wheel-marker--target'
@@ -318,25 +322,10 @@ export function WheelPositionControl() {
                   }
                   cx={marker.outerX}
                   cy={marker.outerY}
-                  r={marker.isCurrentSpoke ? 5 : 3}
+                  r={marker.isReferenceSpoke ? 5 : 3}
                 />
               ))}
             </g>
-
-            <line
-              className="wheel-position-control__wheel-current-pointer-line"
-              x1="100"
-              y1="100"
-              x2={currentPointerX}
-              y2={currentPointerY}
-            />
-
-            <circle
-              className="wheel-position-control__wheel-current-pointer-tip"
-              cx={currentPointerX}
-              cy={currentPointerY}
-              r="4.5"
-            />
 
             {targetMarkerPosition !== null && (
               <circle
@@ -394,7 +383,7 @@ export function WheelPositionControl() {
           <div className="wheel-position-control__wheel-legend">
             <span>
               <i className="wheel-position-control__legend-dot wheel-position-control__legend-dot--current" />
-              Raio atual
+              Raio referência
             </span>
 
             <span>

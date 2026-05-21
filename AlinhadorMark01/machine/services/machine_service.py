@@ -3,6 +3,7 @@ import time
 from machine.models import MachineConfig
 from machine.services.machine_state_service import MachineStateService
 from machine.services.serial_service import SerialService
+from machine.services.simulated_serial_service import SimulatedSerialService
 
 
 class MachineService:
@@ -47,6 +48,25 @@ class MachineService:
 
         if action == 'lateral_sensor_stop_reading':
             return self.serial_service.send_command('LATERAL_SENSOR_STOP_READING')
+
+        # =========================
+        # TENSÃO DOS RAIOS - HX711
+        # =========================
+
+        if action == 'spoke_tension_start_collection':
+            return self.spoke_tension_start_collection()
+
+        if action == 'spoke_tension_stop_collection':
+            return self.spoke_tension_stop_collection()
+
+        if action == 'spoke_tension_tare':
+            return self.spoke_tension_tare(data)
+
+        if action == 'spoke_tension_set_calibration':
+            return self.spoke_tension_set_calibration(data)
+
+        if action == 'spoke_tension_status':
+            return self.serial_service.send_command('SPOKE_TENSION_STATUS')
 
         # =========================
         # MOTOR DA RODA
@@ -182,27 +202,35 @@ class MachineService:
         config = self.get_active_machine_config()
 
         commands = [
-        (
-            'CONFIG_WHEEL_TOTAL_SPOKES',
-            config.wheel_total_spokes,
-        ),
-        (
-            'CONFIG_MOTOR_STEPS_PER_WHEEL_TURN',
-            config.motor_steps_per_wheel_turn,
-        ),
-        (
-            'CONFIG_MOTOR_MAX_SPEED',
-            config.motor_max_speed,
-        ),
-        (
-            'CONFIG_MOTOR_ACCELERATION',
-            config.motor_acceleration,
-        ),
-        (
-            'CONFIG_MOTOR_STATUS',
-            None,
-        ),
-    ]
+            (
+                'CONFIG_WHEEL_TOTAL_SPOKES',
+                config.wheel_total_spokes,
+            ),
+            (
+                'CONFIG_MOTOR_STEPS_PER_WHEEL_TURN',
+                config.motor_steps_per_wheel_turn,
+            ),
+            (
+                'CONFIG_MOTOR_MAX_SPEED',
+                config.motor_max_speed,
+            ),
+            (
+                'CONFIG_MOTOR_ACCELERATION',
+                config.motor_acceleration,
+            ),
+            (
+                'CONFIG_MOTOR_STATUS',
+                None,
+            ),
+            (
+                'SPOKE_TENSION_SET_CALIBRATION:LEFT',
+                config.spoke_tension_left_calibration_factor,
+            ),
+            (
+                'SPOKE_TENSION_SET_CALIBRATION:RIGHT',
+                config.spoke_tension_right_calibration_factor,
+            ),
+        ]
 
         results = []
 
@@ -268,6 +296,78 @@ class MachineService:
 
         return '\n'.join(lines)
 
+    # =========================
+    # TENSÃO DOS RAIOS - HX711
+    # =========================
+
+    def spoke_tension_start_collection(self) -> dict:
+        serial_result = self.serial_service.send_command(
+            'SPOKE_TENSION_START_COLLECTION'
+        )
+
+        self.machine_state_service.update_state({
+            'is_spoke_tension_collecting': True,
+        })
+
+        return serial_result
+
+    def spoke_tension_stop_collection(self) -> dict:
+        serial_result = self.serial_service.send_command(
+            'SPOKE_TENSION_STOP_COLLECTION'
+        )
+
+        self.machine_state_service.update_state({
+            'is_spoke_tension_collecting': False,
+        })
+
+        return serial_result
+
+    def spoke_tension_tare(self, data: dict) -> dict:
+        side = data.get('side', 'both')
+
+        if side not in {'left', 'right', 'both'}:
+            return {
+                'type': 'error',
+                'message': f'Lado inválido para tara: {side}',
+            }
+
+        command = f'SPOKE_TENSION_TARE:{side.upper()}'
+
+        return self.serial_service.send_command(command)
+
+    def spoke_tension_set_calibration(self, data: dict) -> dict:
+        side = data.get('side')
+        factor = data.get('factor')
+
+        if side not in {'left', 'right'}:
+            return {
+                'type': 'error',
+                'message': f'Lado inválido para calibração: {side}',
+            }
+
+        try:
+            factor_value = float(factor)
+        except (TypeError, ValueError):
+            return {
+                'type': 'error',
+                'message': f'Fator de calibração inválido: {factor}',
+            }
+
+        config = self.get_active_machine_config()
+
+        if side == 'left':
+            config.spoke_tension_left_calibration_factor = factor_value
+        else:
+            config.spoke_tension_right_calibration_factor = factor_value
+
+        config.save()
+
+        command = (
+            f'SPOKE_TENSION_SET_CALIBRATION:{side.upper()}:{factor_value:g}'
+        )
+
+        return self.serial_service.send_command(command)
+
     def sync_wheel_positioning_config(self) -> None:
         """
         Reenvia a calibracao usada nos comandos de posicionamento da roda.
@@ -311,8 +411,32 @@ class MachineService:
     # PORTA SERIAL
     # =========================
 
+    def use_serial_service_for_port(self, port: str) -> None:
+        if port == SimulatedSerialService.PORT:
+            if not isinstance(self.serial_service, SimulatedSerialService):
+                self.serial_service.disconnect()
+                self.serial_service = SimulatedSerialService(
+                    baudrate=self.serial_service.baudrate,
+                    timeout=self.serial_service.timeout,
+                )
+                self.machine_state_service.serial_service = self.serial_service
+            return
+
+        if isinstance(self.serial_service, SimulatedSerialService):
+            self.serial_service.disconnect()
+            self.serial_service = SerialService(
+                port=port,
+                baudrate=self.serial_service.baudrate,
+                timeout=self.serial_service.timeout,
+            )
+            self.machine_state_service.serial_service = self.serial_service
+
     def list_serial_ports(self) -> dict:
-        ports = []
+        ports = [{
+            'device': SimulatedSerialService.PORT,
+            'description': SimulatedSerialService.DESCRIPTION,
+            'hwid': SimulatedSerialService.HWID,
+        }]
 
         for port in list_ports.comports():
             ports.append({
@@ -340,6 +464,7 @@ class MachineService:
                 'message': 'Nenhuma porta serial foi informada',
             }
 
+        self.use_serial_service_for_port(port)
         self.serial_service.set_port(port)
         connected = self.serial_service.connect()
 

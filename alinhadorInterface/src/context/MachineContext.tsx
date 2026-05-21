@@ -27,6 +27,17 @@ type MachineProviderProps = {
 
 const LATERAL_PLAYBACK_INTERVAL_MS = 33
 const MAX_LATERAL_BUFFER_POINTS = 30
+const WHEEL_PLAYBACK_INTERVAL_MS = 16
+const MAX_WHEEL_BUFFER_POINTS = 20
+
+const WHEEL_REALTIME_KEYS = new Set<keyof MachineUpdatePayload>([
+  'wheel_position_degrees',
+  'wheel_total_turns',
+  'wheel_current_angle',
+  'wheel_current_spoke',
+  'wheel_is_running',
+  'wheel_is_positioning',
+])
 
 function isLateralSensorOnlyPayload(
   payload: MachineUpdatePayload,
@@ -37,9 +48,23 @@ function isLateralSensorOnlyPayload(
   )
 }
 
+function isWheelRealtimeOnlyPayload(payload: MachineUpdatePayload) {
+  const payloadKeys = Object.keys(payload) as Array<keyof MachineUpdatePayload>
+
+  return (
+    payloadKeys.length > 0 &&
+    payloadKeys.every((key) => WHEEL_REALTIME_KEYS.has(key)) &&
+    (
+      payload.wheel_position_degrees !== undefined ||
+      payload.wheel_total_turns !== undefined
+    )
+  )
+}
+
 export function MachineProvider({ children }: MachineProviderProps) {
   const [state, dispatch] = useReducer(machineReducer, initialMachineState)
   const lateralBufferRef = useRef<number[]>([])
+  const wheelBufferRef = useRef<MachineUpdatePayload[]>([])
 
   const playNextLateralValue = useCallback(() => {
     const lateralValue = lateralBufferRef.current.shift()
@@ -67,6 +92,43 @@ export function MachineProvider({ children }: MachineProviderProps) {
     }
   }, [])
 
+  const playNextWheelPayload = useCallback(() => {
+    const wheelPayload = wheelBufferRef.current.shift()
+
+    if (wheelPayload === undefined) {
+      return
+    }
+
+    dispatch({
+      type: 'MACHINE_UPDATED',
+      payload: wheelPayload,
+    })
+  }, [])
+
+  const enqueueWheelRealtimePayload = useCallback((
+    wheelPayload: MachineUpdatePayload,
+  ) => {
+    if (wheelPayload.wheel_is_running === false) {
+      wheelBufferRef.current = []
+
+      dispatch({
+        type: 'MACHINE_UPDATED',
+        payload: wheelPayload,
+      })
+
+      return
+    }
+
+    wheelBufferRef.current.push(wheelPayload)
+
+    const overflow =
+      wheelBufferRef.current.length - MAX_WHEEL_BUFFER_POINTS
+
+    if (overflow > 0) {
+      wheelBufferRef.current.splice(0, overflow)
+    }
+  }, [])
+
   useEffect(() => {
     const intervalId = window.setInterval(
       playNextLateralValue,
@@ -77,6 +139,17 @@ export function MachineProvider({ children }: MachineProviderProps) {
       window.clearInterval(intervalId)
     }
   }, [playNextLateralValue])
+
+  useEffect(() => {
+    const intervalId = window.setInterval(
+      playNextWheelPayload,
+      WHEEL_PLAYBACK_INTERVAL_MS,
+    )
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [playNextWheelPayload])
 
   const handleConnected = useCallback(() => {
     dispatch({ type: 'SOCKET_CONNECTED' })
@@ -135,8 +208,18 @@ export function MachineProvider({ children }: MachineProviderProps) {
         return
       }
 
+      if (isWheelRealtimeOnlyPayload(message.payload)) {
+        enqueueWheelRealtimePayload(message.payload)
+
+        return
+      }
+
       if (message.payload.is_lateral_reading_enabled === false) {
         lateralBufferRef.current = []
+      }
+
+      if (message.payload.wheel_is_running === false) {
+        wheelBufferRef.current = []
       }
 
       dispatch({
@@ -268,7 +351,7 @@ export function MachineProvider({ children }: MachineProviderProps) {
         },
       })
     }
-  }, [enqueueLateralSensorValue])
+  }, [enqueueLateralSensorValue, enqueueWheelRealtimePayload])
 
   const { send } = useMachineSocket({
     onConnected: handleConnected,

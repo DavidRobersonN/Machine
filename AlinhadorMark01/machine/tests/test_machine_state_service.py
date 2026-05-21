@@ -52,6 +52,9 @@ def make_expected_payload(
     wheel_total_spokes=36,
     wheel_is_positioning=False,
     lateral_misalignment_current=0.0,
+    spoke_tension_left_kg=0.0,
+    spoke_tension_right_kg=0.0,
+    is_spoke_tension_collecting=False,
 ):
     return {
         'led': led,
@@ -70,6 +73,9 @@ def make_expected_payload(
         'wheel_total_spokes': wheel_total_spokes,
         'wheel_is_positioning': wheel_is_positioning,
         'lateral_misalignment_current': lateral_misalignment_current,
+        'spoke_tension_left_kg': spoke_tension_left_kg,
+        'spoke_tension_right_kg': spoke_tension_right_kg,
+        'is_spoke_tension_collecting': is_spoke_tension_collecting,
     }
 
 

@@ -53,6 +53,28 @@ class MachineConsumer(WebsocketConsumer):
 
         return True
 
+    def handle_spoke_tension_line(self, line: str) -> bool:
+        if not line.startswith('SPOKE_TENSION:'):
+            return False
+
+        values = line.replace('SPOKE_TENSION:', '', 1).split(',')
+
+        if len(values) != 2:
+            return False
+
+        try:
+            left_kg = float(values[0])
+            right_kg = float(values[1])
+        except ValueError:
+            return False
+
+        self.machine_state_service.update_state({
+            'spoke_tension_left_kg': left_kg,
+            'spoke_tension_right_kg': right_kg,
+        })
+
+        return True
+
     def handle_serial_json_message(self, data: dict) -> bool:
         """
         Trata mensagens JSON recebidas diretamente do Arduino pela serial.
@@ -171,6 +193,33 @@ class MachineConsumer(WebsocketConsumer):
 
             return True
 
+        if message_type == 'spoke_tension_status':
+            payload = {
+                'spoke_tension_left_kg': data.get('left_kg'),
+                'spoke_tension_right_kg': data.get('right_kg'),
+                'is_spoke_tension_collecting': data.get('collecting'),
+            }
+
+            clean_payload = {
+                key: value
+                for key, value in payload.items()
+                if value is not None
+            }
+
+            if clean_payload:
+                self.machine_state_service.update_state(clean_payload)
+
+            self.send(text_data=json.dumps({
+                'type': 'serial_message',
+                'direction': 'received',
+                'message': data.get(
+                    'message',
+                    'Status da tensão dos raios atualizado',
+                ),
+            }))
+
+            return True
+
         return False
 
         if message_type == 'lateral_sensor_status':
@@ -229,6 +278,9 @@ class MachineConsumer(WebsocketConsumer):
                     continue
 
                 if self.handle_wheel_position_line(line):
+                    continue
+
+                if self.handle_spoke_tension_line(line):
                     continue
 
                 print(f'[Serial Listener] Recebido: {line}')

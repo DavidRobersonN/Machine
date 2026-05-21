@@ -28,6 +28,10 @@ describe('machineReducer', () => {
       lateral_misalignment_current: 0,
       lateral_misalignment_history: [],
       is_lateral_reading_enabled: false,
+
+      spoke_tension_left_kg: 0,
+      spoke_tension_right_kg: 0,
+      is_spoke_tension_collecting: false,
     })
   })
 
@@ -443,6 +447,21 @@ describe('machineReducer', () => {
     expect(newState.is_lateral_reading_enabled).toBe(false)
   })
 
+  it('deve atualizar a tensão dos raios via MACHINE_UPDATED', () => {
+    const newState = machineReducer(initialMachineState, {
+      type: 'MACHINE_UPDATED',
+      payload: {
+        spoke_tension_left_kg: 42.5,
+        spoke_tension_right_kg: 40.75,
+        is_spoke_tension_collecting: true,
+      },
+    })
+
+    expect(newState.spoke_tension_left_kg).toBe(42.5)
+    expect(newState.spoke_tension_right_kg).toBe(40.75)
+    expect(newState.is_spoke_tension_collecting).toBe(true)
+  })
+
   it('não deve apagar dados antigos quando MACHINE_UPDATED vier parcial', () => {
     const state = {
       ...initialMachineState,
@@ -465,6 +484,10 @@ describe('machineReducer', () => {
 
       lateral_misalignment_current: 8.2,
       is_lateral_reading_enabled: true,
+
+      spoke_tension_left_kg: 42.5,
+      spoke_tension_right_kg: 40.75,
+      is_spoke_tension_collecting: true,
     }
 
     const newState = machineReducer(state, {
@@ -493,6 +516,9 @@ describe('machineReducer', () => {
 
     expect(newState.lateral_misalignment_current).toBe(8.2)
     expect(newState.is_lateral_reading_enabled).toBe(true)
+    expect(newState.spoke_tension_left_kg).toBe(42.5)
+    expect(newState.spoke_tension_right_kg).toBe(40.75)
+    expect(newState.is_spoke_tension_collecting).toBe(true)
     expect(newState.arduino_connected).toBe('Conectado')
   })
 

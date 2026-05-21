@@ -5,12 +5,14 @@
 #include "Led.h"
 #include "LateralSensor.h"
 #include "MotorRoda.h"
+#include "SpokeTensionSensor.h"
 
 class SerialCommandHandler {
 private:
   Led& led;
   LateralSensor& lateralSensor;
   MotorRoda& motorRoda;
+  SpokeTensionSensor& spokeTensionSensor;
 
   String inputBuffer;
 
@@ -23,7 +25,8 @@ public:
   SerialCommandHandler(
     Led& ledReference,
     LateralSensor& lateralSensorReference,
-    MotorRoda& motorRodaReference
+    MotorRoda& motorRodaReference,
+    SpokeTensionSensor& spokeTensionSensorReference
   );
 
   void update();

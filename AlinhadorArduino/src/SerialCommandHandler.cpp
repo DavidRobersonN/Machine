@@ -3,11 +3,13 @@
 SerialCommandHandler::SerialCommandHandler(
   Led& ledReference,
   LateralSensor& lateralSensorReference,
-  MotorRoda& motorRodaReference
+  MotorRoda& motorRodaReference,
+  SpokeTensionSensor& spokeTensionSensorReference
 )
   : led(ledReference),
     lateralSensor(lateralSensorReference),
-    motorRoda(motorRodaReference)
+    motorRoda(motorRodaReference),
+    spokeTensionSensor(spokeTensionSensorReference)
 {
   inputBuffer = "";
 }
@@ -106,6 +108,58 @@ void SerialCommandHandler::handleCommand(String command) {
 
   if (command == "READ_LATERAL_SENSOR") {
     lateralSensor.sendNow();
+    return;
+  }
+
+  // =======================
+  // TENSÃO DOS RAIOS - HX711
+  // =======================
+
+  if (command == "SPOKE_TENSION_START_COLLECTION") {
+    spokeTensionSensor.startCollection();
+    return;
+  }
+
+  if (command == "SPOKE_TENSION_STOP_COLLECTION") {
+    spokeTensionSensor.stopCollection();
+    return;
+  }
+
+  if (command == "SPOKE_TENSION_STATUS") {
+    spokeTensionSensor.sendStatus();
+    return;
+  }
+
+  if (command == "SPOKE_TENSION_TARE:LEFT") {
+    spokeTensionSensor.tareLeft();
+    return;
+  }
+
+  if (command == "SPOKE_TENSION_TARE:RIGHT") {
+    spokeTensionSensor.tareRight();
+    return;
+  }
+
+  if (command == "SPOKE_TENSION_TARE:BOTH") {
+    spokeTensionSensor.tareBoth();
+    return;
+  }
+
+  if (command.startsWith("SPOKE_TENSION_SET_CALIBRATION:LEFT:")) {
+    String value = command.substring(
+      String("SPOKE_TENSION_SET_CALIBRATION:LEFT:").length()
+    );
+
+    spokeTensionSensor.setLeftCalibrationFactor(value.toFloat());
+    return;
+  }
+
+  if (command.startsWith("SPOKE_TENSION_SET_CALIBRATION:RIGHT:")) {
+    String value = command.substring(
+      String("SPOKE_TENSION_SET_CALIBRATION:RIGHT:").length()
+    );
+
+    spokeTensionSensor.setRightCalibrationFactor(value.toFloat());
     return;
   }
 

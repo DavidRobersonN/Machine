@@ -8,6 +8,7 @@ type MenuScreenProps = {
   onSelectMotors: () => void
   onSelectAlignment: () => void
   onSelectWheelMap: () => void
+  onSelectSpokeTension: () => void
 }
 
 type MenuCard = {
@@ -25,6 +26,7 @@ function MenuScreenComponent({
   onSelectMotors,
   onSelectAlignment,
   onSelectWheelMap,
+  onSelectSpokeTension,
 }: MenuScreenProps) {
   const menuCards = useMemo<MenuCard[]>(
     () => [
@@ -42,6 +44,14 @@ function MenuScreenComponent({
         badge: 'Sensor',
         icon: 'L',
         onClick: onSelectAlignment,
+        featured: true,
+      },
+      {
+        title: 'Tensao dos raios',
+        description: 'Meça os pares de raios com celulas de carga HX711.',
+        badge: 'HX711',
+        icon: 'T',
+        onClick: onSelectSpokeTension,
         featured: true,
       },
       {
@@ -73,6 +83,7 @@ function MenuScreenComponent({
       onSelectMotors,
       onSelectAlignment,
       onSelectWheelMap,
+      onSelectSpokeTension,
     ],
   )
 

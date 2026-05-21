@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useMachineContext } from '../../../context/useMachineContext'
+import {
+  getSafeTotalSpokes,
+  getWheelReferenceAngle,
+  getWrappedSpoke,
+} from '../../../utils/wheelReference'
 
 import './WheelAlignmentMapScreen.css'
 
@@ -9,10 +14,6 @@ type WheelMapPoint = {
   angle: number
   value: number
   captureId: number
-}
-
-function normalizeDegrees(value: number) {
-  return ((value % 360) + 360) % 360
 }
 
 function getPointStatus(value: number) {
@@ -58,10 +59,10 @@ export function WheelAlignmentMapScreen() {
   const nextCaptureIdRef = useRef(1)
   const lastCapturedSpokeRef = useRef<number | null>(null)
 
-  const totalSpokes = Math.max(state.wheel_total_spokes, 1)
+  const totalSpokes = getSafeTotalSpokes(state.wheel_total_spokes)
   const degreesPerSpoke = 360 / totalSpokes
-  const currentAngle = normalizeDegrees(state.wheel_position_degrees)
-  const currentSpoke = state.wheel_current_spoke
+  const currentAngle = getWheelReferenceAngle(state)
+  const currentSpoke = getWrappedSpoke(state.wheel_current_spoke, totalSpokes)
   const lateralValue = state.lateral_misalignment_current
 
   const capturePoint = useCallback((spoke: number, angle: number, value: number) => {
@@ -202,6 +203,7 @@ export function WheelAlignmentMapScreen() {
     setIsAutoCollecting(false)
     lastCapturedSpokeRef.current = null
     sendCommand({ action: 'motor_roda_stop' })
+    sendCommand({ action: 'lateral_sensor_stop_reading' })
   }
 
   function handleCaptureAndNext() {

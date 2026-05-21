@@ -183,6 +183,7 @@ function getBottomActions({
 
     case 'alignment':
     case 'wheelMap':
+    case 'spokeTension':
       return [
         {
           label: 'Voltar ao menu',

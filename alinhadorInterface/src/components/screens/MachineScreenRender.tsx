@@ -7,6 +7,7 @@ import { StartScreen } from './StartScreen/StartScreen'
 import { MotorsScreen } from '../screens/MotorsScreen/MotorsScreen'
 import { LateralAlignmentScreen } from './LateralAlignmentScreen/LateralAlignmentScreen'
 import { WheelAlignmentMapScreen } from './WheelAlignmentMapScreen/WheelAlignmentMapScreen'
+import { SpokeTensionScreen } from './SpokeTensionScreen/SpokeTensionScreen'
 
 import type { AppScreen } from '../../types/navigation'
 
@@ -78,6 +79,10 @@ function MachineScreenRendererComponent(props: MachineScreenRendererProps) {
     onGoToScreen('wheelMap')
   }, [onGoToScreen])
 
+  const handleSelectSpokeTension = useCallback(() => {
+    onGoToScreen('spokeTension')
+  }, [onGoToScreen])
+
   switch (currentScreen) {
     case 'start':
       return <StartScreen />
@@ -90,6 +95,7 @@ function MachineScreenRendererComponent(props: MachineScreenRendererProps) {
           onSelectMotors={handleSelectMotors}
           onSelectAlignment={handleSelectAlignment}
           onSelectWheelMap={handleSelectWheelMap}
+          onSelectSpokeTension={handleSelectSpokeTension}
         />
       )
 
@@ -106,6 +112,9 @@ function MachineScreenRendererComponent(props: MachineScreenRendererProps) {
 
     case 'wheelMap':
       return <WheelAlignmentMapScreen />
+
+    case 'spokeTension':
+      return <SpokeTensionScreen />
 
     case 'logs':
       return <LogsScreen logs={logs} />
@@ -155,6 +164,7 @@ function areMachineScreenRendererPropsEqual(
       )
 
     case 'wheelMap':
+    case 'spokeTension':
       return true
 
     case 'logs':
