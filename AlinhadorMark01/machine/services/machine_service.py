@@ -20,6 +20,14 @@ class MachineService:
     SPEED_STEP = 5
     MIN_SPEED = 0
     MAX_SPEED = 100
+    PNEUMATIC_CYLINDER_STATE_FIELDS = {
+        'spoke_tension_left': 'pneumatic_spoke_tension_left_extended',
+        'spoke_tension_right': 'pneumatic_spoke_tension_right_extended',
+        'nipple_arm_left': 'pneumatic_nipple_arm_left_extended',
+        'nipple_arm_right': 'pneumatic_nipple_arm_right_extended',
+        'nipple_lift_left': 'pneumatic_nipple_lift_left_extended',
+        'nipple_lift_right': 'pneumatic_nipple_lift_right_extended',
+    }
 
     def __init__(self):
         self.serial_service = SerialService(
@@ -67,6 +75,13 @@ class MachineService:
 
         if action == 'spoke_tension_status':
             return self.serial_service.send_command('SPOKE_TENSION_STATUS')
+
+        # =========================
+        # CILINDROS PNEUMATICOS
+        # =========================
+
+        if action == 'pneumatic_cylinder_move':
+            return self.pneumatic_cylinder_move(data)
 
         # =========================
         # MOTOR DA RODA
@@ -223,6 +238,34 @@ class MachineService:
                 None,
             ),
             (
+                'CONFIG_PNEUMATIC_CYLINDER_PIN:spoke_tension_left',
+                config.pneumatic_spoke_tension_left_pin,
+            ),
+            (
+                'CONFIG_PNEUMATIC_CYLINDER_PIN:spoke_tension_right',
+                config.pneumatic_spoke_tension_right_pin,
+            ),
+            (
+                'CONFIG_PNEUMATIC_CYLINDER_PIN:nipple_arm_left',
+                config.pneumatic_nipple_arm_left_pin,
+            ),
+            (
+                'CONFIG_PNEUMATIC_CYLINDER_PIN:nipple_arm_right',
+                config.pneumatic_nipple_arm_right_pin,
+            ),
+            (
+                'CONFIG_PNEUMATIC_CYLINDER_PIN:nipple_lift_left',
+                config.pneumatic_nipple_lift_left_pin,
+            ),
+            (
+                'CONFIG_PNEUMATIC_CYLINDER_PIN:nipple_lift_right',
+                config.pneumatic_nipple_lift_right_pin,
+            ),
+            (
+                'CONFIG_PNEUMATIC_CYLINDERS_STATUS',
+                None,
+            ),
+            (
                 'SPOKE_TENSION_SET_CALIBRATION:LEFT',
                 config.spoke_tension_left_calibration_factor,
             ),
@@ -368,6 +411,46 @@ class MachineService:
 
         return self.serial_service.send_command(command)
 
+    # =========================
+    # CILINDROS PNEUMATICOS
+    # =========================
+
+    def pneumatic_cylinder_move(self, data: dict) -> dict:
+        cylinder = data.get('cylinder')
+        position = data.get('position')
+
+        if cylinder not in self.PNEUMATIC_CYLINDER_STATE_FIELDS:
+            return {
+                'type': 'error',
+                'message': f'Cilindro pneumático inválido: {cylinder}',
+            }
+
+        if position not in {'extended', 'retracted'}:
+            return {
+                'type': 'error',
+                'message': f'Posição inválida para cilindro: {position}',
+            }
+
+        serial_action = 'EXTEND' if position == 'extended' else 'RETRACT'
+        command = f'PNEUMATIC_CYLINDER:{cylinder}:{serial_action}'
+        serial_result = self.serial_service.send_command(command)
+
+        state_field = self.PNEUMATIC_CYLINDER_STATE_FIELDS[cylinder]
+
+        self.machine_state_service.update_state({
+            state_field: position == 'extended',
+        })
+
+        return {
+            'type': 'log',
+            'direction': 'received',
+            'message': self.get_serial_message(
+                serial_result,
+                f'Cilindro {cylinder} definido como {position}',
+            ),
+            'serial': serial_result,
+        }
+
     def sync_wheel_positioning_config(self) -> None:
         """
         Reenvia a calibracao usada nos comandos de posicionamento da roda.
@@ -395,6 +478,30 @@ class MachineService:
             (
                 'CONFIG_MOTOR_ACCELERATION',
                 config.motor_acceleration,
+            ),
+            (
+                'CONFIG_PNEUMATIC_CYLINDER_PIN:spoke_tension_left',
+                config.pneumatic_spoke_tension_left_pin,
+            ),
+            (
+                'CONFIG_PNEUMATIC_CYLINDER_PIN:spoke_tension_right',
+                config.pneumatic_spoke_tension_right_pin,
+            ),
+            (
+                'CONFIG_PNEUMATIC_CYLINDER_PIN:nipple_arm_left',
+                config.pneumatic_nipple_arm_left_pin,
+            ),
+            (
+                'CONFIG_PNEUMATIC_CYLINDER_PIN:nipple_arm_right',
+                config.pneumatic_nipple_arm_right_pin,
+            ),
+            (
+                'CONFIG_PNEUMATIC_CYLINDER_PIN:nipple_lift_left',
+                config.pneumatic_nipple_lift_left_pin,
+            ),
+            (
+                'CONFIG_PNEUMATIC_CYLINDER_PIN:nipple_lift_right',
+                config.pneumatic_nipple_lift_right_pin,
             ),
         ]
 

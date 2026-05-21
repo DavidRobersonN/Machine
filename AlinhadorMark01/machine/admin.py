@@ -17,6 +17,8 @@ class MachineStateAdmin(admin.ModelAdmin):
         'spoke_tension_left_kg',
         'spoke_tension_right_kg',
         'is_spoke_tension_collecting',
+        'pneumatic_spoke_tension_left_extended',
+        'pneumatic_spoke_tension_right_extended',
         'updated_at',
     )
 
@@ -57,6 +59,19 @@ class MachineStateAdmin(admin.ModelAdmin):
             },
         ),
         (
+            'Cilindros pneumáticos',
+            {
+                'fields': (
+                    'pneumatic_spoke_tension_left_extended',
+                    'pneumatic_spoke_tension_right_extended',
+                    'pneumatic_nipple_arm_left_extended',
+                    'pneumatic_nipple_arm_right_extended',
+                    'pneumatic_nipple_lift_left_extended',
+                    'pneumatic_nipple_lift_right_extended',
+                )
+            },
+        ),
+        (
             'Tensão dos raios - HX711',
             {
                 'fields': (
@@ -80,6 +95,8 @@ class MachineConfigAdmin(admin.ModelAdmin):
         'motor_turns_per_wheel_turn',
         'spoke_tension_left_calibration_factor',
         'spoke_tension_right_calibration_factor',
+        'pneumatic_spoke_tension_left_pin',
+        'pneumatic_spoke_tension_right_pin',
         'serial_baudrate',
         'updated_at',
     )
@@ -162,6 +179,19 @@ class MachineConfigAdmin(admin.ModelAdmin):
                     'spoke_tension_left_calibration_factor',
                     'spoke_tension_right_calibration_factor',
                     'spoke_tension_read_interval_ms',
+                )
+            },
+        ),
+        (
+            'Pinos dos cilindros pneumÃ¡ticos',
+            {
+                'fields': (
+                    'pneumatic_spoke_tension_left_pin',
+                    'pneumatic_spoke_tension_right_pin',
+                    'pneumatic_nipple_arm_left_pin',
+                    'pneumatic_nipple_arm_right_pin',
+                    'pneumatic_nipple_lift_left_pin',
+                    'pneumatic_nipple_lift_right_pin',
                 )
             },
         ),

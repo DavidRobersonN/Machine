@@ -8,3 +8,4 @@ export type AppScreen =
   | 'alignment'
   | 'wheelMap'
   | 'spokeTension'
+  | 'cylinders'

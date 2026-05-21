@@ -72,4 +72,15 @@ export interface MachineState {
   spoke_tension_left_kg: number
   spoke_tension_right_kg: number
   is_spoke_tension_collecting: boolean
+
+  // =======================
+  // CILINDROS PNEUMATICOS
+  // =======================
+
+  pneumatic_spoke_tension_left_extended: boolean
+  pneumatic_spoke_tension_right_extended: boolean
+  pneumatic_nipple_arm_left_extended: boolean
+  pneumatic_nipple_arm_right_extended: boolean
+  pneumatic_nipple_lift_left_extended: boolean
+  pneumatic_nipple_lift_right_extended: boolean
 }

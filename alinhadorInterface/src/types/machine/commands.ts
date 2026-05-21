@@ -155,6 +155,22 @@ export interface SpokeTensionStatusCommand {
 }
 
 // =======================
+// CILINDROS PNEUMATICOS
+// =======================
+
+export interface PneumaticCylinderMoveCommand {
+  action: 'pneumatic_cylinder_move'
+  cylinder:
+    | 'spoke_tension_left'
+    | 'spoke_tension_right'
+    | 'nipple_arm_left'
+    | 'nipple_arm_right'
+    | 'nipple_lift_left'
+    | 'nipple_lift_right'
+  position: 'extended' | 'retracted'
+}
+
+// =======================
 // UNION PRINCIPAL
 // =======================
 
@@ -184,3 +200,4 @@ export type MachineCommand =
   | SpokeTensionTareCommand
   | SpokeTensionSetCalibrationCommand
   | SpokeTensionStatusCommand
+  | PneumaticCylinderMoveCommand

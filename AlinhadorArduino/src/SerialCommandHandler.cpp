@@ -4,11 +4,13 @@ SerialCommandHandler::SerialCommandHandler(
   Led& ledReference,
   LateralSensor& lateralSensorReference,
   MotorRoda& motorRodaReference,
+  PneumaticCylinders& pneumaticCylindersReference,
   SpokeTensionSensor& spokeTensionSensorReference
 )
   : led(ledReference),
     lateralSensor(lateralSensorReference),
     motorRoda(motorRodaReference),
+    pneumaticCylinders(pneumaticCylindersReference),
     spokeTensionSensor(spokeTensionSensorReference)
 {
   inputBuffer = "";
@@ -92,6 +94,29 @@ void SerialCommandHandler::handleCommand(String command) {
     return;
   }
 
+  if (command.startsWith("CONFIG_PNEUMATIC_CYLINDER_PIN:")) {
+    String payload = command.substring(
+      String("CONFIG_PNEUMATIC_CYLINDER_PIN:").length()
+    );
+    int separatorIndex = payload.indexOf(':');
+
+    if (separatorIndex < 0) {
+      sendUnknownCommandError(command);
+      return;
+    }
+
+    String cylinderId = payload.substring(0, separatorIndex);
+    int pin = payload.substring(separatorIndex + 1).toInt();
+
+    pneumaticCylinders.setPin(cylinderId, pin);
+    return;
+  }
+
+  if (command == "CONFIG_PNEUMATIC_CYLINDERS_STATUS") {
+    pneumaticCylinders.sendStatus();
+    return;
+  }
+
   // =======================
   // SENSOR LATERAL
   // =======================
@@ -160,6 +185,38 @@ void SerialCommandHandler::handleCommand(String command) {
     );
 
     spokeTensionSensor.setRightCalibrationFactor(value.toFloat());
+    return;
+  }
+
+  // =======================
+  // CILINDROS PNEUMATICOS
+  // =======================
+
+  if (command.startsWith("PNEUMATIC_CYLINDER:")) {
+    String payload = command.substring(
+      String("PNEUMATIC_CYLINDER:").length()
+    );
+    int separatorIndex = payload.indexOf(':');
+
+    if (separatorIndex < 0) {
+      sendUnknownCommandError(command);
+      return;
+    }
+
+    String cylinderId = payload.substring(0, separatorIndex);
+    String action = payload.substring(separatorIndex + 1);
+
+    pneumaticCylinders.move(cylinderId, action);
+    return;
+  }
+
+  if (command == "PNEUMATIC_CYLINDERS_RETRACT_ALL") {
+    pneumaticCylinders.retractAll();
+    return;
+  }
+
+  if (command == "PNEUMATIC_CYLINDERS_STATUS") {
+    pneumaticCylinders.sendStatus();
     return;
   }
 

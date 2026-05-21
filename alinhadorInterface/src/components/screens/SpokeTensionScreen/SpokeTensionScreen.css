@@ -263,16 +263,6 @@
   stroke-width: 4;
 }
 
-.spoke-tension-wheel__spoke.is-left-measured {
-  stroke: #2563eb;
-  stroke-width: 5.5;
-}
-
-.spoke-tension-wheel__spoke.is-right-measured {
-  stroke: #16a34a;
-  stroke-width: 5.5;
-}
-
 .spoke-tension-wheel__fixture {
   filter: drop-shadow(0 2px 2px rgba(15, 23, 42, 0.16));
 }
@@ -303,6 +293,38 @@
 
 .spoke-tension-wheel__fixture--right circle {
   stroke: #16a34a;
+}
+
+.spoke-tension-wheel__press-line {
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 7 6;
+  opacity: 0.78;
+  pointer-events: none;
+}
+
+.spoke-tension-wheel__press-line--left {
+  stroke: #2563eb;
+}
+
+.spoke-tension-wheel__press-line--right {
+  stroke: #16a34a;
+}
+
+.spoke-tension-wheel__press-label {
+  paint-order: stroke;
+  stroke: #ffffff;
+  stroke-width: 4;
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.spoke-tension-wheel__press-label--left {
+  fill: #1d4ed8;
+}
+
+.spoke-tension-wheel__press-label--right {
+  fill: #15803d;
 }
 
 .spoke-tension-wheel__reference {

@@ -9,6 +9,7 @@ type MenuScreenProps = {
   onSelectAlignment: () => void
   onSelectWheelMap: () => void
   onSelectSpokeTension: () => void
+  onSelectCylinders: () => void
 }
 
 type MenuCard = {
@@ -27,6 +28,7 @@ function MenuScreenComponent({
   onSelectAlignment,
   onSelectWheelMap,
   onSelectSpokeTension,
+  onSelectCylinders,
 }: MenuScreenProps) {
   const menuCards = useMemo<MenuCard[]>(
     () => [
@@ -52,6 +54,14 @@ function MenuScreenComponent({
         badge: 'HX711',
         icon: 'T',
         onClick: onSelectSpokeTension,
+        featured: true,
+      },
+      {
+        title: 'Cilindros pneumaticos',
+        description: 'Teste avanco e recuo dos cilindros da maquina.',
+        badge: 'Pneumatica',
+        icon: 'P',
+        onClick: onSelectCylinders,
         featured: true,
       },
       {
@@ -84,6 +94,7 @@ function MenuScreenComponent({
       onSelectAlignment,
       onSelectWheelMap,
       onSelectSpokeTension,
+      onSelectCylinders,
     ],
   )
 

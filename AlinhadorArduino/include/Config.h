@@ -22,6 +22,14 @@ const int SPOKE_TENSION_LEFT_SCK_PIN = 2;
 const int SPOKE_TENSION_RIGHT_DOUT_PIN = 5;
 const int SPOKE_TENSION_RIGHT_SCK_PIN = 4;
 
+// Valvulas solenoides dos cilindros pneumaticos
+const int PNEUMATIC_SPOKE_TENSION_LEFT_PIN = 22;
+const int PNEUMATIC_SPOKE_TENSION_RIGHT_PIN = 23;
+const int PNEUMATIC_NIPPLE_ARM_LEFT_PIN = 24;
+const int PNEUMATIC_NIPPLE_ARM_RIGHT_PIN = 25;
+const int PNEUMATIC_NIPPLE_LIFT_LEFT_PIN = 26;
+const int PNEUMATIC_NIPPLE_LIFT_RIGHT_PIN = 27;
+
 // =======================
 // CONFIGURAÇÕES DO MOTOR
 // =======================

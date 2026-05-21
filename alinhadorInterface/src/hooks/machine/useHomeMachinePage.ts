@@ -184,6 +184,7 @@ function getBottomActions({
     case 'alignment':
     case 'wheelMap':
     case 'spokeTension':
+    case 'cylinders':
       return [
         {
           label: 'Voltar ao menu',

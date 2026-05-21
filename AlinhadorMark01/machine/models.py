@@ -7,6 +7,13 @@ class MachineState(models.Model):
     Aqui fica a "foto atual" do sistema.
     """
 
+    id = models.BigAutoField(
+        auto_created=True,
+        primary_key=True,
+        serialize=False,
+        verbose_name='ID',
+    )
+
     led = models.CharField(max_length=3, default='OFF')
 
     updated_at = models.DateTimeField(auto_now=True)
@@ -68,6 +75,17 @@ class MachineState(models.Model):
     spoke_tension_right_kg = models.FloatField(default=0)
     is_spoke_tension_collecting = models.BooleanField(default=False)
 
+    # =========================
+    # CILINDROS PNEUMATICOS
+    # =========================
+
+    pneumatic_spoke_tension_left_extended = models.BooleanField(default=False)
+    pneumatic_spoke_tension_right_extended = models.BooleanField(default=False)
+    pneumatic_nipple_arm_left_extended = models.BooleanField(default=False)
+    pneumatic_nipple_arm_right_extended = models.BooleanField(default=False)
+    pneumatic_nipple_lift_left_extended = models.BooleanField(default=False)
+    pneumatic_nipple_lift_right_extended = models.BooleanField(default=False)
+
     def __str__(self):
         return (
             f'MachineState #{self.id} - '
@@ -83,7 +101,14 @@ class MachineState(models.Model):
             f'Motor/Wheel Ratio: {self.motor_turns_per_wheel_turn}, '
             f'Lateral Misalignment: {self.lateral_misalignment_current}, '
             f'Spoke Tension L/R: {self.spoke_tension_left_kg}/'
-            f'{self.spoke_tension_right_kg}'
+            f'{self.spoke_tension_right_kg}, '
+            f'Pneumatic cylinders: '
+            f'{self.pneumatic_spoke_tension_left_extended}/'
+            f'{self.pneumatic_spoke_tension_right_extended}/'
+            f'{self.pneumatic_nipple_arm_left_extended}/'
+            f'{self.pneumatic_nipple_arm_right_extended}/'
+            f'{self.pneumatic_nipple_lift_left_extended}/'
+            f'{self.pneumatic_nipple_lift_right_extended}'
         )
 
 
@@ -97,6 +122,13 @@ class MachineConfig(models.Model):
     A ideia é permitir alterar esses valores pelo Django Admin sem precisar
     modificar o código do Arduino ou do backend a cada teste.
     """
+
+    id = models.BigAutoField(
+        auto_created=True,
+        primary_key=True,
+        serialize=False,
+        verbose_name='ID',
+    )
 
     name = models.CharField(
         max_length=100,
@@ -249,6 +281,46 @@ class MachineConfig(models.Model):
         'Intervalo de leitura em ms',
         default=80,
         help_text='Intervalo de leitura/envio dos HX711 em milissegundos.',
+    )
+
+    # =========================
+    # CILINDROS PNEUMATICOS
+    # =========================
+
+    pneumatic_spoke_tension_left_pin = models.IntegerField(
+        'Cilindro tensao esquerdo',
+        default=22,
+        help_text='Pino da valvula solenoide do cilindro de tensao esquerdo.',
+    )
+
+    pneumatic_spoke_tension_right_pin = models.IntegerField(
+        'Cilindro tensao direito',
+        default=23,
+        help_text='Pino da valvula solenoide do cilindro de tensao direito.',
+    )
+
+    pneumatic_nipple_arm_left_pin = models.IntegerField(
+        'Cilindro avanco horizontal esquerdo',
+        default=24,
+        help_text='Pino da valvula do avanco horizontal esquerdo do mecanismo do niple.',
+    )
+
+    pneumatic_nipple_arm_right_pin = models.IntegerField(
+        'Cilindro avanco horizontal direito',
+        default=25,
+        help_text='Pino da valvula do avanco horizontal direito do mecanismo do niple.',
+    )
+
+    pneumatic_nipple_lift_left_pin = models.IntegerField(
+        'Cilindro sobe/desce esquerdo',
+        default=26,
+        help_text='Pino da valvula do cilindro vertical esquerdo do mecanismo do niple.',
+    )
+
+    pneumatic_nipple_lift_right_pin = models.IntegerField(
+        'Cilindro sobe/desce direito',
+        default=27,
+        help_text='Pino da valvula do cilindro vertical direito do mecanismo do niple.',
     )
 
     # =========================

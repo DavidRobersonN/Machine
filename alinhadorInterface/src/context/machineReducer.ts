@@ -34,6 +34,13 @@ export const initialMachineState: MachineState = {
   spoke_tension_left_kg: 0,
   spoke_tension_right_kg: 0,
   is_spoke_tension_collecting: false,
+
+  pneumatic_spoke_tension_left_extended: false,
+  pneumatic_spoke_tension_right_extended: false,
+  pneumatic_nipple_arm_left_extended: false,
+  pneumatic_nipple_arm_right_extended: false,
+  pneumatic_nipple_lift_left_extended: false,
+  pneumatic_nipple_lift_right_extended: false,
 }
 
 function addLateralMisalignmentPoint(
@@ -247,6 +254,36 @@ export function machineReducer(
           action.payload.is_spoke_tension_collecting !== undefined
             ? action.payload.is_spoke_tension_collecting
             : state.is_spoke_tension_collecting,
+
+        pneumatic_spoke_tension_left_extended:
+          action.payload.pneumatic_spoke_tension_left_extended !== undefined
+            ? action.payload.pneumatic_spoke_tension_left_extended
+            : state.pneumatic_spoke_tension_left_extended,
+
+        pneumatic_spoke_tension_right_extended:
+          action.payload.pneumatic_spoke_tension_right_extended !== undefined
+            ? action.payload.pneumatic_spoke_tension_right_extended
+            : state.pneumatic_spoke_tension_right_extended,
+
+        pneumatic_nipple_arm_left_extended:
+          action.payload.pneumatic_nipple_arm_left_extended !== undefined
+            ? action.payload.pneumatic_nipple_arm_left_extended
+            : state.pneumatic_nipple_arm_left_extended,
+
+        pneumatic_nipple_arm_right_extended:
+          action.payload.pneumatic_nipple_arm_right_extended !== undefined
+            ? action.payload.pneumatic_nipple_arm_right_extended
+            : state.pneumatic_nipple_arm_right_extended,
+
+        pneumatic_nipple_lift_left_extended:
+          action.payload.pneumatic_nipple_lift_left_extended !== undefined
+            ? action.payload.pneumatic_nipple_lift_left_extended
+            : state.pneumatic_nipple_lift_left_extended,
+
+        pneumatic_nipple_lift_right_extended:
+          action.payload.pneumatic_nipple_lift_right_extended !== undefined
+            ? action.payload.pneumatic_nipple_lift_right_extended
+            : state.pneumatic_nipple_lift_right_extended,
       }
     }
 

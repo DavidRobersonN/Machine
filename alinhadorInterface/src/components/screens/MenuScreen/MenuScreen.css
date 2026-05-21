@@ -12,7 +12,8 @@
   gap: 18px;
 
   box-sizing: border-box;
-  overflow: hidden;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 /* =========================
@@ -77,6 +78,7 @@
   gap: 14px;
 
   box-sizing: border-box;
+  padding-bottom: 8px;
 }
 
 /* =========================

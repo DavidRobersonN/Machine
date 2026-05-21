@@ -14,6 +14,14 @@ class MachineStateService:
     SPEED_STEP = 5
     MIN_SPEED = 0
     MAX_SPEED = 100
+    PNEUMATIC_STATE_FIELDS = (
+        'pneumatic_spoke_tension_left_extended',
+        'pneumatic_spoke_tension_right_extended',
+        'pneumatic_nipple_arm_left_extended',
+        'pneumatic_nipple_arm_right_extended',
+        'pneumatic_nipple_lift_left_extended',
+        'pneumatic_nipple_lift_right_extended',
+    )
 
     # Define a velocidade máxima visual da simulação da roda.
     # 0.25 significa:
@@ -187,6 +195,10 @@ class MachineStateService:
         if 'is_spoke_tension_collecting' in data:
             state.is_spoke_tension_collecting = data['is_spoke_tension_collecting']
 
+        for field_name in self.PNEUMATIC_STATE_FIELDS:
+            if field_name in data:
+                setattr(state, field_name, data[field_name])
+
         if 'led' in data:
             state.led = data['led']
 
@@ -320,6 +332,25 @@ class MachineStateService:
             'spoke_tension_left_kg': state.spoke_tension_left_kg,
             'spoke_tension_right_kg': state.spoke_tension_right_kg,
             'is_spoke_tension_collecting': state.is_spoke_tension_collecting,
+
+            'pneumatic_spoke_tension_left_extended': (
+                state.pneumatic_spoke_tension_left_extended
+            ),
+            'pneumatic_spoke_tension_right_extended': (
+                state.pneumatic_spoke_tension_right_extended
+            ),
+            'pneumatic_nipple_arm_left_extended': (
+                state.pneumatic_nipple_arm_left_extended
+            ),
+            'pneumatic_nipple_arm_right_extended': (
+                state.pneumatic_nipple_arm_right_extended
+            ),
+            'pneumatic_nipple_lift_left_extended': (
+                state.pneumatic_nipple_lift_left_extended
+            ),
+            'pneumatic_nipple_lift_right_extended': (
+                state.pneumatic_nipple_lift_right_extended
+            ),
         }
 
     def motor_roda_start(self):

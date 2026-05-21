@@ -40,7 +40,7 @@ export function SpokeTensionScreen() {
   const nextPointIdRef = useRef(1)
 
   const totalSpokes = Math.max(state.wheel_total_spokes, 1)
-  const currentSpoke = state.wheel_current_spoke
+  const currentSpoke = getWrappedSpoke(state.wheel_current_spoke, totalSpokes)
   const currentAngle = getWheelReferenceAngle(state)
   const wheelRotationDegrees = getWheelVisualRotationDegrees(state)
   const leftKg = state.spoke_tension_left_kg
@@ -52,8 +52,47 @@ export function SpokeTensionScreen() {
   ], [currentSpoke, totalSpokes])
   const rightMeasuredSpokes = useMemo<[number, number]>(() => [
     getWrappedSpoke(currentSpoke + 1, totalSpokes),
-    getWrappedSpoke(currentSpoke + 4, totalSpokes),
+    getWrappedSpoke(currentSpoke + 3, totalSpokes),
   ], [currentSpoke, totalSpokes])
+
+  const fixedPressMarkers = useMemo(() => [
+    {
+      key: 'left-upper',
+      side: 'left',
+      spoke: leftMeasuredSpokes[0],
+      x: 62,
+      y: 88,
+      labelX: 44,
+      labelY: 80,
+    },
+    {
+      key: 'left-lower',
+      side: 'left',
+      spoke: leftMeasuredSpokes[1],
+      x: 62,
+      y: 152,
+      labelX: 44,
+      labelY: 164,
+    },
+    {
+      key: 'right-upper',
+      side: 'right',
+      spoke: rightMeasuredSpokes[0],
+      x: 178,
+      y: 88,
+      labelX: 196,
+      labelY: 80,
+    },
+    {
+      key: 'right-lower',
+      side: 'right',
+      spoke: rightMeasuredSpokes[1],
+      x: 178,
+      y: 152,
+      labelX: 196,
+      labelY: 164,
+    },
+  ], [leftMeasuredSpokes, rightMeasuredSpokes])
 
   const captureCurrentPoint = useCallback(() => {
     const point: TensionPoint = {
@@ -113,15 +152,13 @@ export function SpokeTensionScreen() {
 
       return {
         spoke,
-        isLeftMeasured: leftMeasuredSpokes.includes(spoke),
-        isRightMeasured: rightMeasuredSpokes.includes(spoke),
         x1: center + innerRadius * Math.cos(radians),
         y1: center + innerRadius * Math.sin(radians),
         x2: center + outerRadius * Math.cos(radians),
         y2: center + outerRadius * Math.sin(radians),
       }
     })
-  }, [leftMeasuredSpokes, rightMeasuredSpokes, totalSpokes])
+  }, [totalSpokes])
 
   const summary = useMemo(() => {
     if (points.length === 0) {
@@ -255,7 +292,7 @@ export function SpokeTensionScreen() {
         <div className="spoke-tension-sensor-panel spoke-tension-sensor-panel--left">
           <span>Lado esquerdo</span>
           <strong>{formatKg(leftKg)}</strong>
-          <small>Raios {formatPair(leftMeasuredSpokes)}</small>
+          <small>Pressiona raios {formatPair(leftMeasuredSpokes)}</small>
         </div>
 
         <div className="spoke-tension-wheel-card">
@@ -286,14 +323,28 @@ export function SpokeTensionScreen() {
                     [
                       'spoke-tension-wheel__spoke',
                       spoke.spoke === currentSpoke ? 'is-current' : '',
-                      spoke.isLeftMeasured ? 'is-left-measured' : '',
-                      spoke.isRightMeasured ? 'is-right-measured' : '',
                     ].filter(Boolean).join(' ')
                   }
                   x1={spoke.x1}
                   y1={spoke.y1}
                   x2={spoke.x2}
                   y2={spoke.y2}
+                />
+              ))}
+            </g>
+
+            <g className="spoke-tension-wheel__press-lines">
+              {fixedPressMarkers.map((marker) => (
+                <line
+                  key={`press-line-${marker.key}`}
+                  className={[
+                    'spoke-tension-wheel__press-line',
+                    `spoke-tension-wheel__press-line--${marker.side}`,
+                  ].join(' ')}
+                  x1="120"
+                  y1="120"
+                  x2={marker.x}
+                  y2={marker.y}
                 />
               ))}
             </g>
@@ -308,6 +359,25 @@ export function SpokeTensionScreen() {
               <circle cx="178" cy="88" r="5" />
               <circle cx="178" cy="152" r="5" />
             </g>
+
+            <g className="spoke-tension-wheel__press-labels">
+              {fixedPressMarkers.map((marker) => (
+                <text
+                  key={`press-label-${marker.key}`}
+                  className={[
+                    'spoke-tension-wheel__press-label',
+                    `spoke-tension-wheel__press-label--${marker.side}`,
+                  ].join(' ')}
+                  x={marker.labelX}
+                  y={marker.labelY}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                >
+                  {marker.spoke}
+                </text>
+              ))}
+            </g>
+
             <line className="spoke-tension-wheel__reference" x1="120" y1="18" x2="120" y2="42" />
           </svg>
         </div>
@@ -315,7 +385,7 @@ export function SpokeTensionScreen() {
         <div className="spoke-tension-sensor-panel spoke-tension-sensor-panel--right">
           <span>Lado direito</span>
           <strong>{formatKg(rightKg)}</strong>
-          <small>Raios {formatPair(rightMeasuredSpokes)}</small>
+          <small>Pressiona raios {formatPair(rightMeasuredSpokes)}</small>
         </div>
       </section>
 

@@ -4,6 +4,7 @@
 #include "Led.h"
 #include "LateralSensor.h"
 #include "MotorRoda.h"
+#include "PneumaticCylinders.h"
 #include "SerialCommandHandler.h"
 #include "SpokeTensionSensor.h"
 
@@ -41,10 +42,20 @@ SpokeTensionSensor spokeTensionSensor(
   SPOKE_TENSION_RIGHT_CALIBRATION_FACTOR
 );
 
+PneumaticCylinders pneumaticCylinders(
+  PNEUMATIC_SPOKE_TENSION_LEFT_PIN,
+  PNEUMATIC_SPOKE_TENSION_RIGHT_PIN,
+  PNEUMATIC_NIPPLE_ARM_LEFT_PIN,
+  PNEUMATIC_NIPPLE_ARM_RIGHT_PIN,
+  PNEUMATIC_NIPPLE_LIFT_LEFT_PIN,
+  PNEUMATIC_NIPPLE_LIFT_RIGHT_PIN
+);
+
 SerialCommandHandler serialCommandHandler(
   led,
   lateralSensor,
   motorRoda,
+  pneumaticCylinders,
   spokeTensionSensor
 );
 
@@ -58,11 +69,12 @@ void setup() {
   led.begin();
   lateralSensor.begin();
   motorRoda.begin();
+  pneumaticCylinders.begin();
   spokeTensionSensor.begin();
 
   delay(300);
 
-  Serial.println("{\"success\":true,\"type\":\"startup\",\"message\":\"arduino_iniciado_com_sensor_lateral_e_hx711\"}");
+  Serial.println("{\"success\":true,\"type\":\"startup\",\"message\":\"arduino_iniciado_com_sensor_lateral_hx711_e_pneumatica\"}");
   Serial.flush();
 }
 
