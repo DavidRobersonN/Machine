@@ -1,6 +1,6 @@
 # Alinhador Interface
 
-Interface React do projeto Machine / Alinhador. Esta aplicacao renderiza o painel da maquina, conecta no backend Django por WebSocket e envia comandos para controle de serial, motor da roda, sensor lateral, LED e logs.
+Interface React do projeto Machine / Alinhador. Esta aplicacao renderiza o painel da maquina, conecta no backend Django por WebSocket e envia comandos para controle de serial, motor da roda, sensor lateral, tensao dos raios, cilindros pneumaticos, LED e logs.
 
 ## Stack
 
@@ -50,6 +50,26 @@ PainelMachineTemplate.tsx
   -> MachineScreenRenderer.tsx
 Telas especificas
 ```
+
+## Como adicionar uma tela
+
+O README principal do repositorio tem o passo a passo completo. No frontend, o
+caminho normal e:
+
+```text
+src/types/navigation.ts                    # adicionar o nome da tela
+src/components/screens/NovaTelaScreen/     # criar TSX e CSS da tela
+src/components/screens/MachineScreenRender.tsx
+                                           # renderizar a tela pelo currentScreen
+src/components/screens/MenuScreen/         # criar entrada no menu
+src/hooks/machine/useHomeMachinePage.ts    # configurar botao de voltar
+```
+
+Se a tela precisar de um comando novo, adicione o tipo em
+`src/types/machine/commands.ts`. Se ela precisar mostrar um dado novo da maquina,
+adicione o campo em `src/types/machine/state.ts`, aceite a mensagem em
+`src/types/machine/messages.ts` e atualize o reducer em
+`src/context/machineReducer.ts`.
 
 ## Pastas principais
 
@@ -125,6 +145,9 @@ As telas disponiveis sao:
 - `menu`: menu principal;
 - `motors`: controle do motor da roda;
 - `alignment`: leitura e grafico do sensor lateral;
+- `wheelMap`: mapa/visualizacao da roda;
+- `spokeTension`: medicao de tensao dos raios;
+- `cylinders`: teste manual dos cilindros pneumaticos;
 - `serial`: portas COM e monitor serial;
 - `logs`: historico de mensagens.
 
